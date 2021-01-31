@@ -20,10 +20,11 @@ client.login(args.username, args.password)
 
 tanks = client.tanks()
 tank_level = tanks[0].level()
+
 print(tanks[0].name() + ":")
 print("\tCapacity =", tanks[0].capacity())
 print("\tSerial Number =", tanks[0].serial_number())
-print("\tModel =", tanks[0].serial_number())
+print("\tModel =", tanks[0].model())
 print("\tLevel = {0}% ({1} litres)".format(tank_level['LevelPercentage'], tank_level['LevelLitres']))
 print("\tLast Read =", tank_level['ReadingDate'])
 
