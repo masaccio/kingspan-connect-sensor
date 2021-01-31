@@ -1,0 +1,1528 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://mobileapp/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" targetNamespace="http://mobileapp/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types>
+    <s:schema elementFormDefault="qualified" targetNamespace="http://mobileapp/">
+      <s:element name="HelloWorld">
+        <s:complexType />
+      </s:element>
+      <s:element name="HelloWorldResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="HelloWorldResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SoapMobileAPPAuthenicate_v1">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="emailaddress" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="password" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SoapMobileAPPAuthenicate_v1Response">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="SoapMobileAPPAuthenicate_v1Result" type="tns:APIUser" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="APIUser">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="APIResult" type="tns:APIResult" />
+          <s:element minOccurs="0" maxOccurs="1" name="APIUserID" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="EmailAddress" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="ConsumerServicesBrandID" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="ConsumerServicesBrandCode" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Tanks" type="tns:ArrayOfAPITankInfo" />
+          <s:element minOccurs="1" maxOccurs="1" name="DisplayAccount" type="s:boolean" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="APIResult">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="Code" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="Description" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfAPITankInfo">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="APITankInfo" nillable="true" type="tns:APITankInfo" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="APITankInfo">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="SignalmanNo" type="s:long" />
+          <s:element minOccurs="0" maxOccurs="1" name="TankName" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="DisplayMobileApp" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="DisplayLevelAlert" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="DisplayDropAlert" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="DisplayConsumption" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="DisplayGetQuote" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="DisplayAdvancedProperties" type="s:boolean" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="SoapMobileAPPAuthenicate_v2">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="emailaddress" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="password" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SoapMobileAPPAuthenicate_v2Response">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="SoapMobileAPPAuthenicate_v2Result" type="tns:APIUser_V2" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="APIUser_V2">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="APIResult" type="tns:APIResult" />
+          <s:element minOccurs="0" maxOccurs="1" name="APIUserID" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="EmailAddress" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="ConsumerServicesBrandID" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="ConsumerServicesBrandCode" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Tanks" type="tns:ArrayOfAPITankInfo_V2" />
+          <s:element minOccurs="1" maxOccurs="1" name="DisplayAccount" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="RoleID" type="s:int" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfAPITankInfo_V2">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="APITankInfo_V2" nillable="true" type="tns:APITankInfo_V2" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="APITankInfo_V2">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="SignalmanNo" type="s:long" />
+          <s:element minOccurs="0" maxOccurs="1" name="TankName" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="DisplayMobileApp" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="DisplayLevelAlert" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="DisplayDropAlert" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="DisplayConsumption" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="DisplayGetQuote" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="DisplayAdvancedProperties" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="HideLevelAlert" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="HideDropAlert" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="HideLOWBATTERY" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="HideNOECHO" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="HideConsumption" type="s:boolean" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="SoapMobileAPPAuthenicate_v3">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="emailaddress" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="password" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SoapMobileAPPAuthenicate_v3Response">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="SoapMobileAPPAuthenicate_v3Result" type="tns:APIUser_V3" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="APIUser_V3">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="APIResult" type="tns:APIResult" />
+          <s:element minOccurs="0" maxOccurs="1" name="APIUserID" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="EmailAddress" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="ConsumerServicesBrandID" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="ConsumerServicesBrandCode" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Tanks" type="tns:ArrayOfAPITankInfo_V3" />
+          <s:element minOccurs="1" maxOccurs="1" name="DisplayAccount" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="RoleID" type="s:int" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfAPITankInfo_V3">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="APITankInfo_V3" nillable="true" type="tns:APITankInfo_V3" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="APITankInfo_V3">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="SignalmanNo" type="s:long" />
+          <s:element minOccurs="0" maxOccurs="1" name="TankName" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="IsSmartServDevice" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="DisplayMobileApp" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="DisplayLevelAlert" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="DisplayDropAlert" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="DisplayConsumption" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="DisplayGetQuote" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="DisplayAdvancedProperties" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="HideLevelAlert" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="HideDropAlert" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="HideLOWBATTERY" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="HideNOECHO" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="HideConsumption" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="LevelPercentage" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="LevelLitres" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="UnitOfMeasurement" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="Measurement" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="SmartServReading" type="tns:APISmartServReading" />
+          <s:element minOccurs="1" maxOccurs="1" name="ProductTypeID" type="s:int" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="APISmartServReading">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="SignalmanNo" type="s:long" />
+          <s:element minOccurs="1" maxOccurs="1" name="input1InAlarm" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="input1InUse" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="input2InAlarm" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="input2InUse" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="input3InAlarm" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="input3InUse" type="s:boolean" />
+          <s:element minOccurs="0" maxOccurs="1" name="inputsMeaning" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="ReadingDate" type="s:dateTime" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="SoapMobileAPPCheckDeviceStatus_v1">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="username" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="password" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="signalmanNo" type="s:long" />
+            <s:element minOccurs="0" maxOccurs="1" name="culture" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SoapMobileAPPCheckDeviceStatus_v1Response">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="SoapMobileAPPCheckDeviceStatus_v1Result" type="tns:APIResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SoapMobileAPPGetCallHistory_v1">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="userid" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="password" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="signalmanno" type="s:long" />
+            <s:element minOccurs="1" maxOccurs="1" name="startdate" type="s:dateTime" />
+            <s:element minOccurs="1" maxOccurs="1" name="enddate" type="s:dateTime" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SoapMobileAPPGetCallHistory_v1Response">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="SoapMobileAPPGetCallHistory_v1Result" type="tns:APICallHistory" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="APICallHistory">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="APIResult" type="tns:APIResult" />
+          <s:element minOccurs="0" maxOccurs="1" name="Levels" type="tns:ArrayOfAPILevel" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfAPILevel">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="APILevel" nillable="true" type="tns:APILevel" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="APILevel">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="SignalmanNo" type="s:long" />
+          <s:element minOccurs="1" maxOccurs="1" name="LevelPercentage" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="LevelLitres" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="ReadingDate" type="s:dateTime" />
+          <s:element minOccurs="1" maxOccurs="1" name="LevelAlert" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="DropAlert" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="ConsumptionRate" type="s:decimal" />
+          <s:element minOccurs="1" maxOccurs="1" name="RunOutDate" type="s:dateTime" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="SoapMobileAPPGetDeviceType_v1">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="emailaddress" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="password" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="signalmanNo" type="s:long" />
+            <s:element minOccurs="1" maxOccurs="1" name="IMEI" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SoapMobileAPPGetDeviceType_v1Response">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="SoapMobileAPPGetDeviceType_v1Result" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SoapMobileAPPGetLanguages_v1">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="emailaddress" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="password" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SoapMobileAPPGetLanguages_v1Response">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="SoapMobileAPPGetLanguages_v1Result" type="tns:ArrayOfNameValue" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfNameValue">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="NameValue" nillable="true" type="tns:NameValue" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="NameValue">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Name" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Value" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="SoapMobileAPPGetLatestLevel_v1">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="userid" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="password" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="signalmanno" type="s:long" />
+            <s:element minOccurs="0" maxOccurs="1" name="culture" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SoapMobileAPPGetLatestLevel_v1Response">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="SoapMobileAPPGetLatestLevel_v1Result" type="tns:APILatestLevel" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="APILatestLevel">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="APIResult" type="tns:APIResult" />
+          <s:element minOccurs="0" maxOccurs="1" name="Level" type="tns:APILevel" />
+          <s:element minOccurs="0" maxOccurs="1" name="TankInfo" type="tns:ArrayOfAPITankInfoItem" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfAPITankInfoItem">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="APITankInfoItem" nillable="true" type="tns:APITankInfoItem" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="APITankInfoItem">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Name" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Value" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="SoapMobileAPPGetLatestLevel_v2">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="userid" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="password" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="signalmanno" type="s:long" />
+            <s:element minOccurs="0" maxOccurs="1" name="culture" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SoapMobileAPPGetLatestLevel_v2Response">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="SoapMobileAPPGetLatestLevel_v2Result" type="tns:APILatestLevel_V2" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="APILatestLevel_V2">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="APIResult" type="tns:APIResult" />
+          <s:element minOccurs="0" maxOccurs="1" name="Level" type="tns:APILevel_V2" />
+          <s:element minOccurs="0" maxOccurs="1" name="TankInfo" type="tns:ArrayOfAPITankInfoItem" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="APILevel_V2">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:APILevel">
+            <s:sequence>
+              <s:element minOccurs="1" maxOccurs="1" name="AlarmStatus" type="s:int" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:element name="SoapMobileAPPGetLatestLevel_v3">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="userid" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="password" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="signalmanno" type="s:long" />
+            <s:element minOccurs="0" maxOccurs="1" name="culture" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SoapMobileAPPGetLatestLevel_v3Response">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="SoapMobileAPPGetLatestLevel_v3Result" type="tns:APILatestLevel_V3" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="APILatestLevel_V3">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="APIResult" type="tns:APIResult" />
+          <s:element minOccurs="0" maxOccurs="1" name="Level" type="tns:APILevel_V2" />
+          <s:element minOccurs="0" maxOccurs="1" name="SmartServReading" type="tns:APISmartServReading" />
+          <s:element minOccurs="0" maxOccurs="1" name="TankInfo" type="tns:ArrayOfAPITankInfoItem" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="SoapMobileAPPGetLatestSmartServReading_v1">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="userid" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="password" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="signalmanno" type="s:long" />
+            <s:element minOccurs="0" maxOccurs="1" name="culture" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SoapMobileAPPGetLatestSmartServReading_v1Response">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="SoapMobileAPPGetLatestSmartServReading_v1Result" type="tns:APISmartServReading" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SoapMobileAPPGetSelectedLanguage_v1">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="emailaddress" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="password" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="culture" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SoapMobileAPPGetSelectedLanguage_v1Response">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="SoapMobileAPPGetSelectedLanguage_v1Result" type="tns:ArrayOfNameValue" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SoapMobileAPPGetTankModels_v1">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="emailaddress" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="password" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SoapMobileAPPGetTankModels_v1Response">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="SoapMobileAPPGetTankModels_v1Result" type="tns:ArrayOfNameValue" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SoapMobileAPPGetUserAccountDetails_v1">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="emailaddress" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="password" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="signalmanNo" type="s:long" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SoapMobileAPPGetUserAccountDetails_v1Response">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="SoapMobileAPPGetUserAccountDetails_v1Result" type="tns:APIUserAccountDetails" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="APIUserAccountDetails">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="SignalmanNo" type="s:long" />
+          <s:element minOccurs="0" maxOccurs="1" name="UserName" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="UserPassword" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="UserAddress1" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="UserAddress2" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="UserTown" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="UserCounty" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="UserCountryCode" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="UserPostcode" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="UserContactTel" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="UserEmail" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="DateOfPurchase" type="s:dateTime" />
+          <s:element minOccurs="1" maxOccurs="1" name="SonicHeightCM" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="TankHeightCM" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="FuelType" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="TankModelID" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="TankModel" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="TankShape" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="TankType" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="TankName" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="TankMaterial" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="TankCapacity" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="SendScheduledSMS" type="s:boolean" />
+          <s:element minOccurs="0" maxOccurs="1" name="ScheduledSMSRecipient" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="ScheduledSMSDayOfWeek" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="SendScheduledEmail" type="s:boolean" />
+          <s:element minOccurs="0" maxOccurs="1" name="ScheduledEmailRecipient" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="ScheduledEmailDayOfWeek" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="SendSuddenDropAlerts" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="UpdateUserDetailsOnly" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="HideSuddenDropAlerts" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="UpdateSMSDetails" type="s:boolean" />
+          <s:element minOccurs="1" maxOccurs="1" name="UpdateEmailDetails" type="s:boolean" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="SoapMobileAPPGetUserAccountDetails_v2">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="emailaddress" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="password" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="signalmanNo" type="s:long" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SoapMobileAPPGetUserAccountDetails_v2Response">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="SoapMobileAPPGetUserAccountDetails_v2Result" type="tns:APIUserAccountDetails_V2" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="APIUserAccountDetails_V2">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:APIUserAccountDetails">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="ConsumerName" type="s:string" />
+              <s:element minOccurs="1" maxOccurs="1" name="TankWidthCM" type="s:int" />
+              <s:element minOccurs="1" maxOccurs="1" name="TankLengthCM" type="s:int" />
+              <s:element minOccurs="1" maxOccurs="1" name="TankDiameterCM" type="s:int" />
+              <s:element minOccurs="1" maxOccurs="1" name="HeightOffsetCM" type="s:int" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:element name="SoapMobileAPPOrderOil_v1">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="userid" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="password" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="emailAddress" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="litres" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="signalmanNo" type="s:long" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SoapMobileAPPOrderOil_v1Response">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="SoapMobileAPPOrderOil_v1Result" type="tns:APIResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SoapMobileAPPResetPassword_v1">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="emailaddress" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SoapMobileAPPResetPassword_v1Response">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="SoapMobileAPPResetPassword_v1Result" type="tns:APIResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SoapMobileAPPResetPassword_v2">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="emailaddress" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="culture" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SoapMobileAPPResetPassword_v2Response">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="SoapMobileAPPResetPassword_v2Result" type="tns:APIResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SoapMobileAPPUpdateUserAccountDetails_v1">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="emailaddress" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="password" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="userAccountDetails" type="tns:APIUserAccountDetails" />
+            <s:element minOccurs="0" maxOccurs="1" name="culture" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="mode" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SoapMobileAPPUpdateUserAccountDetails_v1Response">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="SoapMobileAPPUpdateUserAccountDetails_v1Result" type="tns:APIUserAccountValidation" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="APIUserAccountValidation">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="IsValid" type="s:boolean" />
+          <s:element minOccurs="0" maxOccurs="1" name="ErrorMessages" type="tns:ArrayOfString" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfString">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="string" nillable="true" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="SoapMobileAPPUpdateUserAccountDetails_v2">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="emailaddress" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="password" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="userAccountDetails" type="tns:APIUserAccountDetails_V2" />
+            <s:element minOccurs="0" maxOccurs="1" name="culture" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="mode" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SoapMobileAPPUpdateUserAccountDetails_v2Response">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="SoapMobileAPPUpdateUserAccountDetails_v2Result" type="tns:APIUserAccountValidation" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SoapMobileAPPUpdateUserAccountDetails_v3">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="emailaddress" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="password" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="userAccountDetails" type="tns:APIUserAccountDetails_V2" />
+            <s:element minOccurs="0" maxOccurs="1" name="culture" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="mode" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SoapMobileAPPUpdateUserAccountDetails_v3Response">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="SoapMobileAPPUpdateUserAccountDetails_v3Result" type="tns:APIUserAccountValidation" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SoapMobileAPPGetPushNotificationAuditsByUser_V1">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="userid" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SoapMobileAPPGetPushNotificationAuditsByUser_V1Response">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="SoapMobileAPPGetPushNotificationAuditsByUser_V1Result" type="tns:ArrayOfPushNotificationAudit" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfPushNotificationAudit">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="PushNotificationAudit" nillable="true" type="tns:PushNotificationAudit" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="PushNotificationAudit">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:EntityBase">
+            <s:sequence>
+              <s:element minOccurs="0" maxOccurs="1" name="RecipientUserID" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="Title" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="Body" type="s:string" />
+              <s:element minOccurs="1" maxOccurs="1" name="SentTime" type="s:dateTime" />
+              <s:element minOccurs="1" maxOccurs="1" name="SignalmanNo" type="s:int" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="EntityBase" abstract="true">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="CreateID" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="CreateTS" type="s:dateTime" />
+          <s:element minOccurs="0" maxOccurs="1" name="ModifyID" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="ModifyTS" type="s:dateTime" />
+          <s:element minOccurs="1" maxOccurs="1" name="IsDirty" type="s:boolean" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="SoapMobileAPPSetAppUserLanguagePreference">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="userid" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="language" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SoapMobileAPPSetAppUserLanguagePreferenceResponse">
+        <s:complexType />
+      </s:element>
+      <s:element name="SoapMobileAPPGetTankByModelID_v1">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="userid" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="tankModelID" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SoapMobileAPPGetTankByModelID_v1Response">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="SoapMobileAPPGetTankByModelID_v1Result" type="tns:Tank" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="Tank">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:EntityBase">
+            <s:sequence>
+              <s:element minOccurs="1" maxOccurs="1" name="TankID" type="s:int" />
+              <s:element minOccurs="1" maxOccurs="1" name="Capacity" type="s:int" />
+              <s:element minOccurs="1" maxOccurs="1" name="TriggerPoint" type="s:int" />
+              <s:element minOccurs="1" maxOccurs="1" name="Height" type="s:int" />
+              <s:element minOccurs="1" maxOccurs="1" name="Width" type="s:int" />
+              <s:element minOccurs="1" maxOccurs="1" name="Length" type="s:int" />
+              <s:element minOccurs="1" maxOccurs="1" name="Diameter" type="s:int" />
+              <s:element minOccurs="1" maxOccurs="1" name="Distance" type="s:int" />
+              <s:element minOccurs="1" maxOccurs="1" name="Age" type="s:int" />
+              <s:element minOccurs="0" maxOccurs="1" name="TankType" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="Make" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="Model" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="Description" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="Location" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="LPGGauge" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="TankShape" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="Shape" type="tns:Lookup" />
+              <s:element minOccurs="0" maxOccurs="1" name="Orientation" type="tns:Lookup" />
+              <s:element minOccurs="0" maxOccurs="1" name="Material" type="tns:Lookup" />
+              <s:element minOccurs="1" maxOccurs="1" name="StrappingTableID" type="s:int" />
+              <s:element minOccurs="1" maxOccurs="1" name="IsFuelMasterTank" type="s:boolean" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="Lookup">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="ID" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="Code" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Description" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="DescriptionToken" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="SoapMobileAPPUpdateTankDetails_v1">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="userid" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="password" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="userAccountDetails" type="tns:APIUserAccountDetails_V2" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SoapMobileAPPUpdateTankDetails_v1Response">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="SoapMobileAPPUpdateTankDetails_v1Result" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SoapMobileAPPUpdateUserAddressDetails_v1">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="userid" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="password" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="userAccountDetails" type="tns:APIUserAccountDetails_V2" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SoapMobileAPPUpdateUserAddressDetails_v1Response">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="SoapMobileAPPUpdateUserAddressDetails_v1Result" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+    </s:schema>
+  </wsdl:types>
+  <wsdl:message name="HelloWorldSoapIn">
+    <wsdl:part name="parameters" element="tns:HelloWorld" />
+  </wsdl:message>
+  <wsdl:message name="HelloWorldSoapOut">
+    <wsdl:part name="parameters" element="tns:HelloWorldResponse" />
+  </wsdl:message>
+  <wsdl:message name="SoapMobileAPPAuthenicate_v1SoapIn">
+    <wsdl:part name="parameters" element="tns:SoapMobileAPPAuthenicate_v1" />
+  </wsdl:message>
+  <wsdl:message name="SoapMobileAPPAuthenicate_v1SoapOut">
+    <wsdl:part name="parameters" element="tns:SoapMobileAPPAuthenicate_v1Response" />
+  </wsdl:message>
+  <wsdl:message name="SoapMobileAPPAuthenicate_v2SoapIn">
+    <wsdl:part name="parameters" element="tns:SoapMobileAPPAuthenicate_v2" />
+  </wsdl:message>
+  <wsdl:message name="SoapMobileAPPAuthenicate_v2SoapOut">
+    <wsdl:part name="parameters" element="tns:SoapMobileAPPAuthenicate_v2Response" />
+  </wsdl:message>
+  <wsdl:message name="SoapMobileAPPAuthenicate_v3SoapIn">
+    <wsdl:part name="parameters" element="tns:SoapMobileAPPAuthenicate_v3" />
+  </wsdl:message>
+  <wsdl:message name="SoapMobileAPPAuthenicate_v3SoapOut">
+    <wsdl:part name="parameters" element="tns:SoapMobileAPPAuthenicate_v3Response" />
+  </wsdl:message>
+  <wsdl:message name="SoapMobileAPPCheckDeviceStatus_v1SoapIn">
+    <wsdl:part name="parameters" element="tns:SoapMobileAPPCheckDeviceStatus_v1" />
+  </wsdl:message>
+  <wsdl:message name="SoapMobileAPPCheckDeviceStatus_v1SoapOut">
+    <wsdl:part name="parameters" element="tns:SoapMobileAPPCheckDeviceStatus_v1Response" />
+  </wsdl:message>
+  <wsdl:message name="SoapMobileAPPGetCallHistory_v1SoapIn">
+    <wsdl:part name="parameters" element="tns:SoapMobileAPPGetCallHistory_v1" />
+  </wsdl:message>
+  <wsdl:message name="SoapMobileAPPGetCallHistory_v1SoapOut">
+    <wsdl:part name="parameters" element="tns:SoapMobileAPPGetCallHistory_v1Response" />
+  </wsdl:message>
+  <wsdl:message name="SoapMobileAPPGetDeviceType_v1SoapIn">
+    <wsdl:part name="parameters" element="tns:SoapMobileAPPGetDeviceType_v1" />
+  </wsdl:message>
+  <wsdl:message name="SoapMobileAPPGetDeviceType_v1SoapOut">
+    <wsdl:part name="parameters" element="tns:SoapMobileAPPGetDeviceType_v1Response" />
+  </wsdl:message>
+  <wsdl:message name="SoapMobileAPPGetLanguages_v1SoapIn">
+    <wsdl:part name="parameters" element="tns:SoapMobileAPPGetLanguages_v1" />
+  </wsdl:message>
+  <wsdl:message name="SoapMobileAPPGetLanguages_v1SoapOut">
+    <wsdl:part name="parameters" element="tns:SoapMobileAPPGetLanguages_v1Response" />
+  </wsdl:message>
+  <wsdl:message name="SoapMobileAPPGetLatestLevel_v1SoapIn">
+    <wsdl:part name="parameters" element="tns:SoapMobileAPPGetLatestLevel_v1" />
+  </wsdl:message>
+  <wsdl:message name="SoapMobileAPPGetLatestLevel_v1SoapOut">
+    <wsdl:part name="parameters" element="tns:SoapMobileAPPGetLatestLevel_v1Response" />
+  </wsdl:message>
+  <wsdl:message name="SoapMobileAPPGetLatestLevel_v2SoapIn">
+    <wsdl:part name="parameters" element="tns:SoapMobileAPPGetLatestLevel_v2" />
+  </wsdl:message>
+  <wsdl:message name="SoapMobileAPPGetLatestLevel_v2SoapOut">
+    <wsdl:part name="parameters" element="tns:SoapMobileAPPGetLatestLevel_v2Response" />
+  </wsdl:message>
+  <wsdl:message name="SoapMobileAPPGetLatestLevel_v3SoapIn">
+    <wsdl:part name="parameters" element="tns:SoapMobileAPPGetLatestLevel_v3" />
+  </wsdl:message>
+  <wsdl:message name="SoapMobileAPPGetLatestLevel_v3SoapOut">
+    <wsdl:part name="parameters" element="tns:SoapMobileAPPGetLatestLevel_v3Response" />
+  </wsdl:message>
+  <wsdl:message name="SoapMobileAPPGetLatestSmartServReading_v1SoapIn">
+    <wsdl:part name="parameters" element="tns:SoapMobileAPPGetLatestSmartServReading_v1" />
+  </wsdl:message>
+  <wsdl:message name="SoapMobileAPPGetLatestSmartServReading_v1SoapOut">
+    <wsdl:part name="parameters" element="tns:SoapMobileAPPGetLatestSmartServReading_v1Response" />
+  </wsdl:message>
+  <wsdl:message name="SoapMobileAPPGetSelectedLanguage_v1SoapIn">
+    <wsdl:part name="parameters" element="tns:SoapMobileAPPGetSelectedLanguage_v1" />
+  </wsdl:message>
+  <wsdl:message name="SoapMobileAPPGetSelectedLanguage_v1SoapOut">
+    <wsdl:part name="parameters" element="tns:SoapMobileAPPGetSelectedLanguage_v1Response" />
+  </wsdl:message>
+  <wsdl:message name="SoapMobileAPPGetTankModels_v1SoapIn">
+    <wsdl:part name="parameters" element="tns:SoapMobileAPPGetTankModels_v1" />
+  </wsdl:message>
+  <wsdl:message name="SoapMobileAPPGetTankModels_v1SoapOut">
+    <wsdl:part name="parameters" element="tns:SoapMobileAPPGetTankModels_v1Response" />
+  </wsdl:message>
+  <wsdl:message name="SoapMobileAPPGetUserAccountDetails_v1SoapIn">
+    <wsdl:part name="parameters" element="tns:SoapMobileAPPGetUserAccountDetails_v1" />
+  </wsdl:message>
+  <wsdl:message name="SoapMobileAPPGetUserAccountDetails_v1SoapOut">
+    <wsdl:part name="parameters" element="tns:SoapMobileAPPGetUserAccountDetails_v1Response" />
+  </wsdl:message>
+  <wsdl:message name="SoapMobileAPPGetUserAccountDetails_v2SoapIn">
+    <wsdl:part name="parameters" element="tns:SoapMobileAPPGetUserAccountDetails_v2" />
+  </wsdl:message>
+  <wsdl:message name="SoapMobileAPPGetUserAccountDetails_v2SoapOut">
+    <wsdl:part name="parameters" element="tns:SoapMobileAPPGetUserAccountDetails_v2Response" />
+  </wsdl:message>
+  <wsdl:message name="SoapMobileAPPOrderOil_v1SoapIn">
+    <wsdl:part name="parameters" element="tns:SoapMobileAPPOrderOil_v1" />
+  </wsdl:message>
+  <wsdl:message name="SoapMobileAPPOrderOil_v1SoapOut">
+    <wsdl:part name="parameters" element="tns:SoapMobileAPPOrderOil_v1Response" />
+  </wsdl:message>
+  <wsdl:message name="SoapMobileAPPResetPassword_v1SoapIn">
+    <wsdl:part name="parameters" element="tns:SoapMobileAPPResetPassword_v1" />
+  </wsdl:message>
+  <wsdl:message name="SoapMobileAPPResetPassword_v1SoapOut">
+    <wsdl:part name="parameters" element="tns:SoapMobileAPPResetPassword_v1Response" />
+  </wsdl:message>
+  <wsdl:message name="SoapMobileAPPResetPassword_v2SoapIn">
+    <wsdl:part name="parameters" element="tns:SoapMobileAPPResetPassword_v2" />
+  </wsdl:message>
+  <wsdl:message name="SoapMobileAPPResetPassword_v2SoapOut">
+    <wsdl:part name="parameters" element="tns:SoapMobileAPPResetPassword_v2Response" />
+  </wsdl:message>
+  <wsdl:message name="SoapMobileAPPUpdateUserAccountDetails_v1SoapIn">
+    <wsdl:part name="parameters" element="tns:SoapMobileAPPUpdateUserAccountDetails_v1" />
+  </wsdl:message>
+  <wsdl:message name="SoapMobileAPPUpdateUserAccountDetails_v1SoapOut">
+    <wsdl:part name="parameters" element="tns:SoapMobileAPPUpdateUserAccountDetails_v1Response" />
+  </wsdl:message>
+  <wsdl:message name="SoapMobileAPPUpdateUserAccountDetails_v2SoapIn">
+    <wsdl:part name="parameters" element="tns:SoapMobileAPPUpdateUserAccountDetails_v2" />
+  </wsdl:message>
+  <wsdl:message name="SoapMobileAPPUpdateUserAccountDetails_v2SoapOut">
+    <wsdl:part name="parameters" element="tns:SoapMobileAPPUpdateUserAccountDetails_v2Response" />
+  </wsdl:message>
+  <wsdl:message name="SoapMobileAPPUpdateUserAccountDetails_v3SoapIn">
+    <wsdl:part name="parameters" element="tns:SoapMobileAPPUpdateUserAccountDetails_v3" />
+  </wsdl:message>
+  <wsdl:message name="SoapMobileAPPUpdateUserAccountDetails_v3SoapOut">
+    <wsdl:part name="parameters" element="tns:SoapMobileAPPUpdateUserAccountDetails_v3Response" />
+  </wsdl:message>
+  <wsdl:message name="SoapMobileAPPGetPushNotificationAuditsByUser_V1SoapIn">
+    <wsdl:part name="parameters" element="tns:SoapMobileAPPGetPushNotificationAuditsByUser_V1" />
+  </wsdl:message>
+  <wsdl:message name="SoapMobileAPPGetPushNotificationAuditsByUser_V1SoapOut">
+    <wsdl:part name="parameters" element="tns:SoapMobileAPPGetPushNotificationAuditsByUser_V1Response" />
+  </wsdl:message>
+  <wsdl:message name="SoapMobileAPPSetAppUserLanguagePreferenceSoapIn">
+    <wsdl:part name="parameters" element="tns:SoapMobileAPPSetAppUserLanguagePreference" />
+  </wsdl:message>
+  <wsdl:message name="SoapMobileAPPSetAppUserLanguagePreferenceSoapOut">
+    <wsdl:part name="parameters" element="tns:SoapMobileAPPSetAppUserLanguagePreferenceResponse" />
+  </wsdl:message>
+  <wsdl:message name="SoapMobileAPPGetTankByModelID_v1SoapIn">
+    <wsdl:part name="parameters" element="tns:SoapMobileAPPGetTankByModelID_v1" />
+  </wsdl:message>
+  <wsdl:message name="SoapMobileAPPGetTankByModelID_v1SoapOut">
+    <wsdl:part name="parameters" element="tns:SoapMobileAPPGetTankByModelID_v1Response" />
+  </wsdl:message>
+  <wsdl:message name="SoapMobileAPPUpdateTankDetails_v1SoapIn">
+    <wsdl:part name="parameters" element="tns:SoapMobileAPPUpdateTankDetails_v1" />
+  </wsdl:message>
+  <wsdl:message name="SoapMobileAPPUpdateTankDetails_v1SoapOut">
+    <wsdl:part name="parameters" element="tns:SoapMobileAPPUpdateTankDetails_v1Response" />
+  </wsdl:message>
+  <wsdl:message name="SoapMobileAPPUpdateUserAddressDetails_v1SoapIn">
+    <wsdl:part name="parameters" element="tns:SoapMobileAPPUpdateUserAddressDetails_v1" />
+  </wsdl:message>
+  <wsdl:message name="SoapMobileAPPUpdateUserAddressDetails_v1SoapOut">
+    <wsdl:part name="parameters" element="tns:SoapMobileAPPUpdateUserAddressDetails_v1Response" />
+  </wsdl:message>
+  <wsdl:portType name="MobileAppSoap">
+    <wsdl:operation name="HelloWorld">
+      <wsdl:input message="tns:HelloWorldSoapIn" />
+      <wsdl:output message="tns:HelloWorldSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPAuthenicate_v1">
+      <wsdl:input message="tns:SoapMobileAPPAuthenicate_v1SoapIn" />
+      <wsdl:output message="tns:SoapMobileAPPAuthenicate_v1SoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPAuthenicate_v2">
+      <wsdl:input message="tns:SoapMobileAPPAuthenicate_v2SoapIn" />
+      <wsdl:output message="tns:SoapMobileAPPAuthenicate_v2SoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPAuthenicate_v3">
+      <wsdl:input message="tns:SoapMobileAPPAuthenicate_v3SoapIn" />
+      <wsdl:output message="tns:SoapMobileAPPAuthenicate_v3SoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPCheckDeviceStatus_v1">
+      <wsdl:input message="tns:SoapMobileAPPCheckDeviceStatus_v1SoapIn" />
+      <wsdl:output message="tns:SoapMobileAPPCheckDeviceStatus_v1SoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPGetCallHistory_v1">
+      <wsdl:input message="tns:SoapMobileAPPGetCallHistory_v1SoapIn" />
+      <wsdl:output message="tns:SoapMobileAPPGetCallHistory_v1SoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPGetDeviceType_v1">
+      <wsdl:input message="tns:SoapMobileAPPGetDeviceType_v1SoapIn" />
+      <wsdl:output message="tns:SoapMobileAPPGetDeviceType_v1SoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPGetLanguages_v1">
+      <wsdl:input message="tns:SoapMobileAPPGetLanguages_v1SoapIn" />
+      <wsdl:output message="tns:SoapMobileAPPGetLanguages_v1SoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPGetLatestLevel_v1">
+      <wsdl:input message="tns:SoapMobileAPPGetLatestLevel_v1SoapIn" />
+      <wsdl:output message="tns:SoapMobileAPPGetLatestLevel_v1SoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPGetLatestLevel_v2">
+      <wsdl:input message="tns:SoapMobileAPPGetLatestLevel_v2SoapIn" />
+      <wsdl:output message="tns:SoapMobileAPPGetLatestLevel_v2SoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPGetLatestLevel_v3">
+      <wsdl:input message="tns:SoapMobileAPPGetLatestLevel_v3SoapIn" />
+      <wsdl:output message="tns:SoapMobileAPPGetLatestLevel_v3SoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPGetLatestSmartServReading_v1">
+      <wsdl:input message="tns:SoapMobileAPPGetLatestSmartServReading_v1SoapIn" />
+      <wsdl:output message="tns:SoapMobileAPPGetLatestSmartServReading_v1SoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPGetSelectedLanguage_v1">
+      <wsdl:input message="tns:SoapMobileAPPGetSelectedLanguage_v1SoapIn" />
+      <wsdl:output message="tns:SoapMobileAPPGetSelectedLanguage_v1SoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPGetTankModels_v1">
+      <wsdl:input message="tns:SoapMobileAPPGetTankModels_v1SoapIn" />
+      <wsdl:output message="tns:SoapMobileAPPGetTankModels_v1SoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPGetUserAccountDetails_v1">
+      <wsdl:input message="tns:SoapMobileAPPGetUserAccountDetails_v1SoapIn" />
+      <wsdl:output message="tns:SoapMobileAPPGetUserAccountDetails_v1SoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPGetUserAccountDetails_v2">
+      <wsdl:input message="tns:SoapMobileAPPGetUserAccountDetails_v2SoapIn" />
+      <wsdl:output message="tns:SoapMobileAPPGetUserAccountDetails_v2SoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPOrderOil_v1">
+      <wsdl:input message="tns:SoapMobileAPPOrderOil_v1SoapIn" />
+      <wsdl:output message="tns:SoapMobileAPPOrderOil_v1SoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPResetPassword_v1">
+      <wsdl:input message="tns:SoapMobileAPPResetPassword_v1SoapIn" />
+      <wsdl:output message="tns:SoapMobileAPPResetPassword_v1SoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPResetPassword_v2">
+      <wsdl:input message="tns:SoapMobileAPPResetPassword_v2SoapIn" />
+      <wsdl:output message="tns:SoapMobileAPPResetPassword_v2SoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPUpdateUserAccountDetails_v1">
+      <wsdl:input message="tns:SoapMobileAPPUpdateUserAccountDetails_v1SoapIn" />
+      <wsdl:output message="tns:SoapMobileAPPUpdateUserAccountDetails_v1SoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPUpdateUserAccountDetails_v2">
+      <wsdl:input message="tns:SoapMobileAPPUpdateUserAccountDetails_v2SoapIn" />
+      <wsdl:output message="tns:SoapMobileAPPUpdateUserAccountDetails_v2SoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPUpdateUserAccountDetails_v3">
+      <wsdl:input message="tns:SoapMobileAPPUpdateUserAccountDetails_v3SoapIn" />
+      <wsdl:output message="tns:SoapMobileAPPUpdateUserAccountDetails_v3SoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPGetPushNotificationAuditsByUser_V1">
+      <wsdl:input message="tns:SoapMobileAPPGetPushNotificationAuditsByUser_V1SoapIn" />
+      <wsdl:output message="tns:SoapMobileAPPGetPushNotificationAuditsByUser_V1SoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPSetAppUserLanguagePreference">
+      <wsdl:input message="tns:SoapMobileAPPSetAppUserLanguagePreferenceSoapIn" />
+      <wsdl:output message="tns:SoapMobileAPPSetAppUserLanguagePreferenceSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPGetTankByModelID_v1">
+      <wsdl:input message="tns:SoapMobileAPPGetTankByModelID_v1SoapIn" />
+      <wsdl:output message="tns:SoapMobileAPPGetTankByModelID_v1SoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPUpdateTankDetails_v1">
+      <wsdl:input message="tns:SoapMobileAPPUpdateTankDetails_v1SoapIn" />
+      <wsdl:output message="tns:SoapMobileAPPUpdateTankDetails_v1SoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPUpdateUserAddressDetails_v1">
+      <wsdl:input message="tns:SoapMobileAPPUpdateUserAddressDetails_v1SoapIn" />
+      <wsdl:output message="tns:SoapMobileAPPUpdateUserAddressDetails_v1SoapOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="MobileAppSoap" type="tns:MobileAppSoap">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="HelloWorld">
+      <soap:operation soapAction="http://mobileapp/HelloWorld" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPAuthenicate_v1">
+      <soap:operation soapAction="http://mobileapp/SoapMobileAPPAuthenicate_v1" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPAuthenicate_v2">
+      <soap:operation soapAction="http://mobileapp/SoapMobileAPPAuthenicate_v2" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPAuthenicate_v3">
+      <soap:operation soapAction="http://mobileapp/SoapMobileAPPAuthenicate_v3" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPCheckDeviceStatus_v1">
+      <soap:operation soapAction="http://mobileapp/SoapMobileAPPCheckDeviceStatus_v1" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPGetCallHistory_v1">
+      <soap:operation soapAction="http://mobileapp/SoapMobileAPPGetCallHistory_v1" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPGetDeviceType_v1">
+      <soap:operation soapAction="http://mobileapp/SoapMobileAPPGetDeviceType_v1" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPGetLanguages_v1">
+      <soap:operation soapAction="http://mobileapp/SoapMobileAPPGetLanguages_v1" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPGetLatestLevel_v1">
+      <soap:operation soapAction="http://mobileapp/SoapMobileAPPGetLatestLevel_v1" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPGetLatestLevel_v2">
+      <soap:operation soapAction="http://mobileapp/SoapMobileAPPGetLatestLevel_v2" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPGetLatestLevel_v3">
+      <soap:operation soapAction="http://mobileapp/SoapMobileAPPGetLatestLevel_v3" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPGetLatestSmartServReading_v1">
+      <soap:operation soapAction="http://mobileapp/SoapMobileAPPGetLatestSmartServReading_v1" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPGetSelectedLanguage_v1">
+      <soap:operation soapAction="http://mobileapp/SoapMobileAPPGetSelectedLanguage_v1" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPGetTankModels_v1">
+      <soap:operation soapAction="http://mobileapp/SoapMobileAPPGetTankModels_v1" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPGetUserAccountDetails_v1">
+      <soap:operation soapAction="http://mobileapp/SoapMobileAPPGetUserAccountDetails_v1" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPGetUserAccountDetails_v2">
+      <soap:operation soapAction="http://mobileapp/SoapMobileAPPGetUserAccountDetails_v2" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPOrderOil_v1">
+      <soap:operation soapAction="http://mobileapp/SoapMobileAPPOrderOil_v1" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPResetPassword_v1">
+      <soap:operation soapAction="http://mobileapp/SoapMobileAPPResetPassword_v1" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPResetPassword_v2">
+      <soap:operation soapAction="http://mobileapp/SoapMobileAPPResetPassword_v2" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPUpdateUserAccountDetails_v1">
+      <soap:operation soapAction="http://mobileapp/SoapMobileAPPUpdateUserAccountDetails_v1" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPUpdateUserAccountDetails_v2">
+      <soap:operation soapAction="http://mobileapp/SoapMobileAPPUpdateUserAccountDetails_v2" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPUpdateUserAccountDetails_v3">
+      <soap:operation soapAction="http://mobileapp/SoapMobileAPPUpdateUserAccountDetails_v3" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPGetPushNotificationAuditsByUser_V1">
+      <soap:operation soapAction="http://mobileapp/SoapMobileAPPGetPushNotificationAuditsByUser_V1" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPSetAppUserLanguagePreference">
+      <soap:operation soapAction="http://mobileapp/SoapMobileAPPSetAppUserLanguagePreference" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPGetTankByModelID_v1">
+      <soap:operation soapAction="http://mobileapp/SoapMobileAPPGetTankByModelID_v1" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPUpdateTankDetails_v1">
+      <soap:operation soapAction="http://mobileapp/SoapMobileAPPUpdateTankDetails_v1" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPUpdateUserAddressDetails_v1">
+      <soap:operation soapAction="http://mobileapp/SoapMobileAPPUpdateUserAddressDetails_v1" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="MobileAppSoap12" type="tns:MobileAppSoap">
+    <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="HelloWorld">
+      <soap12:operation soapAction="http://mobileapp/HelloWorld" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPAuthenicate_v1">
+      <soap12:operation soapAction="http://mobileapp/SoapMobileAPPAuthenicate_v1" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPAuthenicate_v2">
+      <soap12:operation soapAction="http://mobileapp/SoapMobileAPPAuthenicate_v2" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPAuthenicate_v3">
+      <soap12:operation soapAction="http://mobileapp/SoapMobileAPPAuthenicate_v3" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPCheckDeviceStatus_v1">
+      <soap12:operation soapAction="http://mobileapp/SoapMobileAPPCheckDeviceStatus_v1" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPGetCallHistory_v1">
+      <soap12:operation soapAction="http://mobileapp/SoapMobileAPPGetCallHistory_v1" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPGetDeviceType_v1">
+      <soap12:operation soapAction="http://mobileapp/SoapMobileAPPGetDeviceType_v1" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPGetLanguages_v1">
+      <soap12:operation soapAction="http://mobileapp/SoapMobileAPPGetLanguages_v1" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPGetLatestLevel_v1">
+      <soap12:operation soapAction="http://mobileapp/SoapMobileAPPGetLatestLevel_v1" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPGetLatestLevel_v2">
+      <soap12:operation soapAction="http://mobileapp/SoapMobileAPPGetLatestLevel_v2" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPGetLatestLevel_v3">
+      <soap12:operation soapAction="http://mobileapp/SoapMobileAPPGetLatestLevel_v3" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPGetLatestSmartServReading_v1">
+      <soap12:operation soapAction="http://mobileapp/SoapMobileAPPGetLatestSmartServReading_v1" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPGetSelectedLanguage_v1">
+      <soap12:operation soapAction="http://mobileapp/SoapMobileAPPGetSelectedLanguage_v1" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPGetTankModels_v1">
+      <soap12:operation soapAction="http://mobileapp/SoapMobileAPPGetTankModels_v1" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPGetUserAccountDetails_v1">
+      <soap12:operation soapAction="http://mobileapp/SoapMobileAPPGetUserAccountDetails_v1" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPGetUserAccountDetails_v2">
+      <soap12:operation soapAction="http://mobileapp/SoapMobileAPPGetUserAccountDetails_v2" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPOrderOil_v1">
+      <soap12:operation soapAction="http://mobileapp/SoapMobileAPPOrderOil_v1" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPResetPassword_v1">
+      <soap12:operation soapAction="http://mobileapp/SoapMobileAPPResetPassword_v1" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPResetPassword_v2">
+      <soap12:operation soapAction="http://mobileapp/SoapMobileAPPResetPassword_v2" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPUpdateUserAccountDetails_v1">
+      <soap12:operation soapAction="http://mobileapp/SoapMobileAPPUpdateUserAccountDetails_v1" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPUpdateUserAccountDetails_v2">
+      <soap12:operation soapAction="http://mobileapp/SoapMobileAPPUpdateUserAccountDetails_v2" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPUpdateUserAccountDetails_v3">
+      <soap12:operation soapAction="http://mobileapp/SoapMobileAPPUpdateUserAccountDetails_v3" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPGetPushNotificationAuditsByUser_V1">
+      <soap12:operation soapAction="http://mobileapp/SoapMobileAPPGetPushNotificationAuditsByUser_V1" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPSetAppUserLanguagePreference">
+      <soap12:operation soapAction="http://mobileapp/SoapMobileAPPSetAppUserLanguagePreference" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPGetTankByModelID_v1">
+      <soap12:operation soapAction="http://mobileapp/SoapMobileAPPGetTankByModelID_v1" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPUpdateTankDetails_v1">
+      <soap12:operation soapAction="http://mobileapp/SoapMobileAPPUpdateTankDetails_v1" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SoapMobileAPPUpdateUserAddressDetails_v1">
+      <soap12:operation soapAction="http://mobileapp/SoapMobileAPPUpdateUserAddressDetails_v1" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="MobileApp">
+    <wsdl:port name="MobileAppSoap" binding="tns:MobileAppSoap">
+      <soap:address location="https://www.connectsensor.com/soap/MobileApp.asmx" />
+    </wsdl:port>
+    <wsdl:port name="MobileAppSoap12" binding="tns:MobileAppSoap12">
+      <soap12:address location="https://www.connectsensor.com/soap/MobileApp.asmx" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>
