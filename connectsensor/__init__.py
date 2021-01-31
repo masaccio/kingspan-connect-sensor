@@ -1,1 +1,1 @@
-from .client import SensorClient
+from .client import SensorClient, APIError
