@@ -4,7 +4,7 @@ setuptools.setup(
     name="kingspan-connect-sensor",
     version="1.0",
     author="Jon Connell",
-    author_email="angelosantagata@gmail.com",
+    author_email="python@figsandfudge.com",
     description="API to get oil tank from Kingspan SENSiT sensors",
     license='MIT',
     long_description=open('README.md').read(),
