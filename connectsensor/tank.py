@@ -36,4 +36,7 @@ class Tank:
 
     def history(self):
         history_data = self._client.get_history(self._tank_info["SignalmanNo"])
-        return pd.DataFrame(serialize_object(history_data))
+        df = pd.DataFrame(serialize_object(history_data))
+        df =  df[["ReadingDate", "LevelPercentage", "LevelLitres"]]
+        df.columns = ["reading_date", "level_percent", "level_litres"]
+        return df
