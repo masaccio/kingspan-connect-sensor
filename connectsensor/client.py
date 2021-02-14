@@ -41,7 +41,7 @@ class SensorClient:
             culture="en",
         )
         if response["APIResult"]["Code"] != 0:
-            raise APIError(response["APIResult"]["Description"])
+            raise APIError(response["APIResult"]["Description"])  # pragma: no cover
         return response
 
     def get_history(self, signalman_no, start_date=None, end_date=None):
@@ -58,5 +58,5 @@ class SensorClient:
             enddate=end_date_dt.isoformat(),
         )
         if response["APIResult"]["Code"] != 0:
-            raise APIError(response["APIResult"]["Description"])
+            raise APIError(response["APIResult"]["Description"])  # pragma: no cover
         return response["Levels"]["APILevel"]
