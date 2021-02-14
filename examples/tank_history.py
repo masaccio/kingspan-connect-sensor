@@ -37,6 +37,8 @@ client.login(auth[0], auth[2])
 
 tanks = client.tanks()
 history = tanks[0].history()
+if args.start_date:
+    history = history[history["reading_date"] > args.start_date]
 
 try:
     Path(args.db).parent.mkdir(parents=True, exist_ok=True)
@@ -57,8 +59,6 @@ else:
         )
         history = old_history.append(history).drop_duplicates()
 
-    if args.start_date:
-        history = history[history["reading_date"] > args.start_date]
     history.to_sql("history", conn, if_exists="replace", index=False)
     print(history.sort_values(by=["reading_date"]))
 finally:
