@@ -1,4 +1,9 @@
+import os
+import sys
 import argparse
+
+cwd = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, cwd + "/../")
 
 from connectsensor import SensorClient
 
