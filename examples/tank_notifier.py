@@ -1,5 +1,6 @@
 import argparse
 import configparser
+import numpy as np
 import os
 import pandas as pd
 import smtplib
@@ -100,29 +101,30 @@ def update_tank_cache(config, history, update=False):
     return history
 
 
-def forecast_empty(config, history, window):
-    date_window = history.reading_date.max() + timedelta(days=-window)
-    history = history[history.reading_date >= date_window]
-    history = history.sort_values(by="reading_date")
-
-    current_ts = history.reading_date.iloc[0]
+# Ignore refill days where oil goes up by 'threshold'
+def remove_refills(history, threshold):
     current_level = history.level_litres.iloc[0]
-    consumed_litres = 0
-    total_days = 0
+    new_levels = [current_level]
     for index, row in history.iloc[1:].iterrows():
-        num_days = time_delta_days(row.reading_date - current_ts)
-        level_delta = int(row.level_litres - current_level)
-        current_level = row.level_litres
-        current_ts = row.reading_date
+        if (row.level_litres / current_level) > threshold:
+            new_levels.append(current_level)
+        else:
+            new_levels.append(row.level_litres)
+    return new_levels
 
-        # Ignore rises in levels (refills)
-        if level_delta < 0:
-            consumed_litres += -level_delta / num_days
-            total_days += num_days
 
-    rate = consumed_litres / total_days
-    days_to_empty = current_level / rate
-    return days_to_empty
+def forecast_empty(config, history, window):
+    time_delta = datetime.today() - timedelta(days=window)
+    history = history[history.reading_date >= time_delta]
+
+    threshold = config.get("sensit", "refill-threshold", fallback=1.25)
+    levels = remove_refills(history, threshold)
+    delta_days = history.reading_date - history.reading_date.min()
+    delta_days = delta_days.astype("timedelta64[h]") / 24
+
+    rate = np.polyfit(delta_days, levels, 1)[0]
+    current_level = int(history.level_litres.tail(1))
+    return current_level / abs(rate)
 
 
 parser = argparse.ArgumentParser()
@@ -179,3 +181,5 @@ if days_to_empty < args.notice:
         "Low oil warning from SENSiT",
         message,
     )
+
+    print(f"Sent notification: empty in {days_to_empty} days")
