@@ -124,7 +124,7 @@ def forecast_empty(config, history, window):
 
     rate = np.polyfit(delta_days, levels, 1)[0]
     current_level = int(history.level_litres.tail(1))
-    return current_level / abs(rate)
+    return int(current_level / abs(rate))
 
 
 parser = argparse.ArgumentParser()
@@ -166,7 +166,6 @@ days_to_empty = forecast_empty(config, tank_history, args.window)
 if days_to_empty < args.notice:
     level_percent = tank_history.level_percent.iloc[-1]
     level_litres = tank_history.level_litres.iloc[-1]
-    days_to_empty = int(days_to_empty)
 
     message = "SENSiT is reporting:\n"
     message += f"    * level at {level_percent}%\n"
@@ -183,3 +182,5 @@ if days_to_empty < args.notice:
     )
 
     print(f"Sent notification: empty in {days_to_empty} days")
+else:
+    print(f"No notification; {days_to_empty} days oil remain")
