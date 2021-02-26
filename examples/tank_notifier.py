@@ -110,6 +110,7 @@ def remove_refills(history, threshold):
             new_levels.append(current_level)
         else:
             new_levels.append(row.level_litres)
+        current_level = row.level_litres
     return new_levels
 
 
