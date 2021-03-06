@@ -1,6 +1,5 @@
 import argparse
 import configparser
-import numpy as np
 import os
 import pandas as pd
 import smtplib
@@ -101,17 +100,15 @@ def update_tank_cache(config, history, update=False):
     return history
 
 
-# Ignore refill days where oil goes up by 'threshold'
-def remove_refills(history, threshold):
+def usage_rate(history, threshold):
     current_level = history.level_litres.iloc[0]
-    new_levels = [current_level]
+    delta_levels = []
     for index, row in history.iloc[1:].iterrows():
-        if (row.level_litres / current_level) > threshold:
-            new_levels.append(current_level)
-        else:
-            new_levels.append(row.level_litres)
+        # Ignore refill days where oil goes up by 'threshold'
+        if (row.level_litres / current_level) < threshold:
+            delta_levels.append(current_level - row.level_litres)
         current_level = row.level_litres
-    return new_levels
+    return sum(delta_levels) / len(delta_levels)
 
 
 def forecast_empty(config, history, window):
@@ -119,11 +116,7 @@ def forecast_empty(config, history, window):
     history = history[history.reading_date >= time_delta]
 
     threshold = config.get("sensit", "refill-threshold", fallback=1.25)
-    levels = remove_refills(history, threshold)
-    delta_days = history.reading_date - history.reading_date.min()
-    delta_days = delta_days.astype("timedelta64[h]") / 24
-
-    rate = np.polyfit(delta_days, levels, 1)[0]
+    rate = usage_rate(history, threshold)
     current_level = int(history.level_litres.tail(1))
     return int(current_level / abs(rate))
 
