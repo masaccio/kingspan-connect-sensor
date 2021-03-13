@@ -1,5 +1,12 @@
 from zeep.helpers import serialize_object
 import pandas as pd
+import sqlite3
+import ssl
+import sys
+
+
+class DBError(Exception):
+    pass
 
 
 class Tank:
@@ -37,6 +44,37 @@ class Tank:
     def history(self):
         history_data = self._client.get_history(self._tank_info["SignalmanNo"])
         df = pd.DataFrame(serialize_object(history_data))
-        df =  df[["ReadingDate", "LevelPercentage", "LevelLitres"]]
+        df = df[["ReadingDate", "LevelPercentage", "LevelLitres"]]
         df.columns = ["reading_date", "level_percent", "level_litres"]
         return df
+
+    def cached_history(self, cache_db, update=False):
+        try:
+            conn = sqlite3.connect(cache_db)
+            cur = conn.cursor()
+        except Error as e:
+            raise DBError(f"{cache_db}: connection failed") from e
+
+        if _table_exists(cur):
+            query = "SELECT * FROM history;"
+            old_history = pd.read_sql_query(query, conn, parse_dates=["reading_date"])
+            new_history = self.history()
+            history = old_history.append(new_history).drop_duplicates()
+
+        if update:
+            history.to_sql("history", conn, if_exists="replace", index=False)
+
+        cur.close()
+        conn.close()
+
+        return history
+
+
+def _table_exists(cur):
+    query = "SELECT name FROM sqlite_master WHERE type='table' AND name='history'"
+    try:
+        cur.execute(query)
+        rows = cur.fetchall()
+    except Error as e:
+        raise DBError("Failed to check status of history table") from e
+    return len(rows) > 0
