@@ -69,6 +69,7 @@ def read_tank_history(config):
 
 def update_tank_cache(config, history, update=False):
     cache_db = config.get("sensit", "cache", fallback=None)
+    cache_db = os.path.expanduser(cache_db)
     if cache_db is None:
         return
 
@@ -157,6 +158,7 @@ tank_history = read_tank_history(config)
 tank_history = update_tank_cache(config, tank_history, args.no_update)
 days_to_empty = forecast_empty(config, tank_history, args.window)
 
+print("Current level", tank_history.level_litres.iloc[-1], "litres")
 if days_to_empty < args.notice:
     level_percent = tank_history.level_percent.iloc[-1]
     level_litres = tank_history.level_litres.iloc[-1]
