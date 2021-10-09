@@ -22,6 +22,24 @@ def test_help_verbose(script_runner):
     assert ret.stderr == ""
 
 
+@patch("requests.sessions.Session.post", side_effect=mock_post)
+@patch("requests.sessions.Session.get", side_effect=mock_get)
+def test_help_debug(mock_get, mock_post, script_runner):
+    ret = script_runner.run(
+        "kingspan-status",
+        "--username=test@example.com",
+        "--password=s3cret",
+        "--debug",
+        print_result=False,
+    )
+
+    assert ret.success
+    assert "Level = 50%" in ret.stdout
+    assert "zeep.transports: Loading remote data" in ret.stderr
+    assert "HTTP Response from" in ret.stderr
+    assert "SoapMobileAPPGetLatestLevel_v3Response" in ret.stderr
+
+
 VALID_STATUS = [
     "TestTank:",
     "Capacity = 2000",
@@ -41,7 +59,6 @@ VALID_STATUS = [
 ]
 
 
-@mark.script_launch_mode("inprocess")
 @patch("requests.sessions.Session.post", side_effect=mock_post)
 @patch("requests.sessions.Session.get", side_effect=mock_get)
 def test_status(mock_get, mock_post, script_runner):
