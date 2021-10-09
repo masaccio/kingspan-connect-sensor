@@ -6,9 +6,6 @@ import sys
 from unittest import TestCase, main, mock
 from datetime import datetime
 
-cwd = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, cwd + "/../")
-
 from connectsensor import SensorClient, APIError
 
 
@@ -21,7 +18,7 @@ def xml_match(xml, key):
 
 
 def read_test_xml(filename):
-    test_filename = os.path.join("tests", filename)
+    test_filename = os.path.join("tests/data", filename)
     with open(test_filename) as fh:
         xml = fh.read()
         xml = bytes(bytearray(xml, encoding="utf-8"))
