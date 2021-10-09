@@ -1,5 +1,3 @@
-import os
-import sys
 import argparse
 
 from connectsensor import SensorClient
@@ -36,7 +34,15 @@ def main():
     print("\tLast Read =", tank_level["ReadingDate"])
 
     print("\nHistory:")
-    print(tanks[0].history())
+    print("\t{0:<22} {1:<6} {2:<5}".format("Reading date", "%Full", "Litres"))
+    for index, measurement in tanks[0].history().iterrows():
+        print(
+            "\t{0:<22} {1:<6} {2:<5}".format(
+                measurement.reading_date.strftime("%d-%b-%Y %H:%M"),
+                measurement.level_percent,
+                measurement.level_litres,
+            )
+        )
 
 
 if __name__ == "__main__":
