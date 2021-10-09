@@ -10,7 +10,7 @@ import sys
 cwd = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, cwd + "/../")
 
-from connectsensor import SensorClient
+from connectsensor import SensorClient, APIError
 from datetime import datetime, timedelta
 
 
@@ -35,7 +35,7 @@ def read_config(config_filename):
     try:
         config = configparser.ConfigParser(interpolation=None)
         config.read(config_filename)
-    except Error as e:
+    except configparser.Error as e:
         print(config_filename + ": " + str(e))
         sys.exit(1)
     finally:
@@ -45,7 +45,7 @@ def read_config(config_filename):
 def config_value(config, section, key):
     try:
         value = config.get(section, key)
-    except Error as e:
+    except configparser.Error as e:
         print(f"Config value '{key}' not found in section '{section}'", file=sys.stderr)
         sys.exit(1)
     finally:
@@ -80,7 +80,7 @@ def update_tank_cache(config, history, update=False):
     try:
         conn = sqlite3.connect(cache_db)
         cur = conn.cursor()
-    except Error as e:
+    except configparser.BasicInterpolationError as e:
         print("DB error:", str(e))
         sys.exit(1)
 
@@ -105,7 +105,7 @@ def usage_rate(history, threshold):
     current_level = history.level_litres.iloc[0]
     delta_levels = []
     for index, row in history.iloc[1:].iterrows():
-        # Ignore refill days where oil goes up by 'threshold'
+        # Ignore refill days where oil goes up by 'threshold'
         if (row.level_litres / current_level) < threshold:
             delta_levels.append(current_level - row.level_litres)
         current_level = row.level_litres
@@ -118,8 +118,11 @@ def forecast_empty(config, history, window):
 
     threshold = config.get("sensit", "refill-threshold", fallback=1.25)
     rate = usage_rate(history, threshold)
-    current_level = int(history.level_litres.tail(1))
-    return int(current_level / abs(rate))
+    if rate == 0:
+        return 9999.0
+    else:
+        current_level = int(history.level_litres.tail(1))
+        return int(current_level / abs(rate))
 
 
 parser = argparse.ArgumentParser()

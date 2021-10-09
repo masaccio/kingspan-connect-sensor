@@ -9,7 +9,7 @@ import xlsxwriter
 cwd = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, cwd + "/../")
 
-from connectsensor import SensorClient
+from connectsensor import SensorClient, APIError
 from datetime import datetime, timedelta
 
 
@@ -17,7 +17,7 @@ def read_config(config_filename):
     try:
         config = configparser.ConfigParser(interpolation=None)
         config.read(config_filename)
-    except Error as e:
+    except configparser.Error as e:
         print(config_filename + ": " + str(e))
         sys.exit(1)
     finally:
@@ -27,7 +27,7 @@ def read_config(config_filename):
 def config_value(config, section, key):
     try:
         value = config.get(section, key)
-    except Error as e:
+    except configparser.Error as e:
         print(f"Config value '{key}' not found in section '{section}'", file=sys.stderr)
         sys.exit(1)
     finally:
