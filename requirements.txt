@@ -1,0 +1,5 @@
+zeep
+pandas
+pytest
+pytest-console-scripts
+pytest-check
