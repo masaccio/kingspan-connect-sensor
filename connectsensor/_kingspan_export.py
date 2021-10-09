@@ -6,9 +6,6 @@ import sqlite3
 import sys
 import xlsxwriter
 
-cwd = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, cwd + "/../")
-
 from connectsensor import SensorClient, APIError
 from datetime import datetime, timedelta
 
@@ -73,14 +70,21 @@ parser.add_argument(
     help="Don't update cache with new data (deault: update on)",
 )
 
-args = parser.parse_args()
-config = read_config(args.config)
 
-tank_history = read_tank_history(config)
-start_date = config.get("sensit", "start-date", fallback=None)
-if start_date is not None:
-    tank_history = tank_history[tank_history.reading_date >= start_date]
+def main():
+    args = parser.parse_args()
+    config = read_config(args.config)
 
-writer = pd.ExcelWriter(args.output, engine="xlsxwriter")
-tank_history.to_excel(writer, sheet_name="History", index=False)
-writer.save()
+    tank_history = read_tank_history(config)
+    start_date = config.get("sensit", "start-date", fallback=None)
+    if start_date is not None:
+        tank_history = tank_history[tank_history.reading_date >= start_date]
+
+    writer = pd.ExcelWriter(args.output, engine="xlsxwriter")
+    tank_history.to_excel(writer, sheet_name="History", index=False)
+    writer.save()
+
+
+if __name__ == "__main__":
+    # execute only if run as a script
+    main()

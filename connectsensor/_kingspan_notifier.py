@@ -154,32 +154,39 @@ parser.add_argument(
     help="Number of days before out-of-oil forecast to warn (default: 14)",
 )
 
-args = parser.parse_args()
-config = read_config(args.config)
 
-tank_history = read_tank_history(config)
-tank_history = update_tank_cache(config, tank_history, args.no_update)
-days_to_empty = forecast_empty(config, tank_history, args.window)
+def main():
+    args = parser.parse_args()
+    config = read_config(args.config)
 
-print("Current level", tank_history.level_litres.iloc[-1], "litres")
-if days_to_empty < args.notice:
-    level_percent = tank_history.level_percent.iloc[-1]
-    level_litres = tank_history.level_litres.iloc[-1]
+    tank_history = read_tank_history(config)
+    tank_history = update_tank_cache(config, tank_history, args.no_update)
+    days_to_empty = forecast_empty(config, tank_history, args.window)
 
-    message = "SENSiT is reporting:\n"
-    message += f"    * level at {level_percent}%\n"
-    message += f"    * level at {level_litres} litres\n\n"
-    message += f"Forecasting empty in {days_to_empty} days\n"
+    print("Current level", tank_history.level_litres.iloc[-1], "litres")
+    if days_to_empty < args.notice:
+        level_percent = tank_history.level_percent.iloc[-1]
+        level_litres = tank_history.level_litres.iloc[-1]
 
-    send_email(
-        config_value(config, "smtp", "server"),
-        config_value(config, "smtp", "username"),
-        config_value(config, "smtp", "password"),
-        config_value(config, "smtp", "email"),
-        "Low oil warning from SENSiT",
-        message,
-    )
+        message = "SENSiT is reporting:\n"
+        message += f"    * level at {level_percent}%\n"
+        message += f"    * level at {level_litres} litres\n\n"
+        message += f"Forecasting empty in {days_to_empty} days\n"
 
-    print(f"Sent notification: empty in {days_to_empty} days")
-else:
-    print(f"No notification; {days_to_empty} days oil remain")
+        send_email(
+            config_value(config, "smtp", "server"),
+            config_value(config, "smtp", "username"),
+            config_value(config, "smtp", "password"),
+            config_value(config, "smtp", "email"),
+            "Low oil warning from SENSiT",
+            message,
+        )
+
+        print(f"Sent notification: empty in {days_to_empty} days")
+    else:
+        print(f"No notification; {days_to_empty} days oil remain")
+
+
+if __name__ == "__main__":
+    # execute only if run as a script
+    main()
