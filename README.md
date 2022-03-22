@@ -34,7 +34,7 @@ The `tanks` method returns a `Tanks` object which can be queried for the status 
 
 ## Scripts
 
-Reporting on the curren status of the tank using `kingspan-status`:
+Reporting on the current status of the tank using `kingspan-status`:
 
 ```
 % kingspan-status --username=test@example.com --password=s3cret
