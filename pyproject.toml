@@ -20,9 +20,9 @@ version = "1.0.1"
 [tool.poetry.dependencies]
 pandas = "^1.5.1"
 python = "^3.8"
-zeep = "^4.2.0"
 requests = "^2.28.1"
 xlsxwriter = "^3.0.3"
+zeep = "^4.2.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.2.0"
@@ -48,6 +48,7 @@ directory = "coverage_html_report"
 [tool.pytest.ini_options]
 addopts = "-ra -s"
 minversion = 6.0
+pythonpath = [".", "tests"]
 
 [tool.tox]
 legacy_tox_ini = """
