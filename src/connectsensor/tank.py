@@ -52,7 +52,7 @@ class Tank:
         try:
             conn = sqlite3.connect(cache_db)
             cur = conn.cursor()
-        except Error as e:
+        except sqlite3.Error as e:
             raise DBError(f"{cache_db}: connection failed") from e
 
         if _table_exists(cur):
@@ -75,6 +75,6 @@ def _table_exists(cur):
     try:
         cur.execute(query)
         rows = cur.fetchall()
-    except Error as e:
+    except sqlite3.Error as e:
         raise DBError("Failed to check status of history table") from e
     return len(rows) > 0
