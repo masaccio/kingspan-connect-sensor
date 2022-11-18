@@ -1,12 +1,10 @@
 language: python
 python:
- - "3.6"
- - "3.7.9"
  - "3.8"
  - "3.9"
+ - "3.10"
 install:
-  - pip install -U -r requirements.txt
-  - python3 -m pip install --upgrade attrs
-  - python3 setup.py install
+  - pip install poetry
+  - poetry install
 script:
-  - python3 -m pytest tests
+  - poetry run pytest
