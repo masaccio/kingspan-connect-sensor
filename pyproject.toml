@@ -19,10 +19,13 @@ version = "1.0.1"
 
 [tool.poetry.dependencies]
 pandas = "^1.5.1"
-python = "^3.8"
+python = "^3.9"
 requests = "^2.28.1"
 xlsxwriter = "^3.0.3"
 zeep = "^4.2.0"
+datetime = "^4.7"
+asyncio = "^3.4.3"
+logging = "^0.4.9.6"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.2.0"

@@ -1,49 +1,86 @@
-from unittest.mock import patch
-from pytest import raises
+"""Tests for integration_blueprint api."""
+import asyncio
 
-from mock_requests import mock_get, mock_post
-from connectsensor import SensorClient, APIError
+import aiohttp
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
+
+from custom_components.integration_blueprint.api import IntegrationBlueprintApiClient
 
 
-@patch("requests.sessions.Session.post", side_effect=mock_post)
-@patch("requests.sessions.Session.get", side_effect=mock_get)
-def test_valid_login(mock_get, mock_post):
-    client = SensorClient()
-    mock_get.assert_called_with(
-        "https://www.connectsensor.com/soap/MobileApp.asmx?WSDL", timeout=300
+async def test_api(hass, aioclient_mock, caplog):
+    """Test API calls."""
+
+    # To test the api submodule, we first create an instance of our API client
+    api = IntegrationBlueprintApiClient("test", "test", async_get_clientsession(hass))
+
+    # Use aioclient_mock which is provided by `pytest_homeassistant_custom_components`
+    # to mock responses to aiohttp requests. In this case we are telling the mock to
+    # return {"test": "test"} when a `GET` call is made to the specified URL. We then
+    # call `async_get_data` which will make that `GET` request.
+    aioclient_mock.get(
+        "https://jsonplaceholder.typicode.com/posts/1", json={"test": "test"}
+    )
+    assert await api.async_get_data() == {"test": "test"}
+
+    # We do the same for `async_set_title`. Note the difference in the mock call
+    # between the previous step and this one. We use `patch` here instead of `get`
+    # because we know that `async_set_title` calls `api_wrapper` with `patch` as the
+    # first parameter
+    aioclient_mock.patch("https://jsonplaceholder.typicode.com/posts/1")
+    assert await api.async_set_title("test") is None
+
+    # In order to get 100% coverage, we need to test `api_wrapper` to test the code
+    # that isn't already called by `async_get_data` and `async_set_title`. Because the
+    # only logic that lives inside `api_wrapper` that is not being handled by a third
+    # party library (aiohttp) is the exception handling, we also want to simulate
+    # raising the exceptions to ensure that the function handles them as expected.
+    # The caplog fixture allows access to log messages in tests. This is particularly
+    # useful during exception handling testing since often the only action as part of
+    # exception handling is a logging statement
+    caplog.clear()
+    aioclient_mock.put(
+        "https://jsonplaceholder.typicode.com/posts/1", exc=asyncio.TimeoutError
+    )
+    assert (
+        await api.api_wrapper("put", "https://jsonplaceholder.typicode.com/posts/1")
+        is None
+    )
+    assert (
+        len(caplog.record_tuples) == 1
+        and "Timeout error fetching information from" in caplog.record_tuples[0][2]
     )
 
-    client.login("test@example.com", "s3cret")
-    mock_post.assert_called()
+    caplog.clear()
+    aioclient_mock.post(
+        "https://jsonplaceholder.typicode.com/posts/1", exc=aiohttp.ClientError
+    )
+    assert (
+        await api.api_wrapper("post", "https://jsonplaceholder.typicode.com/posts/1")
+        is None
+    )
+    assert (
+        len(caplog.record_tuples) == 1
+        and "Error fetching information from" in caplog.record_tuples[0][2]
+    )
 
-    tanks = client.tanks()
-    assert tanks[0].name() == "TestTank"
-    assert tanks[0].capacity() == "2000"
-    assert tanks[0].serial_number() == "20001000"
-    assert tanks[0].model() == "TestModel"
-    assert mock_post.call_count == 2
+    caplog.clear()
+    aioclient_mock.post("https://jsonplaceholder.typicode.com/posts/2", exc=Exception)
+    assert (
+        await api.api_wrapper("post", "https://jsonplaceholder.typicode.com/posts/2")
+        is None
+    )
+    assert (
+        len(caplog.record_tuples) == 1
+        and "Something really wrong happened!" in caplog.record_tuples[0][2]
+    )
 
-
-@patch("requests.sessions.Session.post", side_effect=mock_post)
-@patch("requests.sessions.Session.get", side_effect=mock_get)
-def test_invalid_login(mock_get, mock_post):
-    with raises(APIError) as e:
-        client = SensorClient()
-        client.login("invalid", "invalid")
-    assert str(e.value) == "Authentication Failed, Invalid Login"
-
-
-@patch("requests.sessions.Session.post", side_effect=mock_post)
-@patch("requests.sessions.Session.get", side_effect=mock_get)
-def test_levels(mock_get, mock_post):
-    client = SensorClient()
-    client.login("test@example.com", "s3cret")
-    tanks = client.tanks()
-    levels = tanks[0].level()
-    assert levels["SignalmanNo"] == 20001000
-    assert levels["LevelLitres"] == 1000
-    assert levels["LevelLitres"] == 1000
-
-    history = tanks[0].history()
-
-    assert mock_post.call_count == 3
+    caplog.clear()
+    aioclient_mock.post("https://jsonplaceholder.typicode.com/posts/3", exc=TypeError)
+    assert (
+        await api.api_wrapper("post", "https://jsonplaceholder.typicode.com/posts/3")
+        is None
+    )
+    assert (
+        len(caplog.record_tuples) == 1
+        and "Error parsing information from" in caplog.record_tuples[0][2]
+    )
