@@ -1,6 +1,6 @@
 {
   "name": "Kingspan Connect Sensor",
-  "content_in_root": true,
+  "content_in_root": false,
   "country": ["UK"],
   "render_readme": true
 }
