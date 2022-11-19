@@ -1,2 +1,5 @@
+import importlib.metadata
+
 from .client import SensorClient, APIError
-from ._version import __version__
+
+__version__ = importlib.metadata.version("kingspan-connect-sensor")
