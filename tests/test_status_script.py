@@ -2,6 +2,7 @@ from pytest import mark
 from unittest.mock import patch
 
 from mock_requests import mock_get, mock_post
+from mock_data import VALID_STATUS, USERNAME, PASSWORD
 from connectsensor import __version__
 
 
@@ -38,25 +39,6 @@ def test_help_debug(mock_get, mock_post, script_runner):
     assert "zeep.transports: Loading remote data" in ret.stderr
     assert "HTTP Response from" in ret.stderr
     assert "SoapMobileAPPGetLatestLevel_v3Response" in ret.stderr
-
-
-VALID_STATUS = [
-    "TestTank:",
-    "Capacity = 2000",
-    "Serial Number = 20001000",
-    "Model = TestModel",
-    "Level = 50% (1000 litres)",
-    "Last Read = 2021-01-31 00:59:30.987000",
-    "",
-    "History:",
-    "Reading date           %Full  Litres",
-    "25-Jan-2021 13:59      100    2000",
-    "27-Jan-2021 00:59      95     1900",
-    "29-Jan-2021 00:59      94     1880",
-    "30-Jan-2021 00:29      94     1880",
-    "31-Jan-2021 00:59      92     1840",
-    "",
-]
 
 
 @patch("requests.sessions.Session.post", side_effect=mock_post)
