@@ -59,10 +59,10 @@ def mock_load_remote_data(url):
     return xml
 
 
-def mock_post(*args, **kwargs):
-    if args[0].startswith("https://www.connectsensor.com/"):
-        soap_action = kwargs["headers"]["SOAPAction"]
-        xml = kwargs["data"].decode("ascii")
+def mock_post(address, envelope, headers):
+    if address.startswith("https://www.connectsensor.com/"):
+        soap_action = headers["SOAPAction"]
+        xml = str(etree_to_string(envelope))
         if "SoapMobileAPPAuthenicate_v3" in soap_action:
             email = xml_match(xml, "emailaddress")
             password = xml_match(xml, "password")
