@@ -7,7 +7,7 @@ from zeep.transports import AsyncTransport
 from mock_data import VALID_STATUS, USERNAME, PASSWORD
 from mock_requests import MockResponse, mock_load_remote_data, async_mock_post
 
-from connectsensor import __version__, AsyncConnectSensor
+from connectsensor import __version__, AsyncSensorClient
 
 
 @pytest.mark.asyncio
@@ -21,7 +21,7 @@ async def test_status():
         "post_xml",
         side_effect=async_mock_post,
     ) as mock_post:
-        async with AsyncConnectSensor() as client:
+        async with AsyncSensorClient() as client:
             await client.login(USERNAME, PASSWORD)
             tanks = await client.tanks
             tank_level = await tanks[0].level
