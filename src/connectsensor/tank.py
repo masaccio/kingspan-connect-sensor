@@ -17,7 +17,7 @@ class Tank:
     def level(self) -> int:
         """Return the oil level in the tank in litres"""
         self._cache_tank_data()
-        return self._level_data["Level"]
+        return int(self._level_data["LevelLitres"])
 
     @property
     def serial_number(self) -> str:
@@ -38,7 +38,7 @@ class Tank:
     def capacity(self):
         """Return the capacity of the tank in litres"""
         self._cache_tank_data()
-        return self._tank_info["Tank Capacity(L)"]
+        return int(self._tank_info["Tank Capacity(L)"])
 
     @property
     def history(self):

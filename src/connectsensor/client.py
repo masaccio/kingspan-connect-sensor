@@ -1,6 +1,5 @@
 from async_property import async_property
 from datetime import datetime
-from logging import debug
 from urllib.parse import urljoin
 from zeep import Client as SoapClient
 from zeep import AsyncClient as AsyncSoapClient
@@ -17,20 +16,18 @@ class SensorClient:
     def __init__(self):
         self._soap_client = SoapClient(WSDL_URL)
         self._soap_client.set_ns_prefix(None, "http://mobileapp/")
-        transport = Transport(self._soap_client)
-        self._service = Service(transport)
 
     def login(self, username, password):
         print("SensorClient.login")
         self._username = username
         self._password = password
 
-        response = self._service.authenticate(username, password)
+        response = self._soap_client.service.SoapMobileAPPAuthenicate_v3(
+            emailaddress=username, password=password
+        )
 
         if response["APIResult"]["Code"] != 0:
-            err_str = response["APIResult"]["Description"]
-            debug("login: failed with {err_str}")
-            raise APIError()
+            raise APIError(response["APIResult"]["Description"])
 
         self._user_id = response["APIUserID"]
         self._tanks = []
@@ -72,19 +69,16 @@ class SensorClient:
         return response["Levels"]["APILevel"]
 
 
-class AsyncConnectSensor:
+class AsyncSensorClient:
     def __init__(self, base=DEAFULT_SERVER):
-        debug("AsyncConnectSensor:init")
         url = urljoin(base, WSDL_PATH)
         self._soap_client = AsyncSoapClient(url)
         self._soap_client.set_ns_prefix(None, "http://mobileapp/")
 
     async def __aenter__(self):
-        debug("AsyncConnectSensor:aenter")
         return self
 
     async def __aexit__(self, exc_t, exc_v, exc_tb):
-        debug("AsyncConnectSensor:aexit")
         pass
 
     async def login(self, username, password):
