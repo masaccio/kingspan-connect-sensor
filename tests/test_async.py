@@ -30,6 +30,7 @@ async def test_status():
             assert await tanks[0].model == "TestModel"
             assert await tanks[0].name == "TestTank"
             assert await tanks[0].capacity == 2000
+
             tank_history = await tanks[0].history
             assert tank_history.reading_date[0] == datetime(2021, 1, 25, 13, 59, 14)
             assert tank_history.level_percent[1] == 95
