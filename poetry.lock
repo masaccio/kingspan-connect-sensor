@@ -213,14 +213,6 @@ python-versions = "*"
 six = "*"
 
 [[package]]
-name = "logging"
-version = "0.4.9.6"
-description = "A logging module for Python"
-category = "main"
-optional = false
-python-versions = "*"
-
-[[package]]
 name = "lxml"
 version = "4.9.1"
 description = "Powerful and Pythonic XML processing library combining libxml2/libxslt with the ElementTree API."
@@ -575,7 +567,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "57565ac6f3168ba114912c9739f833c3a7caafe7fc04a135e4204914e40a2955"
+content-hash = "0c82e9589a37a3d875a811fe0cc02e057daa4bc64773caed5e1dbc393357184c"
 
 [metadata.files]
 aiofiles = [
@@ -718,9 +710,6 @@ iniconfig = [
 isodate = [
     {file = "isodate-0.6.1-py2.py3-none-any.whl", hash = "sha256:0751eece944162659049d35f4f549ed815792b38793f07cf73381c1c87cbed96"},
     {file = "isodate-0.6.1.tar.gz", hash = "sha256:48c5881de7e8b0a0d648cb024c8062dc84e7b840ed81e864c7614fd3c127bde9"},
-]
-logging = [
-    {file = "logging-0.4.9.6.tar.gz", hash = "sha256:26f6b50773f085042d301085bd1bf5d9f3735704db9f37c1ce6d8b85c38f2417"},
 ]
 lxml = [
     {file = "lxml-4.9.1-cp27-cp27m-macosx_10_15_x86_64.whl", hash = "sha256:98cafc618614d72b02185ac583c6f7796202062c41d2eeecdf07820bad3295ed"},

@@ -3,8 +3,6 @@ from zeep.helpers import serialize_object
 
 import pandas as pd
 import os
-import sqlite3
-import aiosqlite
 
 from .exceptions import DBError
 
