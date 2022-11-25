@@ -18,7 +18,6 @@ class SensorClient:
         self._soap_client.set_ns_prefix(None, "http://mobileapp/")
 
     def login(self, username, password):
-        print("SensorClient.login")
         self._username = username
         self._password = password
 
@@ -82,7 +81,6 @@ class AsyncSensorClient:
         pass
 
     async def login(self, username, password):
-
         self._username = username
         self._password = password
 
@@ -91,9 +89,7 @@ class AsyncSensorClient:
         )
 
         if response["APIResult"]["Code"] != 0:
-            err_str = response["APIResult"]["Description"]
-            debug("login: failed with {err_str}")
-            raise APIError()
+            raise APIError(response["APIResult"]["Description"])
 
         self._user_id = response["APIUserID"]
         self._tanks = []
