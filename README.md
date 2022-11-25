@@ -10,7 +10,7 @@ To make use of the API, you will need the credentials you used to register with 
 
 ## Installation
 
-```
+``` bash
 python3 -m pip kingspan-connect-sensor
 ```
 
@@ -23,7 +23,8 @@ from connectsensor import SensorClient
 
 client = SensorClient()
 client.login("test@example.com", "s3cret")
-tanks = client.tanks()
+tanks = client.tanks
+tank_level = tanks[0].level
 ```
 
 The `tanks` method returns a `Tanks` object which can be queried for the status of the specific tank.
@@ -40,7 +41,7 @@ The `tanks` method returns a `Tanks` object which can be queried for the status 
 
 Reporting on the current status of the tank using `kingspan-status`:
 
-```
+``` bash
 % kingspan-status --username=test@example.com --password=s3cret
 
 Home Tank:
@@ -60,7 +61,7 @@ History:
 
 `kingspan-notifier` can be used to check the status of a tabk and report via email when the tank is likely to run out of oil.
 
-```
+``` bash
 % kingspan-notifier --config kingspan.ini
 Current level 1148 litres
 No notification; 196 days oil remain
@@ -75,7 +76,7 @@ Command line options include:
 
 An example config file is:
 
-```
+``` ini
 [sensit]
 username=test@example.com
 password=s3cret
