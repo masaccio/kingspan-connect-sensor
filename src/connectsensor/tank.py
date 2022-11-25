@@ -37,10 +37,16 @@ class Tank:
         return self._tank_info["Tank Name"]
 
     @property
-    def capacity(self):
+    def capacity(self) -> int:
         """Return the capacity of the tank in litres"""
         self._cache_tank_data()
         return int(self._tank_info["Tank Capacity(L)"])
+
+    @property
+    def last_read(self) -> str:
+        """Return the last read date of the tank as a datetime object"""
+        self._cache_tank_data()
+        return self._level_data["ReadingDate"]
 
     @property
     def history(self):
@@ -80,9 +86,15 @@ class AsyncTank:
         return self._tank_info["Tank Name"]
 
     @async_property
-    async def capacity(self):
+    async def capacity(self) -> int:
         await self._cache_tank_data()
         return int(self._tank_info["Tank Capacity(L)"])
+
+    @async_property
+    async def last_read(self) -> str:
+        """Return the last read date of the tank as a datetime object"""
+        self._cache_tank_data()
+        return self._level_data["ReadingDate"]
 
     @async_property
     async def history(self):

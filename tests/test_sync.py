@@ -5,7 +5,7 @@ from unittest.mock import patch
 from zeep.transports import Transport
 
 from mock_data import VALID_STATUS, USERNAME, PASSWORD
-from mock_requests import MockResponse, mock_load_remote_data, mock_post
+from mock_requests import MockResponse, mock_load_remote_data, mock_post_xml
 
 from connectsensor import __version__, SensorClient
 
@@ -18,7 +18,7 @@ def test_status():
     ) as mock_get, patch.object(
         Transport,
         "post_xml",
-        side_effect=mock_post,
+        side_effect=mock_post_xml,
     ) as mock_post_func:
         client = SensorClient()
         client.login(USERNAME, PASSWORD)

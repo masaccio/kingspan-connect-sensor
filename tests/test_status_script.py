@@ -1,7 +1,7 @@
 from pytest import mark
 from unittest.mock import patch
 
-from mock_requests import mock_get, mock_post
+from mock_requests import mock_get, mock_requests_post
 from mock_data import VALID_STATUS, USERNAME, PASSWORD
 from connectsensor import __version__
 
@@ -23,7 +23,7 @@ def test_help_verbose(script_runner):
     assert ret.stderr == ""
 
 
-@patch("requests.sessions.Session.post", side_effect=mock_post)
+@patch("requests.sessions.Session.post", side_effect=mock_requests_post)
 @patch("requests.sessions.Session.get", side_effect=mock_get)
 def test_help_debug(mock_get, mock_post, script_runner):
     ret = script_runner.run(
@@ -41,7 +41,22 @@ def test_help_debug(mock_get, mock_post, script_runner):
     assert "SoapMobileAPPGetLatestLevel_v3Response" in ret.stderr
 
 
-@patch("requests.sessions.Session.post", side_effect=mock_post)
+@patch("requests.sessions.Session.post", side_effect=mock_requests_post)
+@patch("requests.sessions.Session.get", side_effect=mock_get)
+def test_help_invalid_credentials(mock_get, mock_post, script_runner):
+    ret = script_runner.run(
+        "kingspan-status",
+        "--username=invalid@example.com",
+        "--password=invalid",
+        print_result=False,
+    )
+
+    assert not ret.success
+    assert "invalid username or password" in ret.stderr
+    assert ret.stdout == ""
+
+
+@patch("requests.sessions.Session.post", side_effect=mock_requests_post)
 @patch("requests.sessions.Session.get", side_effect=mock_get)
 def test_status(mock_get, mock_post, script_runner):
     ret = script_runner.run(

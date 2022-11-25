@@ -47,6 +47,43 @@ def read_tank_history(config):
         tank_history = tanks[0].cached_history(cache_db, update=True)
         return tank_history
 
+    @property
+    def history(self):
+        history_data = self._soap_client._get_history(self._signalman_no)
+        return history_to_df(history_data)
+
+
+def cached_history(self, cache_db, update=False):
+    try:
+        db = sqlite3.connect(cache_db)
+        cursor = conn.cursor()
+    except sqlite3.Error as e:
+        raise DBError(f"{cache_db}: connection failed") from e
+
+    if table_exists(cursor):
+        query = "SELECT * FROM history;"
+        old_history = pd.read_sql_query(query, db, parse_dates=["reading_date"])
+        new_history = self.history()
+        history = old_history.concat(new_history).drop_duplicates()
+
+    if update:
+        history.to_sql("history", db, if_exists="replace", index=False)
+
+    cursor.close()
+    db.close()
+
+    return history
+
+
+def table_exists(cur):
+    query = "SELECT name FROM sqlite_master WHERE type='table' AND name='history'"
+    try:
+        cur.execute(query)
+        rows = cur.fetchall()
+    except sqlite3.Error as e:
+        raise DBError("Failed to check status of history table") from e
+    return len(rows) > 0
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument(

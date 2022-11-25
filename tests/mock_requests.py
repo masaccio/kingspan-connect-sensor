@@ -59,32 +59,45 @@ def mock_load_remote_data(url):
     return xml
 
 
-def mock_post(address, envelope, headers):
-    if address.startswith("https://www.connectsensor.com/"):
-        soap_action = headers["SOAPAction"]
-        xml = str(etree_to_string(envelope))
-        if "SoapMobileAPPAuthenicate_v3" in soap_action:
-            email = xml_match(xml, "emailaddress")
-            password = xml_match(xml, "password")
-            if email is None or email != "test@example.com":
-                xml_filename = "SoapMobileAPPAuthenicate_v3.invalid.xml"
-            elif password is None or password != "s3cret":
-                xml_filename = "SoapMobileAPPAuthenicate_v3.invalid.xml"
-            else:
-                xml_filename = "SoapMobileAPPAuthenicate_v3.valid.xml"
-            xml = read_test_xml(xml_filename)
-            return MockResponse(xml, 200)
-        elif "SoapMobileAPPGetLatestLevel_v3" in soap_action:
-            xml = read_test_xml("SoapMobileAPPGetLatestLevel_v3.xml")
-            return MockResponse(xml, 200)
-        elif "SoapMobileAPPGetCallHistory_v1" in soap_action:
-            xml = read_test_xml("SoapMobileAPPGetCallHistory_v1.xml")
-            return MockResponse(xml, 200)
+def mock_post(xml, soap_action):
+    if "SoapMobileAPPAuthenicate_v3" in soap_action:
+        email = xml_match(xml, "emailaddress")
+        password = xml_match(xml, "password")
+        if email is None or email != "test@example.com":
+            xml_filename = "SoapMobileAPPAuthenicate_v3.invalid.xml"
+        elif password is None or password != "s3cret":
+            xml_filename = "SoapMobileAPPAuthenicate_v3.invalid.xml"
+        else:
+            xml_filename = "SoapMobileAPPAuthenicate_v3.valid.xml"
+        xml = read_test_xml(xml_filename)
+        return MockResponse(xml, 200)
+    elif "SoapMobileAPPGetLatestLevel_v3" in soap_action:
+        xml = read_test_xml("SoapMobileAPPGetLatestLevel_v3.xml")
+        return MockResponse(xml, 200)
+    elif "SoapMobileAPPGetCallHistory_v1" in soap_action:
+        xml = read_test_xml("SoapMobileAPPGetCallHistory_v1.xml")
+        return MockResponse(xml, 200)
+
+
+def mock_requests_post(*args, **kwargs):
+    if args[0].startswith("https://www.connectsensor.com/"):
+        soap_action = kwargs["headers"]["SOAPAction"]
+        xml = kwargs["data"].decode("ascii")
+        return mock_post(xml, soap_action)
     else:
         return MockResponse("", 404)
 
 
-async def async_mock_post(address, envelope, headers):
+def mock_post_xml(address, envelope, headers):
+    if address.startswith("https://www.connectsensor.com/"):
+        soap_action = headers["SOAPAction"]
+        xml = str(etree_to_string(envelope))
+        return mock_post(xml, soap_action)
+    else:
+        return MockResponse("", 404)
+
+
+async def async_mock_post_xml(address, envelope, headers):
     if address.startswith("https://www.connectsensor.com/"):
         soap_action = headers["SOAPAction"]
         xml = str(etree_to_string(envelope))

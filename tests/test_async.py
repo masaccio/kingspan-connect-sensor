@@ -5,7 +5,7 @@ from unittest.mock import patch
 from zeep.transports import AsyncTransport
 
 from mock_data import VALID_STATUS, USERNAME, PASSWORD
-from mock_requests import MockResponse, mock_load_remote_data, async_mock_post
+from mock_requests import MockResponse, mock_load_remote_data, async_mock_post_xml
 
 from connectsensor import __version__, AsyncSensorClient
 
@@ -19,7 +19,7 @@ async def test_status():
     ) as mock_get, patch.object(
         AsyncTransport,
         "post_xml",
-        side_effect=async_mock_post,
+        side_effect=async_mock_post_xml,
     ) as mock_post:
         async with AsyncSensorClient() as client:
             await client.login(USERNAME, PASSWORD)
