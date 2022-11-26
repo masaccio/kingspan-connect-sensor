@@ -1,10 +1,8 @@
 import argparse
 import configparser
-import os
 import pandas as pd
 import sqlite3
 import sys
-import xlsxwriter
 
 from connectsensor import SensorClient, APIError, DBError
 from datetime import datetime, timedelta
