@@ -60,11 +60,16 @@ def read_tank_history(config):
             config_value(config, "sensit", "password"),
         )
     except APIError as e:
-        print("SENSiT connect failed:", str(e))
+        if "Authentication Failed" in str(e):
+            print(
+                "Authentication Failed: invalid username or password", file=sys.stderr
+            )
+        else:  # pragma: no cover
+            print("Unknown API error:", e.value, file=sys.stderr)
         sys.exit(1)
-    finally:
-        tanks = client.tanks()
-        return tanks[0].history()
+
+    tanks = client.tanks
+    return tanks[0].history
 
 
 def update_tank_cache(config, history, update=False):
@@ -102,6 +107,8 @@ def update_tank_cache(config, history, update=False):
 
 
 def usage_rate(history, threshold):
+    if len(history) == 0:
+        return 0
     current_level = history.level_litres.iloc[0]
     delta_levels = []
     for index, row in history.iloc[1:].iterrows():
