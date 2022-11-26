@@ -16,6 +16,8 @@ python3 -m pip kingspan-connect-sensor
 
 ## Usage
 
+*NOTE* from version 2.0.0, the API changes to use attributes rather than methods for tank parameters.
+
 Reading documents:
 
 ``` python
@@ -28,6 +30,20 @@ tank_level = tanks[0].level
 ```
 
 The `tanks` method returns a `Tanks` object which can be queried for the status of the specific tank.
+
+## Async Usage
+
+From version 2.0.0, an asyncio verison of the client is available:
+
+``` python
+async with AsyncSensorClient() as client:
+    await client.login("test@example.com", "s3cret")
+    tanks = await client.tanks
+    tank_level = await tanks[0].level
+    tank_capcity = await tanks[0].capacity
+    tank_percent = 100 * (tank_level / tank_percent)
+    print(f"Tank is {tank_percent:.1f}% full")
+```
 
 ## Tanks object
 
