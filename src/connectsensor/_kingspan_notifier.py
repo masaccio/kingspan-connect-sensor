@@ -95,7 +95,7 @@ def update_tank_cache(config, history, update=False):
         old_history = pd.read_sql_query(
             "select * from history;", conn, parse_dates=["reading_date"]
         )
-        history = old_history.append(history).drop_duplicates()
+        history = pd.concat([history, old_history]).drop_duplicates()
 
     if update:
         history.to_sql("history", conn, if_exists="replace", index=False)
