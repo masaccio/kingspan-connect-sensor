@@ -15,15 +15,16 @@ name = "kingspan-connect-sensor"
 packages = [{include = "connectsensor", from = "src"}]
 readme = "README.md"
 repository = "https://github.com/masaccio/kingspan-connect-sensor"
-version = "2.0.4"
+version = "2.0.5"
 
 [tool.poetry.dependencies]
 async-property = "^0.2.1"
 asyncio = "^3.4.3"
 datetime = "^4.7"
+# homeassistant has a constraint on httpx==0.23.1
 httpx = "^0.23.0"
-pandas = "^1.5.1"
-pytest = "^7.1"
+# homeassistant has a constraint on pandas==1.4.3
+pandas = "^1.4.3"
 python = "^3.9"
 requests = "^2.28.1"
 zeep = "^4.2.0"
@@ -54,7 +55,7 @@ branch = true
 directory = "coverage_html_report"
 
 [tool.pytest.ini_options]
-addopts = "-ra -s -W ignore::DeprecationWarning"
+addopts = "-W ignore::DeprecationWarning --cov=connectsensor"
 minversion = 6.0
 pythonpath = [".", "tests"]
 testpaths = ["tests"]
