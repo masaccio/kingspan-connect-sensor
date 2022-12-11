@@ -2,9 +2,6 @@ from async_property import async_property
 from zeep.helpers import serialize_object
 
 import pandas as pd
-import os
-
-from .exceptions import DBError
 
 
 class Tank:
