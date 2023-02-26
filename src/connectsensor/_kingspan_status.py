@@ -29,27 +29,27 @@ def main():
             print("Unknown API error:", e.value, file=sys.stderr)
         sys.exit(1)
 
-    tanks = client.tanks
-    tank_level = tanks[0].level
-    tank_level_percent = str(int(100 * tanks[0].level / tanks[0].capacity))
+    for tank in client.tanks:
+        tank_level = tank.level
+        tank_level_percent = str(int(100 * tank.level / tank.capacity))
 
-    print(tanks[0].name + ":")
-    print(f"\tCapacity = {tanks[0].capacity}")
-    print(f"\tSerial Number = {tanks[0].serial_number}")
-    print(f"\tModel = {tanks[0].model}")
-    print(f"\tLevel = {tank_level_percent}% ({tanks[0].level} litres)")
-    print(f"\tLast Read = {tanks[0].last_read}")
+        print(tank.name + ":")
+        print(f"\tCapacity = {tank.capacity}")
+        print(f"\tSerial Number = {tank.serial_number}")
+        print(f"\tModel = {tank.model}")
+        print(f"\tLevel = {tank_level_percent}% ({tank.level} litres)")
+        print(f"\tLast Read = {tank.last_read}")
 
-    print("\nHistory:")
-    print("\t{0:<22} {1:<6} {2:<5}".format("Reading date", "%Full", "Litres"))
-    for index, measurement in tanks[0].history.iterrows():
-        print(
-            "\t{0:<22} {1:<6} {2:<5}".format(
-                measurement.reading_date.strftime("%d-%b-%Y %H:%M"),
-                measurement.level_percent,
-                measurement.level_litres,
+        print("\nHistory:")
+        print("\t{0:<22} {1:<6} {2:<5}".format("Reading date", "%Full", "Litres"))
+        for index, measurement in tank.history.iterrows():
+            print(
+                "\t{0:<22} {1:<6} {2:<5}".format(
+                    measurement.reading_date.strftime("%d-%b-%Y %H:%M"),
+                    measurement.level_percent,
+                    measurement.level_litres,
+                )
             )
-        )
 
 
 if __name__ == "__main__":
