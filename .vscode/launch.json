@@ -5,16 +5,14 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Debug Test",
+            "name": "Python: Debug Tests",
             "type": "python",
-            "request": "test",
-            "justMyCode": true,
-        },
-        {
-        //     "name": "Debug Test (incl. System Code)",
-        //     "type": "python",
-        //     "request": "test",
-        //     "justMyCode": false,
-        // }
+            "request": "launch",
+            "program": "${file}",
+            "purpose": ["debug-test"],
+            "console": "integratedTerminal",
+            "env": {"PYTEST_ADDOPTS": "--no-cov"}, 
+            "justMyCode": false
+        }
     ]
 }
