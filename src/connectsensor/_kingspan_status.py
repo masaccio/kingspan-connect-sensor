@@ -42,12 +42,12 @@ def main():
 
         print("\nHistory:")
         print("\t{0:<22} {1:<6} {2:<5}".format("Reading date", "%Full", "Litres"))
-        for index, measurement in tank.history.iterrows():
+        for index, measurement in enumerate(tank.history):
             print(
                 "\t{0:<22} {1:<6} {2:<5}".format(
-                    measurement.reading_date.strftime("%d-%b-%Y %H:%M"),
-                    measurement.level_percent,
-                    measurement.level_litres,
+                    measurement["reading_date"].strftime("%d-%b-%Y %H:%M"),
+                    measurement["level_percent"],
+                    measurement["level_litres"],
                 )
             )
 

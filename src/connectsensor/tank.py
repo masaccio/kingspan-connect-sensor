@@ -46,7 +46,7 @@ class Tank:
     @property
     def history(self):
         history_data = self._soap_client._get_history(self._signalman_no)
-        return history_to_df(history_data)
+        return transform_history_data(history_data)
 
     def _cache_tank_data(self):
         if self._level_data is None:
@@ -94,7 +94,7 @@ class AsyncTank:
     @async_property
     async def history(self):
         history_data = await self._soap_client._get_history(self._signalman_no)
-        return history_to_df(history_data)
+        return transform_history_data(history_data)
 
     async def _cache_tank_data(self):
         if self._level_data is None:
@@ -108,8 +108,13 @@ def unpack_tank_data(cls, response):
     cls._tank_info = {x["Name"]: x["Value"] for x in tank_info["APITankInfoItem"]}
 
 
-def history_to_df(history_data):
-    df = pd.DataFrame(serialize_object(history_data))
-    df = df[["ReadingDate", "LevelPercentage", "LevelLitres"]]
-    df.columns = ["reading_date", "level_percent", "level_litres"]
-    return df
+def transform_history_data(data):
+    data = [
+        {
+            "reading_date": x["ReadingDate"],
+            "level_percent": x["LevelPercentage"],
+            "level_litres": x["LevelLitres"],
+        }
+        for x in data
+    ]
+    return data

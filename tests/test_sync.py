@@ -1,5 +1,3 @@
-import pytest
-
 from datetime import datetime
 from unittest.mock import patch
 from zeep.transports import Transport
@@ -8,6 +6,8 @@ from mock_data import VALID_STATUS, USERNAME, PASSWORD
 from mock_requests import MockResponse, mock_load_remote_data, mock_post_xml
 
 from connectsensor import __version__, SensorClient
+
+import pandas as pd
 
 
 def test_status():
@@ -29,7 +29,7 @@ def test_status():
         assert tanks[0].model == "TestModel"
         assert tanks[0].name == "TestTank"
         assert tanks[0].capacity == 2000
-        tank_history = tanks[0].history
+        tank_history = pd.DataFrame(tanks[0].history)
         assert tank_history.reading_date[0] == datetime(2021, 1, 25, 13, 59, 14)
         assert tank_history.level_percent[1] == 95
         assert tank_history.level_litres[2] == 1880

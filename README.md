@@ -47,11 +47,19 @@ async with AsyncSensorClient() as client:
 
 ## Tanks object
 
-`history` returns a Pandas dataframe with all entries available from the web API, sorted by logging time. There should be one record per day. The dataframe has the following entries:
+As of version 3.0, `history` no longer returns a Pandas dataframe to simplify packge dependencies. Instead, an list of dicts is returned, where each list element is a sample from the web API, sorted by logging time. There should be one record per day. Each dict has the following keys:
 
 * `reading_date`: a datetime object indicating the time a measurement was made
 * `level_percent`: integer percentage full
 * `level_litres`: number of lites in the tank
+
+You can construct a Pandas dataframe simply using:
+
+``` python
+tanks = await client.tanks
+history = await tanks[0].history
+df = pd.DataFrame(history)
+```
 
 ## Scripts
 
@@ -75,7 +83,7 @@ History:
  02-Feb-2021 00:59      76     986  
 ```
 
-`kingspan-notifier` can be used to check the status of a tabk and report via email when the tank is likely to run out of oil.
+`kingspan-notifier` can be used to check the status of a tabk and report via email when the tank is likely to run out of oil. As of version 3.0, [pandas](https://pypi.org/project/pandas/) is no longer installed as a dependency so you must `pip install pandas` manually to use `kingspan-notifier`.
 
 ``` bash
 % kingspan-notifier --config kingspan.ini

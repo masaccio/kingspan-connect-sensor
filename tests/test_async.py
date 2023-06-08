@@ -1,13 +1,14 @@
-import pytest
-
 from datetime import datetime
 from unittest.mock import patch
+
+import pandas as pd
+import pytest
+
+from mock_data import PASSWORD, USERNAME, VALID_STATUS
+from mock_requests import MockResponse, async_mock_post_xml, mock_load_remote_data
 from zeep.transports import AsyncTransport
 
-from mock_data import VALID_STATUS, USERNAME, PASSWORD
-from mock_requests import MockResponse, mock_load_remote_data, async_mock_post_xml
-
-from connectsensor import __version__, AsyncSensorClient
+from connectsensor import AsyncSensorClient, __version__
 
 
 @pytest.mark.asyncio
@@ -32,6 +33,7 @@ async def test_status():
             assert await tanks[0].capacity == 2000
 
             tank_history = await tanks[0].history
+            tank_history = pd.DataFrame(tank_history)
             assert tank_history.reading_date[0] == datetime(2021, 1, 25, 13, 59, 14)
             assert tank_history.level_percent[1] == 95
             assert tank_history.level_litres[2] == 1880

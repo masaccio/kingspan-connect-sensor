@@ -69,7 +69,7 @@ def read_tank_history(config):
         sys.exit(1)
 
     tanks = client.tanks
-    return tanks[0].history
+    return pd.DataFrame(tanks[0].history)
 
 
 def update_tank_cache(config, history, update=False):

@@ -50,10 +50,10 @@ def cached_history(tank, cache_db, update):
     if table_exists(cursor):
         query = "SELECT * FROM history;"
         old_history = pd.read_sql_query(query, db, parse_dates=["reading_date"])
-        new_history = tank.history
+        new_history = pd.DataFrame(tank.history)
         history = pd.concat([old_history, new_history]).drop_duplicates()
     else:
-        history = tank.history
+        history = pd.DataFrame(tank.history)
 
     if update:
         history.to_sql("history", db, if_exists="replace", index=False)
