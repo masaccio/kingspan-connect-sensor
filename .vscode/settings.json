@@ -1,6 +1,17 @@
 {
-    "python.testing.unittestEnabled": false,
-    "python.testing.nosetestsEnabled": false,
+    "[python]": {
+        "editor.formatOnSave": true,
+        "editor.wordWrap": "wordWrapColumn",
+        "editor.wordWrapColumn": 100,
+        "editor.defaultFormatter": "ms-python.black-formatter"
+    },
+    "python.formatting.provider": "none",
+    "python.linting.enabled": true,
+    "python.linting.lintOnSave": true,
+    "black-formatter.args": [],
+    "python.testing.pytestArgs": [
+        "tests"
+    ],
     "python.testing.pytestEnabled": true,
-    "python.formatting.provider": "black"
+    "python.testing.unittestEnabled": false
 }
