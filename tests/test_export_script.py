@@ -1,14 +1,11 @@
 import pandas as pd
 import sqlite3
 
-from datetime import datetime
 from pathlib import Path
 from pytest import mark
 from unittest.mock import patch
 
-from mock_requests import mock_get, mock_requests_post
-from mock_data import VALID_STATUS, USERNAME, PASSWORD, VALID_DATA, NEW_TEST_DATA
-from connectsensor import __version__
+from mock_data import VALID_DATA, NEW_TEST_DATA
 
 
 @mark.script_launch_mode("subprocess")
@@ -16,7 +13,7 @@ def test_help(script_runner):
     ret = script_runner.run("kingspan-export", print_result=False)
     assert "usage: kingspan-export [-h]" in ret.stderr
     assert ret.stdout == ""
-    assert ret.success == False
+    assert not ret.success
 
 
 @mark.script_launch_mode("subprocess")
@@ -28,9 +25,8 @@ def test_help_verbose(script_runner):
     assert ret.success
 
 
-@patch("requests.sessions.Session.post", side_effect=mock_requests_post)
-@patch("requests.sessions.Session.get", side_effect=mock_get)
-def test_help_invalid_credentials(mock_get, mock_post, script_runner):
+@mark.script_launch_mode("inprocess")
+def test_help_invalid_credentials(mock_zeep, script_runner):
     ret = script_runner.run(
         "kingspan-export",
         "--config=tests/data/invalid_config.ini",
@@ -42,9 +38,8 @@ def test_help_invalid_credentials(mock_get, mock_post, script_runner):
     assert not ret.success
 
 
-@patch("requests.sessions.Session.post", side_effect=mock_requests_post)
-@patch("requests.sessions.Session.get", side_effect=mock_get)
-def test_get_history(mock_get, mock_post, script_runner, tmp_path):
+@mark.script_launch_mode("inprocess")
+def test_get_history(mock_zeep, script_runner, tmp_path):
     Path("test.db").unlink(missing_ok=True)
     output_filename = tmp_path / "history.xlsx"
     ret = script_runner.run(
@@ -64,9 +59,8 @@ def test_get_history(mock_get, mock_post, script_runner, tmp_path):
         assert tank_history.level_litres[i] == row[2]
 
 
-@patch("requests.sessions.Session.post", side_effect=mock_requests_post)
-@patch("requests.sessions.Session.get", side_effect=mock_get)
-def test_get_cached_history(mock_get, mock_post, script_runner, tmp_path):
+@mark.script_launch_mode("inprocess")
+def test_get_cached_history(mock_zeep, script_runner, tmp_path):
     Path("test.db").unlink(missing_ok=True)
     output_filename = tmp_path / "history.xlsx"
     output_filename.unlink(missing_ok=True)
