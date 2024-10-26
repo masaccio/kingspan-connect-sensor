@@ -7,9 +7,9 @@ from zeep import AsyncClient as AsyncSoapClient
 from .tank import Tank, AsyncTank
 from .exceptions import APIError
 
-DEAFULT_SERVER = "https://www.connectsensor.com/"
+DEFAULT_SERVER = "https://www.connectsensor.com/"
 WSDL_PATH = "soap/MobileApp.asmx?WSDL"
-WSDL_URL = urljoin(DEAFULT_SERVER, WSDL_PATH)
+WSDL_URL = urljoin(DEFAULT_SERVER, WSDL_PATH)
 
 
 class SensorClient:
@@ -69,7 +69,7 @@ class SensorClient:
 
 
 class AsyncSensorClient:
-    def __init__(self, base=DEAFULT_SERVER):
+    def __init__(self, base=DEFAULT_SERVER):
         url = urljoin(base, WSDL_PATH)
         self._soap_client = AsyncSoapClient(url)
         self._soap_client.set_ns_prefix(None, "http://mobileapp/")
