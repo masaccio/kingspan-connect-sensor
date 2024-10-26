@@ -5,7 +5,6 @@ import sqlite3
 import sys
 
 from connectsensor import SensorClient, APIError, DBError
-from datetime import datetime, timedelta
 
 
 def read_config(config_filename):

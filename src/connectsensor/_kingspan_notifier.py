@@ -1,17 +1,18 @@
 import argparse
 import configparser
 import os
-import pandas as pd
 import smtplib
 import sqlite3
 import ssl
 import sys
+from datetime import datetime, timedelta
+
+import pandas as pd
+
+from connectsensor import APIError, SensorClient
 
 cwd = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, cwd + "/../")
-
-from connectsensor import SensorClient, APIError
-from datetime import datetime, timedelta
 
 
 def time_delta_days(td):

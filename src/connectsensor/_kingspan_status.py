@@ -14,8 +14,8 @@ def main():
 
     args = parser.parse_args()
 
-    if args.debug:
-        import connectsensor.debug
+    if args.debug:  # pragma: no branch
+        import connectsensor.debug  # noqa: F401
 
     client = SensorClient()
     try:
