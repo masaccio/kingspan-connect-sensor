@@ -1,0 +1,21 @@
+{
+  "Envelope": {
+    "Body": {
+      "SoapMobileAPPAuthenicate_v3Response": {
+        "SoapMobileAPPAuthenicate_v3Result": {
+          "APIResult": {
+            "Code": 1,
+            "Description": "Authentication Failed, Invalid Login"
+          },
+          "APIUserID": "",
+          "EmailAddress": "",
+          "ConsumerServicesBrandID": -1,
+          "ConsumerServicesBrandCode": "",
+          "Tanks": "",
+          "DisplayAccount": false,
+          "RoleID": -1
+        }
+      }
+    }
+  }
+}

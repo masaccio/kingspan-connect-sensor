@@ -1,0 +1,18 @@
+{
+  "Envelope": {
+    "Body": {
+      "SoapMobileAPPGetCallHistory_v1Response": {
+        "SoapMobileAPPGetCallHistory_v1Result": {
+          "APIResult": {
+            "Code": 0,
+            "Description": ""
+          },
+          "Levels": {
+		    "APILevel": [
+		    ]
+		  }
+        }
+      }
+    }
+  }
+}

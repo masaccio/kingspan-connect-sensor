@@ -1,0 +1,54 @@
+{
+  "Envelope": {
+    "Body": {
+      "SoapMobileAPPAuthenicate_v3Response": {
+        "SoapMobileAPPAuthenicate_v3Result": {
+          "APIResult": {
+            "Code": 0,
+            "Description": ""
+          },
+          "APIUserID": "BOX20001000",
+          "EmailAddress": "test@example.com",
+          "ConsumerServicesBrandID": 19,
+          "ConsumerServicesBrandCode": "SENSiT_RETAIL",
+          "Tanks": {
+            "APITankInfo_V3": [ {
+              "SignalmanNo": "2000100",
+              "TankName": "TestTank",
+              "IsSmartServDevice": false,
+              "DisplayMobileApp": true,
+              "DisplayLevelAlert": false,
+              "DisplayDropAlert": true,
+              "DisplayConsumption": false,
+              "DisplayGetQuote": false,
+              "DisplayAdvancedProperties": true,
+              "HideLevelAlert": false,
+              "HideDropAlert": false,
+              "HideLOWBATTERY": false,
+              "HideNOECHO": false,
+              "HideConsumption": false,
+              "LevelPercentage": 80,
+              "LevelLitres": 1600,
+              "UnitOfMeasurement": "litres",
+              "Measurement": 1600,
+              "SmartServReading": {
+                "SignalmanNo": -1,
+                "input1InAlarm": false,
+                "input1InUse": false,
+                "input2InAlarm": false,
+                "input2InUse": false,
+                "input3InAlarm": false,
+                "input3InUse": false,
+                "inputsMeaning": "",
+                "ReadingDate": "0001-01-01T00:00:00"
+              },
+              "ProductTypeID": 7
+            }]
+          },
+          "DisplayAccount": false,
+          "RoleID": 500
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,68 @@
+{
+  "Envelope": {
+    "Body": {
+      "SoapMobileAPPGetCallHistory_v1Response": {
+        "SoapMobileAPPGetCallHistory_v1Result": {
+          "APIResult": {
+            "Code": 0,
+            "Description": ""
+          },
+          "Levels": {
+            "APILevel": [
+              {
+                "SignalmanNo": "20001000",
+                "LevelPercentage": 100,
+                "LevelLitres": 2000,
+                "ReadingDate": "2021-01-25T13:59:14.000",
+                "LevelAlert": false,
+                "DropAlert": false,
+                "ConsumptionRate": -1,
+                "RunOutDate": "0001-01-01T00:00:00"
+              },
+              {
+                "SignalmanNo": "20001000",
+                "LevelPercentage": 95,
+                "LevelLitres": 1900,
+                "ReadingDate": "2021-01-27T00:59:16.000",
+                "LevelAlert": false,
+                "DropAlert": false,
+                "ConsumptionRate": -1,
+                "RunOutDate": "0001-01-01T00:00:00"
+              },
+              {
+                "SignalmanNo": "20001000",
+                "LevelPercentage": 94,
+                "LevelLitres": 1880,
+                "ReadingDate": "2021-01-29T00:59:22.000",
+                "LevelAlert": false,
+                "DropAlert": false,
+                "ConsumptionRate": -1,
+                "RunOutDate": "0001-01-01T00:00:00"
+              },
+              {
+                "SignalmanNo": "20001000",
+                "LevelPercentage": 94,
+                "LevelLitres": 1880,
+                "ReadingDate": "2021-01-30T00:29:30.000",
+                "LevelAlert": false,
+                "DropAlert": false,
+                "ConsumptionRate": -1,
+                "RunOutDate": "0001-01-01T00:00:00"
+              },
+              {
+                "SignalmanNo": "20001000",
+                "LevelPercentage": 92,
+                "LevelLitres": 1840,
+                "ReadingDate": "2021-01-31T00:59:30.000",
+                "LevelAlert": false,
+                "DropAlert": false,
+                "ConsumptionRate": -1,
+                "RunOutDate": "0001-01-01T00:00:00"
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}
