@@ -1,9 +1,9 @@
 from pathlib import Path
-from pytest import mark
+import pytest
 from unittest.mock import patch
 
 
-@mark.script_launch_mode("subprocess")
+@pytest.mark.script_launch_mode("subprocess")
 def test_help(script_runner):
     ret = script_runner.run("kingspan-notifier", print_result=False)
     assert "usage: kingspan-notifier [-h]" in ret.stderr
@@ -11,7 +11,7 @@ def test_help(script_runner):
     assert not ret.success
 
 
-@mark.script_launch_mode("subprocess")
+@pytest.mark.script_launch_mode("subprocess")
 def test_help_verbose(script_runner):
     ret = script_runner.run("kingspan-notifier", "--help", print_result=False)
     assert "usage: kingspan-notifier [-h]" in ret.stdout
@@ -20,7 +20,7 @@ def test_help_verbose(script_runner):
     assert ret.success
 
 
-@mark.script_launch_mode("inprocess")
+@pytest.mark.script_launch_mode("inprocess")
 def test_help_invalid_credentials(mock_zeep, script_runner):
     ret = script_runner.run(
         "kingspan-notifier",
@@ -33,8 +33,9 @@ def test_help_invalid_credentials(mock_zeep, script_runner):
     assert not ret.success
 
 
-@mark.script_launch_mode("inprocess")
 @patch("smtplib.SMTP_SSL")
+@pytest.mark.script_launch_mode("inprocess")
+@pytest.mark.parametrize("mock_zeep", [True], indirect=True)
 def test_notify_empty(mock_smtp, mock_zeep, script_runner):
     Path("test.db").unlink(missing_ok=True)
     ret = script_runner.run(

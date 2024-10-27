@@ -1,4 +1,5 @@
 import pytest
+import pytest_asyncio
 import os
 
 import aiofiles
@@ -22,23 +23,6 @@ def read_json_files():
     return cache
 
 
-TEST_DATA = read_json_files()
-
-
-async def async_read_test_json(filename, api):
-    test_filename = os.path.join("tests/data", filename)
-    async with aiofiles.open(test_filename, mode="r") as fh:
-        obj = json.load(fh)
-        return obj["Envelope"]["Body"][f"{api}Response"][f"{api}Result"]
-
-
-def read_test_json(filename, api):
-    test_filename = os.path.join("tests/data", filename)
-    with open(test_filename) as fh:
-        obj = json.load(fh)
-        return obj["Envelope"]["Body"][f"{api}Response"][f"{api}Result"]
-
-
 def generate_history_data(obj):
     for i in range(10):
         percent = 100 - i * 10
@@ -60,6 +44,25 @@ def generate_history_data(obj):
     return obj
 
 
+TEST_DATA = read_json_files()
+
+generate_history_data(TEST_DATA["SoapMobileAPPGetCallHistory_v1.template.json"])
+
+
+async def async_read_test_json(filename, api):
+    test_filename = os.path.join("tests/data", filename)
+    async with aiofiles.open(test_filename, mode="r") as fh:
+        obj = json.load(fh)
+        return obj["Envelope"]["Body"][f"{api}Response"][f"{api}Result"]
+
+
+def read_test_json(filename, api):
+    test_filename = os.path.join("tests/data", filename)
+    with open(test_filename) as fh:
+        obj = json.load(fh)
+        return obj["Envelope"]["Body"][f"{api}Response"][f"{api}Result"]
+
+
 def Mocked_SoapMobileAPPAuthenicate_v3(**kwargs):
     if kwargs["emailaddress"] is None or kwargs["emailaddress"] != "test@example.com":
         json_filename = "SoapMobileAPPAuthenicate_v3.invalid.json"
@@ -72,6 +75,10 @@ def Mocked_SoapMobileAPPAuthenicate_v3(**kwargs):
 
 def Mocked_SoapMobileAPPGetLatestLevel_v3(**kwargs):
     return TEST_DATA["SoapMobileAPPGetLatestLevel_v3.json"]
+
+
+def Mocked_Generated_SoapMobileAPPGetCallHistory_v1(**kwargs):
+    return TEST_DATA["SoapMobileAPPGetCallHistory_v1.template.json"]
 
 
 def Mocked_SoapMobileAPPGetCallHistory_v1(**kwargs):
@@ -95,8 +102,9 @@ async def Async_Mocked_SoapMobileAPPGetCallHistory_v1(**kwargs):
     return Mocked_SoapMobileAPPGetCallHistory_v1(**kwargs)
 
 
-@pytest.fixture(name="mock_zeep")
-def mock_zeep_fixture():
+@pytest.fixture
+def mock_zeep(request):
+    generate = hasattr(request, "param")
     with patch("connectsensor.client.SoapClient") as mock_zeep:
         zeep_instance = MagicMock()
         mock_zeep.return_value = zeep_instance
@@ -107,15 +115,20 @@ def mock_zeep_fixture():
         zeep_instance.service.SoapMobileAPPGetLatestLevel_v3.side_effect = (
             Mocked_SoapMobileAPPGetLatestLevel_v3
         )
-        zeep_instance.service.SoapMobileAPPGetCallHistory_v1.side_effect = (
-            Mocked_SoapMobileAPPGetCallHistory_v1
-        )
+        if generate:
+            zeep_instance.service.SoapMobileAPPGetCallHistory_v1.side_effect = (
+                Mocked_Generated_SoapMobileAPPGetCallHistory_v1
+            )
+        else:
+            zeep_instance.service.SoapMobileAPPGetCallHistory_v1.side_effect = (
+                Mocked_SoapMobileAPPGetCallHistory_v1
+            )
 
         yield mock_zeep
 
 
-@pytest.fixture(name="async_mock_zeep")
-def async_mock_zeep_fixture():
+@pytest_asyncio.fixture
+def async_mock_zeep():
     with patch("connectsensor.client.AsyncSoapClient") as mock_zeep:
         zeep_instance = MagicMock()
         mock_zeep.return_value = zeep_instance
