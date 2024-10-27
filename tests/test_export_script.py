@@ -3,7 +3,6 @@ import sqlite3
 
 from pathlib import Path
 from pytest import mark
-from unittest.mock import patch
 
 from mock_data import VALID_DATA, NEW_TEST_DATA
 
