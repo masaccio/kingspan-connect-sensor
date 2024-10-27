@@ -4,6 +4,7 @@ from urllib.parse import urljoin
 from zeep import Client as SoapClient
 from zeep import AsyncClient as AsyncSoapClient
 
+from asyncio import get_running_loop
 from .tank import Tank, AsyncTank
 from .exceptions import APIError
 
@@ -70,9 +71,8 @@ class SensorClient:
 
 class AsyncSensorClient:
     def __init__(self, base=DEFAULT_SERVER):
-        url = urljoin(base, WSDL_PATH)
-        self._soap_client = AsyncSoapClient(url)
-        self._soap_client.set_ns_prefix(None, "http://mobileapp/")
+        self._soap_url = urljoin(base, WSDL_PATH)
+        self._soap_client = None
 
     async def __aenter__(self):
         return self
@@ -80,7 +80,19 @@ class AsyncSensorClient:
     async def __aexit__(self, exc_t, exc_v, exc_tb):
         pass
 
+    async def _init_zeep(self):
+        # Zeep.AsyncClient uses httpx which loads SSL cerficates at construction
+        # time. An alternative would be disabling certificate verification.
+        loop = get_running_loop()
+        self._soap_client = await loop.run_in_executor(
+            None, AsyncSoapClient, self._soap_url
+        )
+        self._soap_client.set_ns_prefix(None, "http://mobileapp/")
+
     async def login(self, username, password):
+        if self._soap_client is None:
+            await self._init_zeep()
+
         self._username = username
         self._password = password
 
