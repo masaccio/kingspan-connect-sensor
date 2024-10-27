@@ -2,8 +2,6 @@ import pytest
 import pytest_asyncio
 import os
 
-import aiofiles
-
 import json
 from glob import glob
 import re
@@ -11,16 +9,11 @@ from datetime import timedelta, datetime
 from time import strptime
 from unittest.mock import patch, MagicMock
 
-
-def read_json_files():
-    cache = {}
-    for filename in glob("tests/data/*.json"):
-        api = re.sub(".*/(\w+)\..*", "\\1", filename)
-        with open(filename) as fh:
-            obj = json.load(fh)
-            body = obj["Envelope"]["Body"]
-            cache[os.path.basename(filename)] = body[f"{api}Response"][f"{api}Result"]
-    return cache
+INVALID_LOGON_SESSION = "SoapMobileAPPAuthenicate_v3.invalid.json"
+VALID_LOGON_SESSION = "SoapMobileAPPAuthenicate_v3.valid.json"
+TANK_HISTORY_SESSION = "SoapMobileAPPGetCallHistory_v1.json"
+TEMPLATE_TANK_HISTORY_SESSION = "SoapMobileAPPGetCallHistory_v1.template.json"
+GET_LEVELS_SESSION = "SoapMobileAPPGetLatestLevel_v3.json"
 
 
 def generate_history_data(obj):
@@ -44,50 +37,54 @@ def generate_history_data(obj):
     return obj
 
 
+def patch_datetime(obj):
+    obj["ReadingDate"] = datetime.strptime(obj["ReadingDate"], "%Y-%m-%dT%H:%M:%S.%f")
+
+
+def patch_levels_datetimes(obj):
+    for level in obj["Levels"]["APILevel"]:
+        patch_datetime(level)
+
+
+def read_json_files():
+    cache = {}
+    for filename in glob("tests/data/*.json"):
+        api = re.sub(".*/(\w+)\..*", "\\1", filename)
+        with open(filename) as fh:
+            obj = json.load(fh)
+            body = obj["Envelope"]["Body"]
+            cache[os.path.basename(filename)] = body[f"{api}Response"][f"{api}Result"]
+
+    patch_datetime(cache[GET_LEVELS_SESSION]["Level"])
+    patch_levels_datetimes(cache[TANK_HISTORY_SESSION])
+    generate_history_data(cache[TEMPLATE_TANK_HISTORY_SESSION])
+
+    return cache
+
+
 TEST_DATA = read_json_files()
-
-generate_history_data(TEST_DATA["SoapMobileAPPGetCallHistory_v1.template.json"])
-
-
-async def async_read_test_json(filename, api):
-    test_filename = os.path.join("tests/data", filename)
-    async with aiofiles.open(test_filename, mode="r") as fh:
-        obj = json.load(fh)
-        return obj["Envelope"]["Body"][f"{api}Response"][f"{api}Result"]
-
-
-def read_test_json(filename, api):
-    test_filename = os.path.join("tests/data", filename)
-    with open(test_filename) as fh:
-        obj = json.load(fh)
-        return obj["Envelope"]["Body"][f"{api}Response"][f"{api}Result"]
 
 
 def Mocked_SoapMobileAPPAuthenicate_v3(**kwargs):
     if kwargs["emailaddress"] is None or kwargs["emailaddress"] != "test@example.com":
-        json_filename = "SoapMobileAPPAuthenicate_v3.invalid.json"
+        json_filename = INVALID_LOGON_SESSION
     elif kwargs["password"] is None or kwargs["password"] != "s3cret":
-        json_filename = "SoapMobileAPPAuthenicate_v3.invalid.json"
+        json_filename = INVALID_LOGON_SESSION
     else:
-        json_filename = "SoapMobileAPPAuthenicate_v3.valid.json"
+        json_filename = VALID_LOGON_SESSION
     return TEST_DATA[json_filename]
 
 
 def Mocked_SoapMobileAPPGetLatestLevel_v3(**kwargs):
-    return TEST_DATA["SoapMobileAPPGetLatestLevel_v3.json"]
+    return TEST_DATA[GET_LEVELS_SESSION]
 
 
 def Mocked_Generated_SoapMobileAPPGetCallHistory_v1(**kwargs):
-    return TEST_DATA["SoapMobileAPPGetCallHistory_v1.template.json"]
+    return TEST_DATA[TEMPLATE_TANK_HISTORY_SESSION]
 
 
 def Mocked_SoapMobileAPPGetCallHistory_v1(**kwargs):
-    obj = TEST_DATA["SoapMobileAPPGetCallHistory_v1.json"]
-    for level in obj["Levels"]["APILevel"]:
-        level["ReadingDate"] = datetime(
-            *strptime(level["ReadingDate"], "%Y-%m-%dT%H:%M:%S.000")[:6]
-        )
-    return obj
+    return TEST_DATA[TANK_HISTORY_SESSION]
 
 
 async def Async_Mocked_SoapMobileAPPAuthenicate_v3(**kwargs):
