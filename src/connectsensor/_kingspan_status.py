@@ -30,7 +30,6 @@ def main():
         sys.exit(1)
 
     for tank in client.tanks:
-        tank_level = tank.level
         tank_level_percent = str(int(100 * tank.level / tank.capacity))
 
         print(tank.name + ":")

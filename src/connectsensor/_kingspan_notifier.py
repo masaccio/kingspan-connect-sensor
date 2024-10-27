@@ -46,7 +46,7 @@ def read_config(config_filename):
 def config_value(config, section, key):
     try:
         value = config.get(section, key)
-    except configparser.Error as e:
+    except configparser.Error:
         print(f"Config value '{key}' not found in section '{section}'", file=sys.stderr)
         sys.exit(1)
     finally:

@@ -1,8 +1,6 @@
 from async_property import async_property
 from zeep.helpers import serialize_object
 
-import pandas as pd
-
 
 class Tank:
     def __init__(self, soap_client: object, signalman_no: str):
