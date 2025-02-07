@@ -25,7 +25,7 @@ def test_help_verbose(script_runner):
 
 
 @mark.script_launch_mode("inprocess")
-def test_help_invalid_credentials(mock_zeep, script_runner):
+def test_help_invalid_credentials(mock_sync_httpx_post, script_runner):
     ret = script_runner.run(
         "kingspan-export",
         "--config=tests/data/invalid_config.ini",
@@ -38,7 +38,7 @@ def test_help_invalid_credentials(mock_zeep, script_runner):
 
 
 @mark.script_launch_mode("inprocess")
-def test_get_history(mock_zeep, script_runner, tmp_path):
+def test_get_history(mock_sync_httpx_post, script_runner, tmp_path):
     Path("test.db").unlink(missing_ok=True)
     output_filename = tmp_path / "history.xlsx"
     ret = script_runner.run(
@@ -59,7 +59,7 @@ def test_get_history(mock_zeep, script_runner, tmp_path):
 
 
 @mark.script_launch_mode("inprocess")
-def test_get_cached_history(mock_zeep, script_runner, tmp_path):
+def test_get_cached_history(mock_sync_httpx_post, script_runner, tmp_path):
     Path("test.db").unlink(missing_ok=True)
     output_filename = tmp_path / "history.xlsx"
     output_filename.unlink(missing_ok=True)

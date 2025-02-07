@@ -15,13 +15,13 @@ name = "kingspan-connect-sensor"
 packages = [{include = "connectsensor", from = "src"}]
 readme = "README.md"
 repository = "https://github.com/masaccio/kingspan-connect-sensor"
-version = "3.0.6"
+version = "3.1.0"
 
 [tool.poetry.dependencies]
 async-property = "^0.2.1"
 asyncio = "^3.4.3"
 datetime = "^4.7"
-httpx = "^0"
+httpx = ">=0.28"
 python = ">=3.10,<4.0"
 requests = "^2.28.1"
 lxml = ">=5.3" # Actually a Zeep dependency but need to force version
@@ -40,6 +40,7 @@ xlsxwriter = "^3.0.3"
 ruff = "^0.7.1"
 tox = "^4.23.2"
 mypy = "^1.14.1"
+pytest-mock = "^3.14.0"
 
 [build-system]
 build-backend = "poetry.core.masonry.api"

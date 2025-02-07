@@ -6,7 +6,7 @@ from mock_data import USERNAME, PASSWORD
 from connectsensor import SensorClient
 
 
-def test_status(mock_zeep):
+def test_status(mock_sync_httpx_post):
     client = SensorClient()
     client.login(USERNAME, PASSWORD)
     tanks = client.tanks
@@ -16,6 +16,7 @@ def test_status(mock_zeep):
     assert tanks[0].name == "TestTank"
     assert tanks[0].capacity == 2000
     tank_history = pd.DataFrame(tanks[0].history)
-    assert tank_history.reading_date[0] == datetime(2021, 1, 25, 13, 59, 14)
+    reading_date = tank_history.reading_date[0].to_pydatetime()
+    assert reading_date == datetime(2021, 1, 25, 13, 59, 14)
     assert tank_history.level_percent[1] == 95
     assert tank_history.level_litres[2] == 1880

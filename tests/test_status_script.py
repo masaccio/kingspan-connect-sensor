@@ -21,7 +21,7 @@ def test_help_verbose(script_runner):
 
 
 @mark.script_launch_mode("inprocess")
-def test_help_invalid_credentials(script_runner, mock_zeep):
+def test_help_invalid_credentials(script_runner, mock_sync_httpx_post):
     ret = script_runner.run(
         "kingspan-status",
         "--username=invalid@example.com",
@@ -35,7 +35,7 @@ def test_help_invalid_credentials(script_runner, mock_zeep):
 
 
 @mark.script_launch_mode("inprocess")
-def test_status(script_runner, mock_zeep):
+def test_status(script_runner, mock_sync_httpx_post):
     ret = script_runner.run(
         "kingspan-status",
         "--username=test@example.com",
