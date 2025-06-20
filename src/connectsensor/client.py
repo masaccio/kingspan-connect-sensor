@@ -1,3 +1,5 @@
+"""Client for interacting with the Kingspan Connect Sensor."""
+
 import logging
 from asyncio import get_running_loop
 from datetime import datetime
@@ -25,22 +27,33 @@ class HttpxTransport(Transport):
     """Custom Zeep transport using httpx.Client for synchronous HTTP requests."""
 
     def __init__(self) -> None:
+        """Initialize the HttpxTransport with a synchronous httpx.Client."""
         super().__init__()
         self.client = httpx.Client()  # Synchronous HTTPX client
 
-    def post(self, address, envelope, headers):  # type: ignore
+    def post(
+        self,
+        address: str,
+        envelope: bytes | None,
+        headers: dict,
+    ) -> httpx.Response:
         """Override the default `post` method to use `httpx.Client`."""
-        return self.client.post(address, data=envelope, headers=headers)
+        return self.client.post(
+            address,
+            data=envelope,  # type: ignore[reportOptionalMemberAccess]
+            headers=headers,
+        )
 
 
 class SensorClient:
     """Synchronous client for interacting with the Kingspan Connect Sensor SOAP API."""
 
     def __init__(self) -> None:
+        """Initialize the SensorClient with a SOAP client."""
         self._soap_client = SoapClient(WSDL_URL, transport=HttpxTransport())
         self._soap_client.set_ns_prefix(None, "http://mobileapp/")
 
-    def login(self, username, password) -> None:
+    def login(self, username: str, password: str) -> None:
         """Authenticate with the SOAP API and initialize tank list."""
         self._username = username
         self._password = password
@@ -64,15 +77,16 @@ class SensorClient:
             for tank_info in response["Tanks"]["APITankInfo_V3"]:
                 self._tanks.append(Tank(self, tank_info["SignalmanNo"]))
         except KeyError as e:
-            _LOGGER.error("Invalid SOAP response: %s", e)
-            raise APIError("Invalid SOAP response") from e
+            msg = "Invalid SOAP response"
+            _LOGGER.exception(msg)
+            raise APIError(msg) from e
 
     @property
-    def tanks(self):
+    def tanks(self) -> list[Tank]:
         """Return the list of Tank objects for the authenticated user."""
         return self._tanks
 
-    def _get_latest_level(self, signalman_no):
+    def _get_latest_level(self, signalman_no: str) -> dict:
         """Get the latest level reading for a given tank."""
         try:
             response = self._soap_client.service.SoapMobileAPPGetLatestLevel_v3(
@@ -88,18 +102,25 @@ class SensorClient:
 
         try:
             if response["APIResult"]["Code"] != 0:
-                raise APIError(response["APIResult"]["Description"])  # pragma: no cover
-            return response
+                raise APIError(response["APIResult"]["Description"])
         except KeyError as e:
-            _LOGGER.error("Invalid SOAP response: %s", e)
-            raise APIError("Invalid SOAP response") from e
+            msg = "Invalid SOAP response"
+            _LOGGER.exception(msg)
+            raise APIError(msg) from e
+        else:
+            return response
 
-    def _get_history(self, signalman_no, start_date=None, end_date=None):
+    def _get_history(
+        self,
+        signalman_no: str,
+        start_date: datetime | None = None,
+        end_date: datetime | None = None,
+    ) -> list[dict]:
         """Get the call history for a given tank within the specified date range."""
         if start_date is None:
-            start_date_dt = datetime.fromtimestamp(0)
+            start_date_dt = datetime.fromtimestamp(0)  # noqa: DTZ006
         if end_date is None:
-            end_date_dt = datetime.now()
+            end_date_dt = datetime.now()  # noqa: DTZ005
 
         try:
             response = self._soap_client.service.SoapMobileAPPGetCallHistory_v1(
@@ -116,26 +137,28 @@ class SensorClient:
 
         try:
             if response["APIResult"]["Code"] != 0:
-                raise APIError(response["APIResult"]["Description"])  # pragma: no cover
-            return response["Levels"]["APILevel"]
+                raise APIError(response["APIResult"]["Description"])
         except KeyError as e:
-            _LOGGER.error("Invalid SOAP response: %s", e)
-            raise APIError("Invalid SOAP response") from e
+            msg = "Invalid SOAP response"
+            _LOGGER.exception(msg)
+            raise APIError(msg) from e
+        else:
+            return response["Levels"]["APILevel"]
 
 
 class AsyncSensorClient:
     """Asynchronous client for interacting with the Kingspan Connect Sensor SOAP API."""
 
     def __init__(self) -> None:
+        """Initialize the AsyncSensorClient with an async SOAP client."""
         self._soap_client = None
 
-    async def __aenter__(self):
+    async def __aenter__(self):  # noqa: ANN204
         """Enter the async context manager."""
         return self
 
-    async def __aexit__(self, exc_t, exc_v, exc_tb):
+    async def __aexit__(self, exc_t, exc_v, exc_tb):  # noqa: ANN204, ANN001
         """Exit the async context manager."""
-        pass
 
     async def _init_zeep(self) -> None:
         """Initialize the Zeep async SOAP client."""
@@ -157,7 +180,7 @@ class AsyncSensorClient:
             msg = f"Zeep error during initialisation: {e}"
             raise APIError(msg) from e
 
-    async def login(self, username, password):
+    async def login(self, username: str, password: str) -> dict:
         """Authenticate with the SOAP API and initialize async tank list."""
         if self._soap_client is None:
             await self._init_zeep()
@@ -167,7 +190,7 @@ class AsyncSensorClient:
 
         _LOGGER.debug("Logging in with username: %s", username)
         try:
-            response = await self._soap_client.service.SoapMobileAPPAuthenicate_v3(
+            response = await self._soap_client.service.SoapMobileAPPAuthenicate_v3(  # type: ignore[reportOptionalMemberAccess]
                 emailaddress=username,
                 password=password,
             )
@@ -184,17 +207,19 @@ class AsyncSensorClient:
             self._tanks = []
             for tank_info in response["Tanks"]["APITankInfo_V3"]:
                 self._tanks.append(AsyncTank(self, tank_info["SignalmanNo"]))
-            return response
         except KeyError as e:
-            _LOGGER.error("Invalid SOAP response: %s", e)
-            raise APIError("Invalid SOAP response") from e
+            msg = "Invalid SOAP response"
+            _LOGGER.exception(msg)
+            raise APIError(msg) from e
+        else:
+            return response
 
     @async_property
-    async def tanks(self):
+    async def tanks(self) -> list[AsyncTank]:
         """Return the list of AsyncTank objects for the authenticated user."""
         return self._tanks
 
-    async def _get_latest_level(self, signalman_no):
+    async def _get_latest_level(self, signalman_no: str) -> dict:
         """Get the latest level reading for a given tank asynchronously."""
         if self._soap_client is None:
             await self._init_zeep()
@@ -214,21 +239,32 @@ class AsyncSensorClient:
 
         try:
             if response["APIResult"]["Code"] != 0:
-                raise APIError(response["APIResult"]["Description"])  # pragma: no cover
-            return response
+                raise APIError(response["APIResult"]["Description"])
         except KeyError as e:
-            _LOGGER.error("Invalid SOAP response: %s", e)
-            raise APIError("Invalid SOAP response") from e
+            msg = "Invalid SOAP response"
+            _LOGGER.exception(msg)
+            raise APIError(msg) from e
+        else:
+            return response
 
-    async def _get_history(self, signalman_no, start_date=None, end_date=None):
+    async def _get_history(
+        self,
+        signalman_no: str,
+        start_date: datetime | None = None,
+        end_date: datetime | None = None,
+    ) -> list[dict]:
         """Get the call history for a given tank within the specified date range asynchronously."""
         if self._soap_client is None:
             await self._init_zeep()
         if self._soap_client is None:
             msg = "SOAP client could not be initialized."
             raise APIError(msg)
-        start_date_dt = datetime.fromtimestamp(0) if start_date is None else start_date
-        end_date_dt = datetime.now() if end_date is None else end_date
+        start_date_dt = (
+            datetime.fromtimestamp(0)  # noqa: DTZ006
+            if start_date is None
+            else start_date
+        )
+        end_date_dt = datetime.now() if end_date is None else end_date  # noqa: DTZ005
         try:
             response = await self._soap_client.service.SoapMobileAPPGetCallHistory_v1(
                 userid=self._user_id,
@@ -243,8 +279,9 @@ class AsyncSensorClient:
 
         try:
             if response["APIResult"]["Code"] != 0:
-                raise APIError(response["APIResult"]["Description"])  # pragma: no cover
+                raise APIError(response["APIResult"]["Description"])
             return response["Levels"]["APILevel"]
         except KeyError as e:
-            _LOGGER.error("Invalid SOAP response: %s", e)
-            raise APIError("Invalid SOAP response") from e
+            msg = "Invalid SOAP response"
+            _LOGGER.exception(msg)
+            raise APIError(msg) from e
