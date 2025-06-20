@@ -68,18 +68,16 @@ class SensorClient:
             msg = f"Zeep error during login: {e}"
             raise APIError(msg) from e
 
-        try:
-            if response["APIResult"]["Code"] != 0:
-                raise APIError(response["APIResult"]["Description"])
+        # No need to catch KeyErrors here as the WSDL guarantees the structure
+        # of the response, so we can assume the keys exist. If not, a ZeepError
+        # will have been raised earlier.
+        if response["APIResult"]["Code"] != 0:
+            raise APIError(response["APIResult"]["Description"])
 
-            self._user_id = response["APIUserID"]
-            self._tanks = []
-            for tank_info in response["Tanks"]["APITankInfo_V3"]:
-                self._tanks.append(Tank(self, tank_info["SignalmanNo"]))
-        except KeyError as e:
-            msg = "Invalid SOAP response"
-            _LOGGER.exception(msg)
-            raise APIError(msg) from e
+        self._user_id = response["APIUserID"]
+        self._tanks = []
+        for tank_info in response["Tanks"]["APITankInfo_V3"]:
+            self._tanks.append(Tank(self, tank_info["SignalmanNo"]))
 
     @property
     def tanks(self) -> list[Tank]:
@@ -100,15 +98,12 @@ class SensorClient:
             msg = f"Zeep error fetching tank data: {e}"
             raise APIError(msg) from e
 
-        try:
-            if response["APIResult"]["Code"] != 0:
-                raise APIError(response["APIResult"]["Description"])
-        except KeyError as e:
-            msg = "Invalid SOAP response"
-            _LOGGER.exception(msg)
-            raise APIError(msg) from e
-        else:
-            return response
+        # No need to catch KeyErrors here as the WSDL guarantees the structure
+        # of the response, so we can assume the keys exist. If not, a ZeepError
+        # will have been raised earlier.
+        if response["APIResult"]["Code"] != 0:
+            raise APIError(response["APIResult"]["Description"])
+        return response
 
     def _get_history(
         self,
@@ -135,15 +130,12 @@ class SensorClient:
             msg = f"Zeep error fetching tank history: {e}"
             raise APIError(msg) from e
 
-        try:
-            if response["APIResult"]["Code"] != 0:
-                raise APIError(response["APIResult"]["Description"])
-        except KeyError as e:
-            msg = "Invalid SOAP response"
-            _LOGGER.exception(msg)
-            raise APIError(msg) from e
-        else:
-            return response["Levels"]["APILevel"]
+        # No need to catch KeyErrors here as the WSDL guarantees the structure
+        # of the response, so we can assume the keys exist. If not, a ZeepError
+        # will have been raised earlier.
+        if response["APIResult"]["Code"] != 0:
+            raise APIError(response["APIResult"]["Description"])
+        return response["Levels"]["APILevel"]
 
 
 class AsyncSensorClient:
@@ -199,20 +191,17 @@ class AsyncSensorClient:
             msg = f"Zeep error during login: {e}"
             raise APIError(msg) from e
 
-        try:
-            if response["APIResult"]["Code"] != 0:
-                raise APIError(response["APIResult"]["Description"])
+        # No need to catch KeyErrors here as the WSDL guarantees the structure
+        # of the response, so we can assume the keys exist. If not, a ZeepError
+        # will have been raised earlier.
+        if response["APIResult"]["Code"] != 0:
+            raise APIError(response["APIResult"]["Description"])
 
-            self._user_id = response["APIUserID"]
-            self._tanks = []
-            for tank_info in response["Tanks"]["APITankInfo_V3"]:
-                self._tanks.append(AsyncTank(self, tank_info["SignalmanNo"]))
-        except KeyError as e:
-            msg = "Invalid SOAP response"
-            _LOGGER.exception(msg)
-            raise APIError(msg) from e
-        else:
-            return response
+        self._user_id = response["APIUserID"]
+        self._tanks = []
+        for tank_info in response["Tanks"]["APITankInfo_V3"]:
+            self._tanks.append(AsyncTank(self, tank_info["SignalmanNo"]))
+        return response
 
     @async_property
     async def tanks(self) -> list[AsyncTank]:
@@ -237,15 +226,12 @@ class AsyncSensorClient:
             msg = f"Zeep error fetching tank data: {e}"
             raise APIError(msg) from e
 
-        try:
-            if response["APIResult"]["Code"] != 0:
-                raise APIError(response["APIResult"]["Description"])
-        except KeyError as e:
-            msg = "Invalid SOAP response"
-            _LOGGER.exception(msg)
-            raise APIError(msg) from e
-        else:
-            return response
+        # No need to catch KeyErrors here as the WSDL guarantees the structure
+        # of the response, so we can assume the keys exist. If not, a ZeepError
+        # will have been raised earlier.
+        if response["APIResult"]["Code"] != 0:
+            raise APIError(response["APIResult"]["Description"])
+        return response
 
     async def _get_history(
         self,
@@ -277,11 +263,9 @@ class AsyncSensorClient:
             msg = f"Zeep error fetching tank history: {e}"
             raise APIError(msg) from e
 
-        try:
-            if response["APIResult"]["Code"] != 0:
-                raise APIError(response["APIResult"]["Description"])
-            return response["Levels"]["APILevel"]
-        except KeyError as e:
-            msg = "Invalid SOAP response"
-            _LOGGER.exception(msg)
-            raise APIError(msg) from e
+        # No need to catch KeyErrors here as the WSDL guarantees the structure
+        # of the response, so we can assume the keys exist. If not, a ZeepError
+        # will have been raised earlier.
+        if response["APIResult"]["Code"] != 0:
+            raise APIError(response["APIResult"]["Description"])
+        return response["Levels"]["APILevel"]
