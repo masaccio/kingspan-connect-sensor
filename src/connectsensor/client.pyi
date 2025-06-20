@@ -1,6 +1,8 @@
-from .exceptions import APIError as APIError
-from .tank import AsyncTank as AsyncTank, Tank as Tank
 from _typeshed import Incomplete
+
+from connectsensor.exceptions import APIError as APIError
+from connectsensor.tank import AsyncTank as AsyncTank
+from connectsensor.tank import Tank as Tank
 
 DEFAULT_SERVER: str
 WSDL_PATH: str
