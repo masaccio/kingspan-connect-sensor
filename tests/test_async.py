@@ -1,11 +1,11 @@
 from datetime import datetime
+from unittest.mock import patch
 
 import pandas as pd
 import pytest
-from tests.conftest import AsyncMockSoapClient
 from zeep.exceptions import Error as ZeepError
 
-from connectsensor import AsyncSensorClient, APIError
+from connectsensor import APIError, AsyncSensorClient
 from mock_data import PASSWORD, USERNAME
 
 
@@ -28,18 +28,54 @@ async def test_status(mock_async_httpx_post):
         assert tank_history.level_litres[2] == 1880
 
 
+async def zeep_exception(*args, **kwargs):
+    raise ZeepError("Test error")
+
+
 @pytest.mark.asyncio
-async def test_exceptions(mock_async_httpx_post):
+async def test_login_exception(mock_async_httpx_post):
     async with AsyncSensorClient() as client:
-        client._soap_client = AsyncMockSoapClient(  # noqa: SLF001
-            ZeepError,
-            "Mocked Zeep error",
+        await client._init_zeep()  # noqa: SLF001
+        client._soap_client.service.SoapMobileAPPAuthenicate_v3 = (  # noqa: SLF001
+            zeep_exception
         )
+
         with pytest.raises(
             APIError,
-            match="Zeep error during login: Mocked Zeep error",
+            match="Zeep error during login: Test error",
         ):
             await client.login("invalid_user", "invalid_password")
 
-        result = await client.login(USERNAME, PASSWORD)
-        assert result["APIResult"]["Code"] == 0
+
+@pytest.mark.asyncio
+async def test_tank_exception(mock_async_httpx_post):
+    async with AsyncSensorClient() as client:
+        await client._init_zeep()  # noqa: SLF001
+        client._soap_client.service.SoapMobileAPPGetLatestLevel_v3 = (  # noqa: SLF001
+            zeep_exception
+        )
+        await client.login(USERNAME, PASSWORD)
+        tanks = await client.tanks
+
+        with pytest.raises(
+            APIError,
+            match="Zeep error fetching tank data: Test error",
+        ):
+            await tanks[0].level
+
+
+@pytest.mark.asyncio
+async def test_history_exception(mock_async_httpx_post):
+    async with AsyncSensorClient() as client:
+        await client._init_zeep()  # noqa: SLF001
+        client._soap_client.service.SoapMobileAPPGetCallHistory_v1 = (  # noqa: SLF001
+            zeep_exception
+        )
+        await client.login(USERNAME, PASSWORD)
+        tanks = await client.tanks
+
+        with pytest.raises(
+            APIError,
+            match="Zeep error fetching tank history: Test error",
+        ):
+            await tanks[0].history

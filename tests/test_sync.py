@@ -2,10 +2,9 @@ from datetime import datetime
 
 import pandas as pd
 import pytest
-from tests.conftest import MockSoapClient
 from zeep.exceptions import Error as ZeepError
 
-from connectsensor import SensorClient
+from connectsensor import APIError, SensorClient
 from mock_data import PASSWORD, USERNAME
 
 
@@ -25,10 +24,48 @@ def test_status(mock_sync_httpx_post):  # noqa: ARG001
     assert tank_history.level_litres[2] == 1880
 
 
-def test_exceptions(mock_async_httpx_post):  # noqa: ARG001
+def zeep_exception(*args, **kwargs):
+    raise ZeepError("Test error")
+
+
+def test_login_exception(mock_sync_httpx_post):
     client = SensorClient()
-    client._soap_client = MockSoapClient(ZeepError, "Mocked Zeep error")
-    with pytest.raises(Exception):
+    client._soap_client.service.SoapMobileAPPAuthenicate_v3 = (  # noqa: SLF001
+        zeep_exception
+    )
+
+    with pytest.raises(
+        APIError,
+        match="Zeep error during login: Test error",
+    ):
         client.login("invalid_user", "invalid_password")
 
+
+def test_tank_exception(mock_sync_httpx_post):
+    client = SensorClient()
+    client._soap_client.service.SoapMobileAPPGetLatestLevel_v3 = (  # noqa: SLF001
+        zeep_exception
+    )
     client.login(USERNAME, PASSWORD)
+    tanks = client.tanks
+
+    with pytest.raises(
+        APIError,
+        match="Zeep error fetching tank data: Test error",
+    ):
+        tanks[0].level
+
+
+def test_history_exception(mock_sync_httpx_post):
+    client = SensorClient()
+    client._soap_client.service.SoapMobileAPPGetCallHistory_v1 = (  # noqa: SLF001
+        zeep_exception
+    )
+    client.login(USERNAME, PASSWORD)
+    tanks = client.tanks
+
+    with pytest.raises(
+        APIError,
+        match="Zeep error fetching tank history: Test error",
+    ):
+        tanks[0].history

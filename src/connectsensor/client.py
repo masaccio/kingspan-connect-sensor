@@ -82,8 +82,8 @@ class SensorClient:
                 culture="en",
             )
         except ZeepError as e:
-            _LOGGER.debug("Zeep error during login: %s", e)
-            msg = f"Zeep error during login: {e}"
+            _LOGGER.debug("Zeep error fetching tank data: %s", e)
+            msg = f"Zeep error fetching tank data: {e}"
             raise APIError(msg) from e
 
         try:
@@ -110,8 +110,8 @@ class SensorClient:
                 enddate=end_date_dt.isoformat(),
             )
         except ZeepError as e:
-            _LOGGER.debug("Zeep error during login: %s", e)
-            msg = f"Zeep error during login: {e}"
+            _LOGGER.debug("Zeep error fetching tank history: %s", e)
+            msg = f"Zeep error fetching tank history: {e}"
             raise APIError(msg) from e
 
         try:
@@ -153,8 +153,8 @@ class AsyncSensorClient:
             )
             self._soap_client.set_ns_prefix(None, "http://mobileapp/")
         except ZeepError as e:
-            _LOGGER.debug("Zeep error during login: %s", e)
-            msg = f"Zeep error during login: {e}"
+            _LOGGER.debug("Zeep error during initialisation: %s", e)
+            msg = f"Zeep error during initialisation: {e}"
             raise APIError(msg) from e
 
     async def login(self, username, password):
@@ -171,7 +171,7 @@ class AsyncSensorClient:
                 emailaddress=username,
                 password=password,
             )
-        except ZeepError as e:
+        except (ZeepError, httpx.HTTPError) as e:
             _LOGGER.debug("Zeep error during login: %s", e)
             msg = f"Zeep error during login: {e}"
             raise APIError(msg) from e
@@ -209,7 +209,7 @@ class AsyncSensorClient:
                 culture="en",
             )
         except ZeepError as e:
-            msg = f"Zeep error during get_latest_level: {e}"
+            msg = f"Zeep error fetching tank data: {e}"
             raise APIError(msg) from e
 
         try:
@@ -238,7 +238,7 @@ class AsyncSensorClient:
                 enddate=end_date_dt.isoformat(),
             )
         except ZeepError as e:
-            msg = f"Zeep error during get_history: {e}"
+            msg = f"Zeep error fetching tank history: {e}"
             raise APIError(msg) from e
 
         try:

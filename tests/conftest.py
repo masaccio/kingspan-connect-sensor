@@ -7,8 +7,9 @@ from unittest.mock import AsyncMock, Mock, patch
 import aiofiles
 import httpx
 import pytest
+from zeep.exceptions import Fault
 
-from mock_data import USERNAME, PASSWORD
+from mock_data import PASSWORD, USERNAME
 
 INVALID_LOGON_SESSION = "SoapMobileAPPAuthenicate_v3.invalid.xml"
 VALID_LOGON_SESSION = "SoapMobileAPPAuthenicate_v3.valid.xml"
@@ -129,63 +130,3 @@ def mock_async_httpx_post(mocker):
     with patch("httpx.AsyncClient.post", new_callable=AsyncMock) as mock_client:
         mock_client.side_effect = mock_post
         yield mock_client
-
-
-class MockSoapService:
-    def __init__(self, exc: type[Exception], error: str) -> None:
-        self.exc = exc
-        self.error = error
-
-    def SoapMobileAPPAuthenicate_v3(  # noqa: N802
-        self,
-        emailaddress: str,
-        password: str,
-    ) -> dict[str, Any]:
-        if emailaddress == USERNAME and password == PASSWORD:
-            return {
-                "APIResult": {"Code": 0},
-                "APIUserID": 1,
-                "Tanks": {"APITankInfo_V3": [{"SignalmanNo": "20001000"}]},
-            }
-        raise self.exc(self.error)
-
-    def SoapMobileAPPGetLatestLevel_v3(self, **_args):  # noqa: N802
-        raise self.exc(self.error)
-
-    def SoapMobileAPPGetCallHistory_v1(self, **_args):  # noqa: N802
-        raise self.exc(self.error)
-
-
-class MockSoapClient:
-    def __init__(self, exc: type[Exception], error: str) -> None:
-        self.service = MockSoapService(exc, error)
-
-
-class AsyncMockSoapService:
-    def __init__(self, exc: type[Exception], error: str) -> None:
-        self.exc = exc
-        self.error = error
-
-    async def SoapMobileAPPAuthenicate_v3(  # noqa: N802
-        self,
-        emailaddress: str,
-        password: str,
-    ) -> dict[str, Any]:
-        if emailaddress == USERNAME and password == PASSWORD:
-            return {
-                "APIResult": {"Code": 0},
-                "APIUserID": 1,
-                "Tanks": {"APITankInfo_V3": [{"SignalmanNo": "20001000"}]},
-            }
-        raise self.exc(self.error)
-
-    async def SoapMobileAPPGetLatestLevel_v3(self, **_args: Any):  # noqa: N802
-        raise self.exc(self.error)
-
-    async def SoapMobileAPPGetCallHistory_v1(self, **_args: Any):  # noqa: N802
-        raise self.exc(self.error)
-
-
-class AsyncMockSoapClient:
-    def __init__(self, exc: type[Exception], error: str) -> None:
-        self.service = AsyncMockSoapService(exc, error)
