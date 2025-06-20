@@ -1,12 +1,15 @@
 from datetime import datetime
 
 import pandas as pd
+import pytest
+from tests.conftest import MockSoapClient
+from zeep.exceptions import Error as ZeepError
 
-from mock_data import USERNAME, PASSWORD
 from connectsensor import SensorClient
+from mock_data import PASSWORD, USERNAME
 
 
-def test_status(mock_sync_httpx_post):
+def test_status(mock_sync_httpx_post):  # noqa: ARG001
     client = SensorClient()
     client.login(USERNAME, PASSWORD)
     tanks = client.tanks
@@ -20,3 +23,12 @@ def test_status(mock_sync_httpx_post):
     assert reading_date == datetime(2021, 1, 25, 13, 59, 14)
     assert tank_history.level_percent[1] == 95
     assert tank_history.level_litres[2] == 1880
+
+
+def test_exceptions(mock_async_httpx_post):  # noqa: ARG001
+    client = SensorClient()
+    client._soap_client = MockSoapClient(ZeepError, "Mocked Zeep error")
+    with pytest.raises(Exception):
+        client.login("invalid_user", "invalid_password")
+
+    client.login(USERNAME, PASSWORD)

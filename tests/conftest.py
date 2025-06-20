@@ -1,12 +1,14 @@
 import os
 import re
 from datetime import datetime, timedelta
+from typing import Any
 from unittest.mock import AsyncMock, Mock, patch
-from mock_data import PASSWORD
 
 import aiofiles
 import httpx
 import pytest
+
+from mock_data import USERNAME, PASSWORD
 
 INVALID_LOGON_SESSION = "SoapMobileAPPAuthenicate_v3.invalid.xml"
 VALID_LOGON_SESSION = "SoapMobileAPPAuthenicate_v3.valid.xml"
@@ -47,7 +49,8 @@ def get_mock_filename(content: bytes, generated=False) -> str:
     if m := re.search(r"<(soap:Body|soap-env:Body)>\s*<(\w+)", content.decode()):
         method = m.group(2)
     else:
-        raise (ValueError(f"Can't extract SOAP method from content: {content}"))
+        msg = f"Can't extract SOAP method from content: {content}"
+        raise (ValueError(msg))
 
     if method == "SoapMobileAPPAuthenicate_v3":
         if f"<password>{PASSWORD}</password>" in content.decode():
@@ -80,7 +83,8 @@ def mock_sync_httpx_post(request, mocker):
             with open(mock_filename, "rb") as f:
                 mock_response = f.read()
         except FileNotFoundError:
-            raise RuntimeError(f"Mock file not found: {mock_filename}")
+            msg = f"Mock file not found: {mock_filename}"
+            raise RuntimeError(msg)
 
         return get_mock_response(url, mock_response)
 
@@ -91,7 +95,8 @@ def mock_sync_httpx_post(request, mocker):
             with open(mock_filename, "rb") as f:
                 mock_response = f.read()
         except FileNotFoundError:
-            raise RuntimeError(f"Mock file not found: {mock_filename}")
+            msg = f"Mock file not found: {mock_filename}"
+            raise RuntimeError(msg)
 
         return get_mock_response(url, mock_response, generated=True)
 
@@ -116,10 +121,71 @@ def mock_async_httpx_post(mocker):
             async with aiofiles.open(mock_filename, "rb") as f:
                 mock_response = await f.read()
         except FileNotFoundError:
-            raise RuntimeError(f"Mock file not found: {mock_filename}")
+            msg = f"Mock file not found: {mock_filename}"
+            raise RuntimeError(msg)
 
         return get_mock_response(url, mock_response)
 
     with patch("httpx.AsyncClient.post", new_callable=AsyncMock) as mock_client:
         mock_client.side_effect = mock_post
         yield mock_client
+
+
+class MockSoapService:
+    def __init__(self, exc: type[Exception], error: str) -> None:
+        self.exc = exc
+        self.error = error
+
+    def SoapMobileAPPAuthenicate_v3(  # noqa: N802
+        self,
+        emailaddress: str,
+        password: str,
+    ) -> dict[str, Any]:
+        if emailaddress == USERNAME and password == PASSWORD:
+            return {
+                "APIResult": {"Code": 0},
+                "APIUserID": 1,
+                "Tanks": {"APITankInfo_V3": [{"SignalmanNo": "20001000"}]},
+            }
+        raise self.exc(self.error)
+
+    def SoapMobileAPPGetLatestLevel_v3(self, **_args):  # noqa: N802
+        raise self.exc(self.error)
+
+    def SoapMobileAPPGetCallHistory_v1(self, **_args):  # noqa: N802
+        raise self.exc(self.error)
+
+
+class MockSoapClient:
+    def __init__(self, exc: type[Exception], error: str) -> None:
+        self.service = MockSoapService(exc, error)
+
+
+class AsyncMockSoapService:
+    def __init__(self, exc: type[Exception], error: str) -> None:
+        self.exc = exc
+        self.error = error
+
+    async def SoapMobileAPPAuthenicate_v3(  # noqa: N802
+        self,
+        emailaddress: str,
+        password: str,
+    ) -> dict[str, Any]:
+        if emailaddress == USERNAME and password == PASSWORD:
+            return {
+                "APIResult": {"Code": 0},
+                "APIUserID": 1,
+                "Tanks": {"APITankInfo_V3": [{"SignalmanNo": "20001000"}]},
+            }
+        raise self.exc(self.error)
+
+    async def SoapMobileAPPGetLatestLevel_v3(self, **_args: Any):  # noqa: N802
+        raise self.exc(self.error)
+
+    async def SoapMobileAPPGetCallHistory_v1(self, **_args: Any):  # noqa: N802
+        raise self.exc(self.error)
+
+
+class AsyncMockSoapClient:
+    def __init__(self, exc: type[Exception], error: str) -> None:
+        self.service = AsyncMockSoapService(exc, error)

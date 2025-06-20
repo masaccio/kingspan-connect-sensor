@@ -3,14 +3,14 @@ from zeep.helpers import serialize_object
 
 
 class Tank:
-    def __init__(self, soap_client: object, signalman_no: str):
+    def __init__(self, soap_client: object, signalman_no: str) -> None:
         self._soap_client = soap_client
         self._signalman_no = signalman_no
         self._level_data = None
 
     @property
     def level(self) -> int:
-        """Return the oil level in the tank in litres"""
+        """Return the oil level in the tank in litres."""
         self._cache_tank_data()
         return int(self._level_data["LevelLitres"])
 
@@ -31,13 +31,13 @@ class Tank:
 
     @property
     def capacity(self) -> int:
-        """Return the capacity of the tank in litres"""
+        """Return the capacity of the tank in litres."""
         self._cache_tank_data()
         return int(self._tank_info["Tank Capacity(L)"])
 
     @property
     def last_read(self) -> str:
-        """Return the last read date of the tank as a datetime object"""
+        """Return the last read date of the tank as a datetime object."""
         self._cache_tank_data()
         return self._level_data["ReadingDate"]
 
@@ -46,14 +46,14 @@ class Tank:
         history_data = self._soap_client._get_history(self._signalman_no)
         return transform_history_data(history_data)
 
-    def _cache_tank_data(self):
+    def _cache_tank_data(self) -> None:
         if self._level_data is None:
             response = self._soap_client._get_latest_level(self._signalman_no)
             unpack_tank_data(self, response)
 
 
 class AsyncTank:
-    def __init__(self, soap_client: object, signalman_no: str):
+    def __init__(self, soap_client: object, signalman_no: str) -> None:
         self._soap_client = soap_client
         self._signalman_no = signalman_no
         self._level_data = None
@@ -85,7 +85,7 @@ class AsyncTank:
 
     @async_property
     async def last_read(self) -> str:
-        """Return the last read date of the tank as a datetime object"""
+        """Return the last read date of the tank as a datetime object."""
         await self._cache_tank_data()
         return self._level_data["ReadingDate"]
 
@@ -94,20 +94,20 @@ class AsyncTank:
         history_data = await self._soap_client._get_history(self._signalman_no)
         return transform_history_data(history_data)
 
-    async def _cache_tank_data(self):
+    async def _cache_tank_data(self) -> None:
         if self._level_data is None:
             response = await self._soap_client._get_latest_level(self._signalman_no)
             unpack_tank_data(self, response)
 
 
-def unpack_tank_data(cls, response):
+def unpack_tank_data(cls, response) -> None:
     cls._level_data = serialize_object(response["Level"])
     tank_info = serialize_object(response["TankInfo"])
     cls._tank_info = {x["Name"]: x["Value"] for x in tank_info["APITankInfoItem"]}
 
 
 def transform_history_data(data):
-    data = [
+    return [
         {
             "reading_date": x["ReadingDate"],
             "level_percent": x["LevelPercentage"],
@@ -115,4 +115,3 @@ def transform_history_data(data):
         }
         for x in data
     ]
-    return data

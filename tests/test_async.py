@@ -1,10 +1,12 @@
-import pandas as pd
-import pytest
-
-from mock_data import PASSWORD, USERNAME
 from datetime import datetime
 
-from connectsensor import AsyncSensorClient
+import pandas as pd
+import pytest
+from tests.conftest import AsyncMockSoapClient
+from zeep.exceptions import Error as ZeepError
+
+from connectsensor import AsyncSensorClient, APIError
+from mock_data import PASSWORD, USERNAME
 
 
 @pytest.mark.asyncio
@@ -24,3 +26,20 @@ async def test_status(mock_async_httpx_post):
         assert reading_date == datetime(2021, 1, 25, 13, 59, 14)
         assert tank_history.level_percent[1] == 95
         assert tank_history.level_litres[2] == 1880
+
+
+@pytest.mark.asyncio
+async def test_exceptions(mock_async_httpx_post):
+    async with AsyncSensorClient() as client:
+        client._soap_client = AsyncMockSoapClient(  # noqa: SLF001
+            ZeepError,
+            "Mocked Zeep error",
+        )
+        with pytest.raises(
+            APIError,
+            match="Zeep error during login: Mocked Zeep error",
+        ):
+            await client.login("invalid_user", "invalid_password")
+
+        result = await client.login(USERNAME, PASSWORD)
+        assert result["APIResult"]["Code"] == 0
