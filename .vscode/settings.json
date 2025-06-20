@@ -14,4 +14,7 @@
         "log_cli=True",
         "--log-cli-level=ERROR",
     ],
+    "python.analysis.include": [
+        "src/connectsensor/*.py",
+    ],
 }
