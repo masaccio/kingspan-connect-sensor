@@ -18,5 +18,5 @@ logging.config.dictConfig(
                 "handlers": ["console"],
             },
         },
-    }
+    },
 )

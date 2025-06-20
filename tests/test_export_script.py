@@ -1,10 +1,10 @@
-import pandas as pd
 import sqlite3
-
 from pathlib import Path
+
+import pandas as pd
 from pytest import mark
 
-from mock_data import VALID_DATA, NEW_TEST_DATA
+from mock_data import NEW_TEST_DATA, VALID_DATA
 
 
 @mark.script_launch_mode("subprocess")
@@ -102,7 +102,7 @@ def test_get_cached_history(mock_sync_httpx_post, script_runner, tmp_path):
     tank_history = pd.read_excel(output_filename)
     tank_history = tank_history.sort_values(by=["reading_date"]).reset_index(drop=True)
     tank_history.reading_date = tank_history.reading_date.dt.floor("s")
-    for i, row in enumerate([NEW_TEST_DATA] + VALID_DATA):
+    for i, row in enumerate([NEW_TEST_DATA, *VALID_DATA]):
         assert tank_history.reading_date[i].to_pydatetime() == row[0]
         assert tank_history.level_percent[i] == row[1]
         assert tank_history.level_litres[i] == row[2]

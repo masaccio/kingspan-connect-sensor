@@ -1,6 +1,7 @@
 from pathlib import Path
-import pytest
 from unittest.mock import patch
+
+import pytest
 
 
 @pytest.mark.script_launch_mode("subprocess")
