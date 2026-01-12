@@ -1,5 +1,5 @@
 version = 1
-revision = 2
+revision = 3
 requires-python = ">=3.10, <4.0"
 resolution-markers = [
     "python_full_version >= '3.12'",
@@ -397,7 +397,7 @@ wheels = [
 
 [[package]]
 name = "kingspan-connect-sensor"
-version = "3.2.0"
+version = "3.2.1"
 source = { editable = "." }
 dependencies = [
     { name = "async-property" },

@@ -157,19 +157,22 @@ class AsyncSensorClient:
         # Zeep.AsyncClient uses httpx which loads SSL cerficates at
         # construction, so we need to delay creating the connection.
         loop = get_running_loop()
-        wsdl_client = httpx.Client()
-        httpx_client = httpx.AsyncClient()
-        transport = AsyncTransport(client=httpx_client, wsdl_client=wsdl_client)
+
+        def _build_client() -> AsyncSoapClient:
+            # Build HTTP in s thread so that load_verify_locations() doesn't
+            # block the caller's thread
+            wsdl_client = httpx.Client()
+            httpx_client = httpx.AsyncClient()
+            transport = AsyncTransport(client=httpx_client, wsdl_client=wsdl_client)
+            client = AsyncSoapClient(WSDL_URL, transport=transport)
+            client.set_ns_prefix(None, "http://mobileapp/")
+            return client
 
         try:
-            self._soap_client = await loop.run_in_executor(
-                None,
-                lambda: AsyncSoapClient(WSDL_URL, transport=transport),
-            )
-            self._soap_client.set_ns_prefix(None, "http://mobileapp/")
+            self._soap_client = await loop.run_in_executor(None, _build_client)
         except ZeepError as e:
-            _LOGGER.debug("Zeep error during initialisation: %s", e)
-            msg = f"Zeep error during initialisation: {e}"
+            _LOGGER.debug("Zeep error during initialization: %s", e)
+            msg = f"Zeep error during initialization: {e}"
             raise APIError(msg) from e
 
     async def login(self, username: str, password: str) -> dict:

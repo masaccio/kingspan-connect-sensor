@@ -1,10 +1,10 @@
 [project]
 name = "kingspan-connect-sensor"
-version = "3.2.0"
+version = "3.2.1"
 description = "API to get oil tank from Kingspan SENSiT sensors"
 readme = "README.md"
 requires-python = ">=3.10,<4.0"
-license = {text = "MIT"}
+license = "MIT"
 authors = [
   {name = "Jon Connell", email = "python@figsandfudge.com"}
 ]
@@ -12,7 +12,6 @@ classifiers = [
   "Development Status :: 5 - Production/Stable",
   "Intended Audience :: Developers",
   "Intended Audience :: System Administrators",
-  "License :: OSI Approved :: MIT License",
   "Programming Language :: Python",
   "Programming Language :: Python :: 3",
 ]
