@@ -19,7 +19,7 @@ VALID_STATUS = [
 ]
 
 USERNAME = "test@example.com"
-PASSWORD = "s3cret"
+PASSWORD = "s3cret"  # noqa: S105
 
 VALID_DATA = [
     [datetime(2021, 1, 25, 13, 59, 14), 100, 2000],

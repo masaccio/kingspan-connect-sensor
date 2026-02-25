@@ -1,6 +1,7 @@
 aiofiles
 connectsensor
 Connell
+inprocess
 Kingspan
 pytest
 sensit

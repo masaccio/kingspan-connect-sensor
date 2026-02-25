@@ -1,3 +1,4 @@
+import json
 import os
 import re
 from datetime import datetime, timedelta
@@ -7,15 +8,8 @@ from unittest.mock import AsyncMock, Mock, patch
 import aiofiles
 import httpx
 import pytest
-import json
 
 from mock_data import PASSWORD, USERNAME
-
-INVALID_LOGON_SESSION = "Authenicate_v3.invalid.json"
-VALID_LOGON_SESSION = "Authenicate_v3.valid.json"
-TANK_HISTORY_SESSION = "GetCallHistory_v1.json"
-TEMPLATE_TANK_HISTORY_SESSION = "GetCallHistory_v1.template.json"
-GET_LEVELS_SESSION = "GetLatestLevel_v3.json"
 
 
 def generate_history_data(data: bytes) -> bytes:

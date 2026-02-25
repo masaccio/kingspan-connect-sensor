@@ -22,7 +22,7 @@ def test_help_verbose(script_runner):
 
 
 @pytest.mark.script_launch_mode("inprocess")
-def test_help_invalid_credentials(mock_sync_httpx_post, script_runner):
+def test_help_invalid_credentials(mock_sync_httpx_post, script_runner):  # noqa: ARG001
     ret = script_runner.run(
         "kingspan-notifier",
         "--config=tests/data/invalid_config.ini",
@@ -37,7 +37,7 @@ def test_help_invalid_credentials(mock_sync_httpx_post, script_runner):
 @patch("smtplib.SMTP_SSL")
 @pytest.mark.script_launch_mode("inprocess")
 @pytest.mark.parametrize("mock_sync_httpx_post", [True], indirect=True)
-def test_notify_empty(mock_smtp, mock_sync_httpx_post, script_runner):
+def test_notify_empty(mock_smtp, mock_sync_httpx_post, script_runner):  # noqa: ARG001
     Path("test.db").unlink(missing_ok=True)
     ret = script_runner.run(
         "kingspan-notifier",

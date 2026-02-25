@@ -83,7 +83,7 @@ def update_tank_cache(config, history, update=False):
     try:
         conn = sqlite3.connect(cache_db)
         cur = conn.cursor()
-    except configparser.BasicInterpolationError as e:
+    except sqlite3.Error as e:
         print("DB error:", str(e))
         sys.exit(1)
 
