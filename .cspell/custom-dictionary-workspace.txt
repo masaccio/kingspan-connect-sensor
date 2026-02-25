@@ -1,2 +1,7 @@
+aiofiles
 connectsensor
+Connell
 Kingspan
+pytest
+sensit
+sensorapi

@@ -117,7 +117,7 @@ def mock_async_httpx_post(mocker):
     """Mock httpx.AsyncClient.post method to return content from a file."""
 
     async def mock_post(url, *args, **kwargs):
-        mock_filename = get_mock_filename(kwargs["content"])
+        mock_filename = get_mock_filename(url, kwargs["content"])
 
         try:
             async with aiofiles.open(mock_filename, "rb") as f:

@@ -81,20 +81,20 @@ class Tank(BaseTank):
             self._unpack_tank_data(response)
 
 
-class AsyncTank:
+class AsyncTank(BaseTank):
     """Asynchronous Tank class."""
 
     @async_property
     async def level(self) -> int:
         """Return the oil level in the tank in litres."""
         await self._cache_tank_data()
-        return int(self._level_data["LevelLitres"])
+        return int(self._level_data["levelLitres"])
 
     @async_property
     async def serial_number(self) -> str:
         """Return the serial number of the tank."""
         await self._cache_tank_data()
-        return self._tank_info["Serial No"]
+        return self._tank_info["Signalman No"]
 
     @async_property
     async def model(self) -> str:
@@ -130,4 +130,4 @@ class AsyncTank:
         """Cache the latest tank data if not already cached."""
         if self._level_data is None:
             response = await self._client._get_latest_level(self._signalman_no)
-            self._unpack_tank_data(self, response)
+            self._unpack_tank_data(response)

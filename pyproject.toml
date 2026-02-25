@@ -105,3 +105,4 @@ ban-relative-imports = "all"
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["PLR2004", "S101", "D101", "D102", "D103", "ANN201", "ANN001"]
+"src/connectsensor/_*" = ["T201"]

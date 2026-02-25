@@ -1,12 +1,12 @@
 from datetime import datetime
 
+import httpx
 import pandas as pd
 import pytest
-import httpx
 
+from conftest import get_mock_filename, get_mock_response
 from connectsensor import KingspanAPIError, KingspanInvalidCredentials, SensorClient
 from mock_data import PASSWORD, USERNAME
-from conftest import get_mock_response, get_mock_filename
 
 
 def test_status(mock_sync_httpx_post):  # noqa: ARG001
