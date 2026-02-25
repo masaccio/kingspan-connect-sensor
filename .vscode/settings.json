@@ -17,4 +17,5 @@
     "python.analysis.include": [
         "src/connectsensor/*.py",
     ],
+    "python-envs.defaultEnvManager": "ms-python.python:venv",
 }
