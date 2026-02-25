@@ -5,7 +5,7 @@ import smtplib
 import sqlite3
 import ssl
 import sys
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import pandas as pd
 
