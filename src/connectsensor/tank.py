@@ -1,134 +1,133 @@
 """Tank class for Connect Sensor API."""
 
 from async_property import async_property
-from zeep.helpers import serialize_object
+from datetime import datetime
 
 
-class Tank:
-    def __init__(self, soap_client: object, signalman_no: str) -> None:
+class BaseTank:
+    """Base class for Tanks."""
+
+    def __init__(self, client: object, signalman_no: str) -> None:
         """Initialize a Tank instance."""
-        self._soap_client = soap_client
+        self._client = client
         self._signalman_no = signalman_no
         self._level_data = None
+
+    def _unpack_tank_data(self, response) -> None:
+        self._level_data = response["level"]
+        self._tank_info = {x["name"]: x["value"] for x in response["tankInfo"]}
+
+    def _transform_history_data(self, data: dict[str, list[dict]]) -> list[dict]:
+        """Transform raw tank history data into a list of dicts."""
+        return [
+            {
+                "reading_date": datetime.fromisoformat(x["readingDate"]),
+                "level_percent": x["levelPercentage"],
+                "level_litres": x["levelLitres"],
+            }
+            for x in data
+        ]
+
+
+class Tank(BaseTank):
+    """Synchronous Tank class."""
 
     @property
     def level(self) -> int:
         """Return the oil level in the tank in litres."""
         self._cache_tank_data()
-        return int(self._level_data["LevelLitres"])  # type: ignore[reportOptionalSubscript]
+        return int(self._level_data["levelLitres"])
 
     @property
     def serial_number(self) -> str:
         """Return the serial number of the tank."""
         self._cache_tank_data()
-        return self._tank_info["Serial No"]  # type: ignore[reportOptionalSubscript]
+        return self._tank_info["Signalman No"]
 
     @property
     def model(self) -> str:
         """Return the model of the tank."""
         self._cache_tank_data()
-        return self._tank_info["Model"]  # type: ignore[reportOptionalSubscript]
+        return self._tank_info["Model"]
 
     @property
     def name(self) -> str:
         """Return the name of the tank."""
         self._cache_tank_data()
-        return self._tank_info["Tank Name"]  # type: ignore[reportOptionalSubscript]
+        return self._tank_info["Tank Name"]
 
     @property
     def capacity(self) -> int:
         """Return the capacity of the tank in litres."""
         self._cache_tank_data()
-        return int(self._tank_info["Tank Capacity(L)"])  # type: ignore[reportOptionalSubscript]
+        return int(self._tank_info["Tank Capacity(L)"])
 
     @property
     def last_read(self) -> str:
         """Return the last read date of the tank as a datetime object."""
         self._cache_tank_data()
-        return self._level_data["ReadingDate"]  # type: ignore[reportOptionalSubscript]
+        return self._level_data["readingDate"]
 
     @property
     def history(self):
         """Return the history of the tank readings as a list of dicts."""
-        history_data = self._soap_client._get_history(self._signalman_no)
-        return transform_history_data(history_data)
+        history_data = self._client._get_history(self._signalman_no)
+        return self._transform_history_data(history_data)
 
     def _cache_tank_data(self) -> None:
         """Cache the latest tank data if not already cached."""
         if self._level_data is None:
-            response = self._soap_client._get_latest_level(self._signalman_no)
-            unpack_tank_data(self, response)
+            response = self._client._get_latest_level(self._signalman_no)
+            self._unpack_tank_data(response)
 
 
 class AsyncTank:
-    def __init__(self, soap_client: object, signalman_no: str) -> None:
-        """Initialize an AsyncTank instance."""
-        self._soap_client = soap_client
-        self._signalman_no = signalman_no
-        self._level_data = None
+    """Asynchronous Tank class."""
 
     @async_property
     async def level(self) -> int:
         """Return the oil level in the tank in litres."""
         await self._cache_tank_data()
-        return int(self._level_data["LevelLitres"])  # type: ignore[reportOptionalSubscript]
+        return int(self._level_data["LevelLitres"])
 
     @async_property
     async def serial_number(self) -> str:
         """Return the serial number of the tank."""
         await self._cache_tank_data()
-        return self._tank_info["Serial No"]  # type: ignore[reportOptionalSubscript]
+        return self._tank_info["Serial No"]
 
     @async_property
     async def model(self) -> str:
         """Return the model of the tank."""
         await self._cache_tank_data()
-        return self._tank_info["Model"]  # type: ignore[reportOptionalSubscript]
+        return self._tank_info["Model"]
 
     @async_property
     async def name(self) -> str:
         """Return the name of the tank."""
         await self._cache_tank_data()
-        return self._tank_info["Tank Name"]  # type: ignore[reportOptionalSubscript]
+        return self._tank_info["Tank Name"]
 
     @async_property
     async def capacity(self) -> int:
         """Return the capacity of the tank in litres."""
         await self._cache_tank_data()
-        return int(self._tank_info["Tank Capacity(L)"])  # type: ignore[reportOptionalSubscript]
+        return int(self._tank_info["Tank Capacity(L)"])
 
     @async_property
     async def last_read(self) -> str:
         """Return the last read date of the tank as a datetime object."""
         await self._cache_tank_data()
-        return self._level_data["ReadingDate"]  # type: ignore[reportOptionalSubscript]
+        return self._level_data["ReadingDate"]
 
     @async_property
     async def history(self):
         """Return the history of the tank readings as a list of dicts."""
-        history_data = await self._soap_client._get_history(self._signalman_no)
-        return transform_history_data(history_data)
+        history_data = await self._client._get_history(self._signalman_no)
+        return self._transform_history_data(history_data)
 
     async def _cache_tank_data(self) -> None:
         """Cache the latest tank data if not already cached."""
         if self._level_data is None:
-            response = await self._soap_client._get_latest_level(self._signalman_no)
-            unpack_tank_data(self, response)
-
-
-def unpack_tank_data(cls, response) -> None:
-    cls._level_data = serialize_object(response["Level"])
-    tank_info = serialize_object(response["TankInfo"])
-    cls._tank_info = {x["Name"]: x["Value"] for x in tank_info["APITankInfoItem"]}
-
-
-def transform_history_data(data: dict[str, list[dict]]) -> list[dict]:
-    """Transform raw tank history data into a list of dicts."""
-    return [
-        {
-            "reading_date": x["ReadingDate"],
-            "level_percent": x["LevelPercentage"],
-            "level_litres": x["LevelLitres"],
-        }
-        for x in data
-    ]
+            response = await self._client._get_latest_level(self._signalman_no)
+            self._unpack_tank_data(self, response)
