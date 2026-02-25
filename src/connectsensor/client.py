@@ -85,7 +85,7 @@ class SensorClient:
     def _get_latest_level(self, signalman_no: str) -> dict:
         """Get the latest level reading for a given tank."""
         return self._request(
-            "/v1/V1_SoapMobileApp/GetLatestLevel_v1_Async",
+            "/v1/V1_SoapMobileApp/GetLatestLevel_v1_Async?culture=EN",
             {
                 "userId": self._user_id,
                 "signalmanNo": signalman_no,
@@ -188,7 +188,7 @@ class AsyncSensorClient:
     async def _get_latest_level(self, signalman_no: str) -> dict:
         """Get the latest level reading for a given tank."""
         return await self._request(
-            "/v1/V1_SoapMobileApp/GetLatestLevel_v1_Async",
+            "/v1/V1_SoapMobileApp/GetLatestLevel_v1_Async?culture=EN",
             {
                 "userId": self._user_id,
                 "signalmanNo": signalman_no,
