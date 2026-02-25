@@ -1,15 +1,16 @@
 import argparse
 import configparser
-import pandas as pd
 import sqlite3
 import sys
 from os.path import expanduser
 
+import pandas as pd
+
 from connectsensor import (
-    SensorClient,
     KingspanAPIError,
     KingspanDBError,
     KingspanInvalidCredentials,
+    SensorClient,
 )
 
 
@@ -79,7 +80,7 @@ def read_tank_history(config, update):
     except KingspanInvalidCredentials:
         print("Authentication Failed: invalid username or password", file=sys.stderr)
     except KingspanAPIError as e:
-        print("Unknown API error:", e.value, file=sys.stderr)
+        print(f"Unknown API error: {e}", file=sys.stderr)
         sys.exit(1)
 
     cache_db = config_value(config, "sensit", "cache")
@@ -111,7 +112,7 @@ parser.add_argument(
     "--update",
     action="store_true",
     default=False,
-    help="Update cache with new data (deault: false)",
+    help="Update cache with new data (default: false)",
 )
 
 

@@ -91,7 +91,7 @@ def mock_sync_httpx_post(request, mocker):
         return get_mock_response(url, mock_response)
 
     def mock_generated_post(url, *args, **kwargs):
-        mock_filename = get_mock_filename(kwargs["content"], generated=True)
+        mock_filename = get_mock_filename(url, kwargs["content"], generated=True)
 
         try:
             with open(mock_filename, "rb") as f:

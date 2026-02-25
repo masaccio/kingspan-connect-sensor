@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 
 import pandas as pd
 
-from connectsensor import KingspanAPIError, SensorClient
+from connectsensor import KingspanAPIError, KingspanInvalidCredentials, SensorClient
 
 cwd = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, cwd + "/../")
@@ -60,13 +60,10 @@ def read_tank_history(config):
             config_value(config, "sensit", "username"),
             config_value(config, "sensit", "password"),
         )
+    except KingspanInvalidCredentials:
+        print("Authentication Failed: invalid username or password", file=sys.stderr)
     except KingspanAPIError as e:
-        if "Authentication Failed" in str(e):
-            print(
-                "Authentication Failed: invalid username or password", file=sys.stderr
-            )
-        else:  # pragma: no cover
-            print("Unknown API error:", e.value, file=sys.stderr)
+        print(f"Unknown API error: {e}", file=sys.stderr)
         sys.exit(1)
 
     tanks = client.tanks
@@ -145,7 +142,7 @@ parser.add_argument(
     "--no-update",
     action="store_true",
     default=False,
-    help="Don't update cache with new data (deault: update on)",
+    help="Don't update cache with new data (default: update on)",
 )
 parser.add_argument(
     "-w",

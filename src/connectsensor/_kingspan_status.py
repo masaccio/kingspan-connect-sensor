@@ -15,7 +15,7 @@ def main():
     args = parser.parse_args()
 
     if args.debug:  # pragma: no branch
-        import connectsensor.debug  # noqa: F401
+        import connectsensor.debug  # noqa: F401, PLC0415
 
     client = SensorClient()
     try:
@@ -23,7 +23,7 @@ def main():
     except KingspanInvalidCredentials:
         print("Authentication Failed: invalid username or password", file=sys.stderr)
     except KingspanAPIError as e:
-        print("Unknown API error:", e.value, file=sys.stderr)
+        print(f"Unknown API error: {e}", file=sys.stderr)
         sys.exit(1)
 
     for tank in client.tanks:
@@ -38,7 +38,7 @@ def main():
 
         print("\nHistory:")
         print("\t{0:<22} {1:<6} {2:<5}".format("Reading date", "%Full", "Litres"))
-        for index, measurement in enumerate(tank.history):
+        for _, measurement in enumerate(tank.history):
             print(
                 "\t{0:<22} {1:<6} {2:<5}".format(
                     measurement["reading_date"].strftime("%d-%b-%Y %H:%M"),
