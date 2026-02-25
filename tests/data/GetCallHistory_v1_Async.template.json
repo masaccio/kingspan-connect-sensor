@@ -1,15 +1,8 @@
-<?xml version="1.0" encoding="utf-8"?>
-<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <soap:Body>
-    <SoapMobileAPPGetCallHistory_v1Response xmlns="http://mobileapp/">
-      <SoapMobileAPPGetCallHistory_v1Result>
-        <APIResult>
-          <Code>0</Code>
-          <Description/>
-        </APIResult>
-        <Levels>
-        </Levels>
-      </SoapMobileAPPGetCallHistory_v1Result>
-    </SoapMobileAPPGetCallHistory_v1Response>
-  </soap:Body>
-</soap:Envelope>
+{
+    "apiResult": {
+        "code": 0,
+        "description": ""
+    },
+    "levels": [
+	]
+}
