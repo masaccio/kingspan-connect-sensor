@@ -15,24 +15,25 @@ from mock_data import PASSWORD, USERNAME
 def generate_history_data(data: bytes) -> bytes:
     new_data = ""
     for line in data.decode().splitlines():
-        if "<Levels>" in line:
+        if '"levels":' in line:
             new_data += line + "\n"
             for i in range(10):
                 percent = 100 - i * 10
                 level = int(2000 * (percent / 100))
                 n_days = 50 - i * 5
                 dt = datetime.now() - timedelta(days=n_days)
+                comma = "" if i == 9 else ","
                 new_data += (
-                    "{"
-                    '            "signalmanNo": 20001000,'
-                    f'            "levelPercentage": {percent},'
-                    f'            "levelLitres": {level},'
-                    f'            "readingDate": "{dt}",'
-                    '            "levelAlert": false,'
-                    '            "dropAlert": false,'
-                    '            "consumptionRate": -1,'
-                    '            "runOutDate": "0001-01-01T00:00:00.0000000+00:00"'
-                    "},"
+                    "        {\n"
+                    '            "signalmanNo": 20001000,\n'
+                    f'            "levelPercentage": {percent},\n'
+                    f'            "levelLitres": {level},\n'
+                    f'            "readingDate": "{dt}",\n'
+                    '            "levelAlert": false,\n'
+                    '            "dropAlert": false,\n'
+                    '            "consumptionRate": -1,\n'
+                    '            "runOutDate": "0001-01-01T00:00:00.0000000+00:00"\n'
+                    f"        }}{comma}\n"
                 )
         else:
             new_data += line + "\n"
@@ -53,14 +54,14 @@ def get_mock_filename(url: str, content: str, generated=False) -> str:
             return os.path.join(f"tests/data/{method}.valid.json")
         return os.path.join(f"tests/data/{method}.invalid.json")
 
-    if method == "GetCallHistory_v1" and generated:
-        return os.path.join("tests/data/GetCallHistory_v1.template.json")
+    if "GetCallHistory_v1" in method and generated:
+        return os.path.join("tests/data/GetCallHistory_v1_Async.template.json")
 
     return os.path.join(f"tests/data/{method}.json")
 
 
 def get_mock_response(url: str, mock_data: bytes, generated=False) -> httpx.Response:
-    if "GetCallHistory_v1" in mock_data.decode() and generated:
+    if "GetCallHistory_v1" in url and generated:
         mock_data = generate_history_data(mock_data)
 
     headers = {"Content-Type": "text/xml; charset=utf-8"}
