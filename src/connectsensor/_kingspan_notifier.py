@@ -120,6 +120,8 @@ def usage_rate(history, threshold):
 
 def forecast_empty(config, history, window):
     time_delta = datetime.today() - timedelta(days=window)
+    history["reading_date"] = pd.to_datetime(history["reading_date"], utc=True)
+    time_delta = time_delta.replace(tzinfo=timezone.utc)
     history = history[history.reading_date >= time_delta]
 
     threshold = config.get("sensit", "refill-threshold", fallback=1.25)

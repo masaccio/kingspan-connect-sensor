@@ -4,6 +4,8 @@ import sqlite3
 import sys
 from os.path import expanduser
 
+from datetime import timezone
+
 import pandas as pd
 
 from connectsensor import (
@@ -122,9 +124,13 @@ def main():
     config = read_config(args.config)
 
     tank_history = read_tank_history(config, args.update)
+    tank_history.reading_date = pd.to_datetime(
+        tank_history.reading_date, errors="coerce"
+    )
     start_date = config.get("sensit", "start-date", fallback=None)
     if start_date is not None:
-        tank_history = tank_history[tank_history.reading_date >= start_date]
+        start_date_dt = pd.to_datetime(start_date)
+        tank_history = tank_history[tank_history.reading_date >= start_date_dt]
 
     writer = pd.ExcelWriter(args.output, engine="xlsxwriter")
     tank_history.to_excel(writer, sheet_name="History", index=False)
