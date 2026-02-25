@@ -3,8 +3,14 @@ import configparser
 import pandas as pd
 import sqlite3
 import sys
+from os.path import expanduser
 
-from connectsensor import SensorClient, APIError, DBError
+from connectsensor import (
+    SensorClient,
+    KingspanAPIError,
+    KingspanDBError,
+    KingspanInvalidCredentials,
+)
 
 
 def read_config(config_filename):
@@ -34,17 +40,17 @@ def table_exists(cursor):
         cursor.execute(query)
         rows = cursor.fetchall()
     except sqlite3.Error as e:
-        raise DBError("Failed to check status of history table") from e
+        raise KingspanDBError("Failed to check status of history table") from e
     return len(rows) > 0
 
 
 def cached_history(tank, cache_db, update):
     history = pd.DataFrame()
     try:
-        db = sqlite3.connect(cache_db)
+        db = sqlite3.connect(expanduser(cache_db))
         cursor = db.cursor()
     except sqlite3.Error as e:
-        raise DBError(f"{cache_db}: connection failed") from e
+        raise KingspanDBError(f"{cache_db}: connection failed") from e
 
     if table_exists(cursor):
         query = "SELECT * FROM history;"
@@ -70,20 +76,17 @@ def read_tank_history(config, update):
             config_value(config, "sensit", "username"),
             config_value(config, "sensit", "password"),
         )
-    except APIError as e:
-        if "Authentication Failed" in str(e):
-            print(
-                "Authentication Failed: invalid username or password", file=sys.stderr
-            )
-        else:  # pragma: no cover
-            print("Unknown API error:", e.value, file=sys.stderr)
+    except KingspanInvalidCredentials:
+        print("Authentication Failed: invalid username or password", file=sys.stderr)
+    except KingspanAPIError as e:
+        print("Unknown API error:", e.value, file=sys.stderr)
         sys.exit(1)
 
     cache_db = config_value(config, "sensit", "cache")
     tanks = client.tanks
     try:
         tank_history = cached_history(tanks[0], cache_db, update)
-    except DBError as e:
+    except KingspanDBError as e:
         print("DB update failed:", str(e))
         sys.exit(1)
     return tank_history

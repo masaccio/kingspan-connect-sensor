@@ -1,7 +1,7 @@
 import argparse
 import sys
 
-from connectsensor import SensorClient, APIError
+from connectsensor import KingspanAPIError, KingspanInvalidCredentials, SensorClient
 
 
 def main():
@@ -20,13 +20,10 @@ def main():
     client = SensorClient()
     try:
         client.login(args.username, args.password)
-    except APIError as e:
-        if "Authentication Failed" in str(e):
-            print(
-                "Authentication Failed: invalid username or password", file=sys.stderr
-            )
-        else:  # pragma: no cover
-            print("Unknown API error:", e.value, file=sys.stderr)
+    except KingspanInvalidCredentials:
+        print("Authentication Failed: invalid username or password", file=sys.stderr)
+    except KingspanAPIError as e:
+        print("Unknown API error:", e.value, file=sys.stderr)
         sys.exit(1)
 
     for tank in client.tanks:

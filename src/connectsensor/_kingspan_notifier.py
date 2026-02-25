@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 
 import pandas as pd
 
-from connectsensor import APIError, SensorClient
+from connectsensor import KingspanAPIError, SensorClient
 
 cwd = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, cwd + "/../")
@@ -60,7 +60,7 @@ def read_tank_history(config):
             config_value(config, "sensit", "username"),
             config_value(config, "sensit", "password"),
         )
-    except APIError as e:
+    except KingspanAPIError as e:
         if "Authentication Failed" in str(e):
             print(
                 "Authentication Failed: invalid username or password", file=sys.stderr
