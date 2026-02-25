@@ -50,15 +50,6 @@ wheels = [
 ]
 
 [[package]]
-name = "attrs"
-version = "25.3.0"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/5a/b0/1367933a8532ee6ff8d63537de4f1177af4bff9f3e829baf7331f595bb24/attrs-25.3.0.tar.gz", hash = "sha256:75d7cefc7fb576747b2c81b4442d4d4a1ce0900973527c011d1030fd3bf4af1b", size = 812032, upload-time = "2025-03-13T11:10:22.779Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/77/06/bb80f5f86020c4551da315d78b3ab75e8228f89f0162f2c3a819e407941a/attrs-25.3.0-py3-none-any.whl", hash = "sha256:427318ce031701fea540783410126f03899a97ffc6f61596ad581ac2e40e3bc3", size = 63815, upload-time = "2025-03-13T11:10:21.14Z" },
-]
-
-[[package]]
 name = "black"
 version = "25.1.0"
 source = { registry = "https://pypi.org/simple" }
@@ -387,17 +378,8 @@ wheels = [
 ]
 
 [[package]]
-name = "isodate"
-version = "0.7.2"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/54/4d/e940025e2ce31a8ce1202635910747e5a87cc3a6a6bb2d00973375014749/isodate-0.7.2.tar.gz", hash = "sha256:4cd1aa0f43ca76f4a6c6c0292a85f40b35ec2e43e315b59f06e6d32171a953e6", size = 29705, upload-time = "2024-10-08T23:04:11.5Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/15/aa/0aca39a37d3c7eb941ba736ede56d689e7be91cab5d9ca846bde3999eba6/isodate-0.7.2-py3-none-any.whl", hash = "sha256:28009937d8031054830160fce6d409ed342816b543597cece116d966c6d99e15", size = 22320, upload-time = "2024-10-08T23:04:09.501Z" },
-]
-
-[[package]]
 name = "kingspan-connect-sensor"
-version = "3.2.1"
+version = "4.0.0"
 source = { editable = "." }
 dependencies = [
     { name = "async-property" },
@@ -407,7 +389,6 @@ dependencies = [
     { name = "lxml" },
     { name = "requests" },
     { name = "xlsxwriter" },
-    { name = "zeep" },
 ]
 
 [package.dev-dependencies]
@@ -437,7 +418,6 @@ requires-dist = [
     { name = "lxml", specifier = ">=5.3" },
     { name = "requests", specifier = ">=2.28.1,<3.0.0" },
     { name = "xlsxwriter", specifier = ">=3.2.4" },
-    { name = "zeep", specifier = ">=4.2.0,<5.0.0" },
 ]
 
 [package.metadata.requires-dev]
@@ -952,30 +932,6 @@ wheels = [
 ]
 
 [[package]]
-name = "requests-file"
-version = "2.1.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "requests" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/72/97/bf44e6c6bd8ddbb99943baf7ba8b1a8485bcd2fe0e55e5708d7fee4ff1ae/requests_file-2.1.0.tar.gz", hash = "sha256:0f549a3f3b0699415ac04d167e9cb39bccfb730cb832b4d20be3d9867356e658", size = 6891, upload-time = "2024-05-21T16:28:00.24Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/d7/25/dd878a121fcfdf38f52850f11c512e13ec87c2ea72385933818e5b6c15ce/requests_file-2.1.0-py2.py3-none-any.whl", hash = "sha256:cf270de5a4c5874e84599fc5778303d496c10ae5e870bfa378818f35d21bda5c", size = 4244, upload-time = "2024-05-21T16:27:57.733Z" },
-]
-
-[[package]]
-name = "requests-toolbelt"
-version = "1.0.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "requests" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/f3/61/d7545dafb7ac2230c70d38d31cbfe4cc64f7144dc41f6e4e4b78ecd9f5bb/requests-toolbelt-1.0.0.tar.gz", hash = "sha256:7681a0a3d047012b5bdc0ee37d7f8f07ebe76ab08caeccfc3921ce23c88d5bc6", size = 206888, upload-time = "2023-05-01T04:11:33.229Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/3f/51/d4db610ef29373b879047326cbf6fa98b6c1969d6f6dc423279de2b1be2c/requests_toolbelt-1.0.0-py2.py3-none-any.whl", hash = "sha256:cccfdd665f0a24fcf4726e690f65639d272bb0637b9b92dfd91a5568ccf6bd06", size = 54481, upload-time = "2023-05-01T04:11:28.427Z" },
-]
-
-[[package]]
 name = "ruff"
 version = "0.12.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1136,25 +1092,6 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/a7/47/7704bac42ac6fe1710ae099b70e6a1e68ed173ef14792b647808c357da43/xlsxwriter-3.2.5.tar.gz", hash = "sha256:7e88469d607cdc920151c0ab3ce9cf1a83992d4b7bc730c5ffdd1a12115a7dbe", size = 213306, upload-time = "2025-06-17T08:59:14.619Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/fa/34/a22e6664211f0c8879521328000bdcae9bf6dbafa94a923e531f6d5b3f73/xlsxwriter-3.2.5-py3-none-any.whl", hash = "sha256:4f4824234e1eaf9d95df9a8fe974585ff91d0f5e3d3f12ace5b71e443c1c6abd", size = 172347, upload-time = "2025-06-17T08:59:13.453Z" },
-]
-
-[[package]]
-name = "zeep"
-version = "4.3.1"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "attrs" },
-    { name = "isodate" },
-    { name = "lxml" },
-    { name = "platformdirs" },
-    { name = "pytz" },
-    { name = "requests" },
-    { name = "requests-file" },
-    { name = "requests-toolbelt" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/09/35/4a91181499a1e098cb01e04a26a053714adf2fb1c25b40fdc5f46cfe2e4f/zeep-4.3.1.tar.gz", hash = "sha256:f45385e9e1b09d5550e0f51ab9fa7c6842713cab7194139372fd82a99c56a06e", size = 166468, upload-time = "2024-10-16T05:31:30.775Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/46/92/8a76eeccb5c176ea3de3965598b6fcd10dc9d72a560e59919b52845327ed/zeep-4.3.1-py3-none-any.whl", hash = "sha256:a637aa7eedb6330bb27e8c94c5233ddf23553904323adf9398f8cf5025acb216", size = 101690, upload-time = "2024-10-16T05:31:28.702Z" },
 ]
 
 [[package]]
