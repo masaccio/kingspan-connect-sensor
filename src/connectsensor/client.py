@@ -32,6 +32,7 @@ class SensorClient:
     def __init__(self) -> None:
         """Initialize the HTTPX Client."""
         self._client = httpx.Client()
+        self._tanks = []
 
     def _request(self, endpoint: str, data: dict[str, str | dict]) -> dict:
         try:
@@ -73,7 +74,6 @@ class SensorClient:
         )
 
         self._user_id = response["apiUserID"]
-        self._tanks = []
         for tank_info in response["tanks"]:
             self._tanks.append(Tank(self, tank_info["signalmanNo"]))
 
@@ -126,6 +126,7 @@ class AsyncSensorClient:
     def __init__(self) -> None:
         """Initialize the HTTPX Async Client."""
         self._client = httpx.AsyncClient()
+        self._tanks = []
 
     async def __aenter__(self):  # noqa: ANN204
         """Enter the async context manager."""
@@ -176,7 +177,6 @@ class AsyncSensorClient:
         )
 
         self._user_id = response["apiUserID"]
-        self._tanks = []
         for tank_info in response["tanks"]:
             self._tanks.append(AsyncTank(self, tank_info["signalmanNo"]))
 
