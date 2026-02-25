@@ -1,0 +1,13 @@
+{
+    "apiResult": {
+        "code": 1,
+        "description": "Authentication Failed, Invalid Login"
+    },
+    "apiUserID": "",
+    "emailAddress": "",
+    "consumerServicesBrandID": -1,
+    "consumerServicesBrandCode": "",
+    "tanks": [],
+    "displayAccount": false,
+    "roleID": -1
+}
