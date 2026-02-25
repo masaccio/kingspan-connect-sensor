@@ -62,6 +62,7 @@ def read_tank_history(config):
         )
     except KingspanInvalidCredentials:
         print("Authentication Failed: invalid username or password", file=sys.stderr)
+        sys.exit(1)
     except KingspanAPIError as e:
         print(f"Unknown API error: {e}", file=sys.stderr)
         sys.exit(1)
