@@ -1,6 +1,7 @@
 from datetime import datetime
 
 import httpx
+import logging
 import pandas as pd
 import pytest
 
@@ -71,3 +72,13 @@ def test_history_exception(mocker):
         match="Test Exception for GetCallHistory",
     ):
         _ = tanks[0].history
+
+
+def test_debug_redaction(mock_sync_httpx_post, caplog):  # noqa: ARG001
+    client = SensorClient()
+    caplog.set_level(logging.DEBUG, logger="connectsensor")
+    client.login(USERNAME, PASSWORD)
+    log_text = caplog.text
+    assert USERNAME not in log_text
+    assert PASSWORD not in log_text
+    assert "*redacted*" in log_text
