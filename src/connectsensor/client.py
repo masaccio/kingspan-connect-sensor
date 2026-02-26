@@ -23,7 +23,7 @@ API_BASE_URL = f"http://{API_SERVER}:{API_PORT}"
 TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJUaGVNb2JpbGVBcHAiLCJyb2xlIjoiVGhlTW9iaWxlQXBwIiwiZXhwIjoxNzg2ODk4NTM3LCJpc3MiOiJTZW5zb3JBUEkgQXV0aFNlcnZlciIsImF1ZCI6IlNlbnNvckFQSSBVc2VycyJ9.PW-NP46vP9pP5Da87KIzsN6ZWIA3vOI4XbqxHWVuTOY"  # noqa: E501, S105
 
 _LOGGER: logging.Logger = logging.getLogger(__package__)
-_LOGGER.debug("Using API: %s", API_BASE_URL)
+_LOGGER.debug("Using Kingspan API: %s", API_BASE_URL)
 
 
 class SensorClient:
@@ -46,22 +46,27 @@ class SensorClient:
             response.raise_for_status()
         except httpx.TimeoutException as e:
             msg = f"HTTP request timeout: {e}"
+            _LOGGER.debug("API error: %s", msg)
             raise KingspanTimeoutError(msg) from e
         except httpx.HTTPError as e:
             msg = f"HTTP request failed: {e}"
+            _LOGGER.debug("API error: %s", msg)
             raise KingspanAPIError(msg) from e
 
         payload = json.loads(response.content)
         if "apiResult" not in payload or "code" not in payload["apiResult"]:
             msg = "Malformed response from API: cannot extract response/code"
+            _LOGGER.debug("API error: %s", msg)
             raise KingspanAPIError(msg)
 
         if payload["apiResult"]["code"] != 0:
             err = payload["apiResult"]["description"]
+            _LOGGER.debug("API error: %s", err)
             if "Authentication Failed" in err:
                 raise KingspanInvalidCredentials(err)
             raise KingspanAPIError(payload["apiResult"]["description"])
 
+        _LOGGER.debug("API request to %s succeeded", url)
         return payload
 
     def login(self, username: str, password: str) -> None:
