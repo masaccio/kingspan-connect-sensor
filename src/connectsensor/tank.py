@@ -1,10 +1,11 @@
 """Tank class for Connect Sensor API."""
 
-from async_property import async_property
 from datetime import datetime
 
+from async_property import async_property
 
-class BaseTank:
+
+class _BaseTank:
     """Base class for Tanks."""
 
     def __init__(self, client: object, signalman_no: str) -> None:
@@ -13,11 +14,11 @@ class BaseTank:
         self._signalman_no = signalman_no
         self._level_data = None
 
-    def _unpack_tank_data(self, response) -> None:
+    def unpack_tank_data(self, response) -> None:
         self._level_data = response["level"]
         self._tank_info = {x["name"]: x["value"] for x in response["tankInfo"]}
 
-    def _transform_history_data(self, data: dict[str, list[dict]]) -> list[dict]:
+    def transform_history_data(self, data: dict[str, list[dict]]) -> list[dict]:
         """Transform raw tank history data into a list of dicts."""
         return [
             {
@@ -29,7 +30,7 @@ class BaseTank:
         ]
 
 
-class Tank(BaseTank):
+class Tank(_BaseTank):
     """Synchronous Tank class."""
 
     @property
@@ -63,25 +64,25 @@ class Tank(BaseTank):
         return int(self._tank_info["Tank Capacity(L)"])
 
     @property
-    def last_read(self) -> str:
+    def last_read(self) -> datetime:
         """Return the last read date of the tank as a datetime object."""
         self._cache_tank_data()
-        return self._level_data["readingDate"]
+        return datetime.fromisoformat(self._level_data["readingDate"])
 
     @property
-    def history(self):
+    def history(self) -> list[dict]:
         """Return the history of the tank readings as a list of dicts."""
-        history_data = self._client._get_history(self._signalman_no)
-        return self._transform_history_data(history_data)
+        history_data = self._client._get_history(self._signalman_no)  # noqa: SLF001
+        return self.transform_history_data(history_data)
 
     def _cache_tank_data(self) -> None:
         """Cache the latest tank data if not already cached."""
         if self._level_data is None:
-            response = self._client._get_latest_level(self._signalman_no)
-            self._unpack_tank_data(response)
+            data = self._client._get_latest_level(self._signalman_no)  # noqa: SLF001
+            self.unpack_tank_data(data)
 
 
-class AsyncTank(BaseTank):
+class AsyncTank(_BaseTank):
     """Asynchronous Tank class."""
 
     @async_property
@@ -115,19 +116,23 @@ class AsyncTank(BaseTank):
         return int(self._tank_info["Tank Capacity(L)"])
 
     @async_property
-    async def last_read(self) -> str:
+    async def last_read(self) -> datetime:
         """Return the last read date of the tank as a datetime object."""
         await self._cache_tank_data()
-        return self._level_data["readingDate"]
+        return datetime.fromisoformat(self._level_data["readingDate"])
 
     @async_property
     async def history(self):
         """Return the history of the tank readings as a list of dicts."""
-        history_data = await self._client._get_history(self._signalman_no)
-        return self._transform_history_data(history_data)
+        history_data = await self._client._get_history(
+            self._signalman_no,
+        )
+        return self.transform_history_data(history_data)
 
     async def _cache_tank_data(self) -> None:
         """Cache the latest tank data if not already cached."""
         if self._level_data is None:
-            response = await self._client._get_latest_level(self._signalman_no)
-            self._unpack_tank_data(response)
+            response = await self._client._get_latest_level(
+                self._signalman_no,
+            )
+            self.unpack_tank_data(response)
