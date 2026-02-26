@@ -6,7 +6,7 @@ VALID_STATUS = [
     "Serial Number = 20001000",
     "Model = TestModel",
     "Level = 50% (1000 litres)",
-    "Last Read = 2021-01-31T00:59:30.987",
+    "Last Read = 2021-01-31 00:59:30.987000",
     "",
     "History:",
     "Reading date           %Full  Litres",

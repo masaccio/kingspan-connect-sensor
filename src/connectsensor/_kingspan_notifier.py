@@ -19,7 +19,7 @@ def time_delta_days(td):
     return td.days + (td.seconds / 3600) / 24
 
 
-def send_email(server, username, password, email, subject, message):
+def send_email(server, username, password, email, subject, message) -> None:
     port = 465
     message = (
         f"From: SENSiT Notifier <{email}>\n"
@@ -75,7 +75,7 @@ def update_tank_cache(config, history, update=False):
     cache_db = config.get("sensit", "cache", fallback=None)
     cache_db = os.path.expanduser(cache_db)
     if cache_db is None:
-        return
+        return None
 
     start_date = config.get("sensit", "start-date", fallback=None)
     if start_date is not None:
@@ -92,7 +92,7 @@ def update_tank_cache(config, history, update=False):
     rows = cur.fetchall()
     if len(rows) > 0:
         old_history = pd.read_sql_query(
-            "select * from history;", conn, parse_dates=["reading_date"]
+            "select * from history;", conn, parse_dates=["reading_date"],
         )
         history = pd.concat([history, old_history]).drop_duplicates()
 
@@ -110,7 +110,7 @@ def usage_rate(history, threshold):
         return 0
     current_level = history.level_litres.iloc[0]
     delta_levels = []
-    for index, row in history.iloc[1:].iterrows():
+    for _index, row in history.iloc[1:].iterrows():
         # Ignore refill days where oil goes up by 'threshold'
         if (row.level_litres / current_level) < threshold:
             delta_levels.append(current_level - row.level_litres)
@@ -128,9 +128,8 @@ def forecast_empty(config, history, window):
     rate = usage_rate(history, threshold)
     if rate == 0:
         return 9999.0
-    else:
-        current_level = int(history.level_litres.tail(1).iloc[0])
-        return int(current_level / abs(rate))
+    current_level = int(history.level_litres.tail(1).iloc[0])
+    return int(current_level / abs(rate))
 
 
 parser = argparse.ArgumentParser()
@@ -163,7 +162,7 @@ parser.add_argument(
 )
 
 
-def main():
+def main() -> None:
     args = parser.parse_args()
     config = read_config(args.config)
 

@@ -4,8 +4,6 @@ import sqlite3
 import sys
 from os.path import expanduser
 
-from datetime import timezone
-
 import pandas as pd
 
 from connectsensor import (
@@ -43,7 +41,8 @@ def table_exists(cursor):
         cursor.execute(query)
         rows = cursor.fetchall()
     except sqlite3.Error as e:
-        raise KingspanDBError("Failed to check status of history table") from e
+        msg = "Failed to check status of history table"
+        raise KingspanDBError(msg) from e
     return len(rows) > 0
 
 
@@ -53,7 +52,8 @@ def cached_history(tank, cache_db, update):
         db = sqlite3.connect(expanduser(cache_db))
         cursor = db.cursor()
     except sqlite3.Error as e:
-        raise KingspanDBError(f"{cache_db}: connection failed") from e
+        msg = f"{cache_db}: connection failed"
+        raise KingspanDBError(msg) from e
 
     if table_exists(cursor):
         query = "SELECT * FROM history;"
@@ -119,13 +119,13 @@ parser.add_argument(
 )
 
 
-def main():
+def main() -> None:
     args = parser.parse_args()
     config = read_config(args.config)
 
     tank_history = read_tank_history(config, args.update)
     tank_history.reading_date = pd.to_datetime(
-        tank_history.reading_date, errors="coerce"
+        tank_history.reading_date, errors="coerce",
     )
     start_date = config.get("sensit", "start-date", fallback=None)
     if start_date is not None:

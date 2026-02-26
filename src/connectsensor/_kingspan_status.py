@@ -4,10 +4,10 @@ import sys
 from connectsensor import KingspanAPIError, KingspanInvalidCredentials, SensorClient
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--username", required=True, help="Kingspan account email address"
+        "--username", required=True, help="Kingspan account email address",
     )
     parser.add_argument("--password", required=True, help="Kingspan account password")
     parser.add_argument("--debug", action="store_true")
@@ -38,14 +38,14 @@ def main():
         print(f"\tLast Read = {tank.last_read}")
 
         print("\nHistory:")
-        print("\t{0:<22} {1:<6} {2:<5}".format("Reading date", "%Full", "Litres"))
+        print("\t{:<22} {:<6} {:<5}".format("Reading date", "%Full", "Litres"))
         for _, measurement in enumerate(tank.history):
             print(
-                "\t{0:<22} {1:<6} {2:<5}".format(
+                "\t{:<22} {:<6} {:<5}".format(
                     measurement["reading_date"].strftime("%d-%b-%Y %H:%M"),
                     measurement["level_percent"],
                     measurement["level_litres"],
-                )
+                ),
             )
 
 
