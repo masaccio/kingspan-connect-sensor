@@ -36,21 +36,19 @@ def read_config(config_filename):
     try:
         config = configparser.ConfigParser(interpolation=None)
         config.read(config_filename)
+        return config
     except configparser.Error as e:
         print(config_filename + ": " + str(e))
         sys.exit(1)
-    finally:
-        return config
 
 
 def config_value(config, section, key):
     try:
         value = config.get(section, key)
+        return value
     except configparser.Error:
         print(f"Config value '{key}' not found in section '{section}'", file=sys.stderr)
         sys.exit(1)
-    finally:
-        return value
 
 
 def read_tank_history(config):
@@ -92,7 +90,9 @@ def update_tank_cache(config, history, update=False):
     rows = cur.fetchall()
     if len(rows) > 0:
         old_history = pd.read_sql_query(
-            "select * from history;", conn, parse_dates=["reading_date"],
+            "select * from history;",
+            conn,
+            parse_dates=["reading_date"],
         )
         history = pd.concat([history, old_history]).drop_duplicates()
 
