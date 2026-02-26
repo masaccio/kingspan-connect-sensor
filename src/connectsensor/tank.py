@@ -118,7 +118,7 @@ class AsyncTank(BaseTank):
     async def last_read(self) -> str:
         """Return the last read date of the tank as a datetime object."""
         await self._cache_tank_data()
-        return self._level_data["ReadingDate"]
+        return self._level_data["readingDate"]
 
     @async_property
     async def history(self):
