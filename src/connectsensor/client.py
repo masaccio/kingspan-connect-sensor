@@ -62,7 +62,10 @@ class _BaseClient:
         }
         url = f"{API_BASE_URL}{endpoint}"
         _LOGGER.debug(
-            "API request %s, headers=%s, content=%s", url, headers, self.redact(data),
+            "API request %s, headers=%s, content=%s",
+            url,
+            headers,
+            self.redact(data),
         )
         return (url, headers, json.dumps(data))
 
