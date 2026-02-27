@@ -2,8 +2,13 @@ aiofiles
 caplog
 connectsensor
 Connell
+httpx
 inprocess
 Kingspan
+mypy
+openpyxl
+pydatetime
 pytest
 sensit
 sensorapi
+setuptools
