@@ -1,0 +1,58 @@
+{
+    "apiResult": {
+        "code": 0,
+        "description": ""
+    },
+    "levels": [
+        {
+            "signalmanNo": 220001000,
+            "levelPercentage": 100,
+            "levelLitres": 2000,
+            "readingDate": "2021-01-25T13:59:14.00",
+            "levelAlert": false,
+            "dropAlert": false,
+            "consumptionRate": -1,
+            "runOutDate": "0001-01-01T00:00:00.0000000+00:00"
+        },
+        {
+            "signalmanNo": 220001000,
+            "levelPercentage": 95,
+            "levelLitres": 1900,
+            "readingDate": "2021-01-27T00:59:16.367",
+            "levelAlert": false,
+            "dropAlert": false,
+            "consumptionRate": -1,
+            "runOutDate": "0001-01-01T00:00:00.0000000+00:00"
+        },
+        {
+            "signalmanNo": 220001000,
+            "levelPercentage": 94,
+            "levelLitres": 1880,
+            "readingDate": "2021-01-29T00:59:22.75",
+            "levelAlert": false,
+            "dropAlert": false,
+            "consumptionRate": -1,
+            "runOutDate": "0001-01-01T00:00:00.0000000+00:00"
+        },
+        {
+            "signalmanNo": 220001000,
+            "levelPercentage": 94,
+            "levelLitres": 1880,
+            "readingDate": "2021-01-30T00:29:30.197",
+            "levelAlert": false,
+            "dropAlert": false,
+            "consumptionRate": -1,
+            "runOutDate": "0001-01-01T00:00:00.0000000+00:00"
+        },
+        {
+            "signalmanNo": 220001000,
+            "levelPercentage": 92,
+            "levelLitres": 1840,
+            "readingDate": "2021-01-31T00:59:30.987",
+            "levelAlert": false,
+            "dropAlert": false,
+            "consumptionRate": -1,
+            "runOutDate": "0001-01-01T00:00:00.0000000+00:00"
+        }
+    ]
+}

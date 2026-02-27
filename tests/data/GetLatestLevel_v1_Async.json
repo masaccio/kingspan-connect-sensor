@@ -1,0 +1,46 @@
+{
+    "apiResult": {
+        "code": 0,
+        "description": ""
+    },
+    "level": {
+        "signalmanNo": 20001000,
+        "levelPercentage": 50,
+        "levelLitres": 1000,
+        "readingDate": "2021-01-31T00:59:30.987",
+        "levelAlert": false,
+        "dropAlert": false,
+        "consumptionRate": 23.47,
+        "runOutDate": "2021-02-04T00:59:30.987"
+    },
+    "tankInfo": [
+        {
+            "name": "Signalman No",
+            "value": "20001000"
+        },
+        {
+            "name": "Tank Name",
+            "value": "TestTank"
+        },
+        {
+            "name": "Model",
+            "value": "TestModel"
+        },
+        {
+            "name": "Tank Capacity(L)",
+            "value": "2000"
+        },
+        {
+            "name": "Material",
+            "value": "Plastic"
+        },
+        {
+            "name": "Fuel Type",
+            "value": "kero"
+        },
+        {
+            "name": "Account No",
+            "value": "RETAIL"
+        }
+    ]
+}

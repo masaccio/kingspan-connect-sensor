@@ -1,6 +1,6 @@
 from _typeshed import Incomplete
 
-from connectsensor.exceptions import APIError as APIError
+from connectsensor.exceptions import KingspanAPIError as KingspanAPIError
 from connectsensor.tank import AsyncTank as AsyncTank
 from connectsensor.tank import Tank as Tank
 

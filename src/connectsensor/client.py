@@ -1,83 +1,157 @@
 """Client for interacting with the Kingspan Connect Sensor."""
 
+import json
 import logging
 from asyncio import get_running_loop
 from datetime import datetime
-from urllib.parse import urljoin
 
 import httpx
 from async_property import async_property
-from zeep import AsyncClient as AsyncSoapClient
-from zeep import Client as SoapClient
-from zeep.exceptions import Error as ZeepError
-from zeep.transports import AsyncTransport, Transport
 
-from connectsensor.exceptions import APIError
+from connectsensor.exceptions import (
+    KingspanAPIError,
+    KingspanInvalidCredentials,
+    KingspanTimeoutError,
+)
 from connectsensor.tank import AsyncTank, Tank
 
-DEFAULT_SERVER = "https://www.connectsensor.com/"
-WSDL_PATH = "soap/MobileApp.asmx?WSDL"
-WSDL_URL = urljoin(DEFAULT_SERVER, WSDL_PATH)
+# API is HTTP and sends the username and password in the clear
+API_SERVER = "sensorapi.connectsensor.com"
+API_PORT = 8087
+API_BASE_URL = f"http://{API_SERVER}:{API_PORT}"
+
+# The JWT appears to be hard-coded into the application rather than securely returned
+TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJUaGVNb2JpbGVBcHAiLCJyb2xlIjoiVGhlTW9iaWxlQXBwIiwiZXhwIjoxNzg2ODk4NTM3LCJpc3MiOiJTZW5zb3JBUEkgQXV0aFNlcnZlciIsImF1ZCI6IlNlbnNvckFQSSBVc2VycyJ9.PW-NP46vP9pP5Da87KIzsN6ZWIA3vOI4XbqxHWVuTOY"  # noqa: E501, S105
 
 _LOGGER: logging.Logger = logging.getLogger(__package__)
-_LOGGER.debug("Using WSDL URL: %s", WSDL_URL)
+_LOGGER.debug("Using Kingspan API: %s", API_BASE_URL)
 
 
-class HttpxTransport(Transport):
-    """Custom Zeep transport using httpx.Client for synchronous HTTP requests."""
+class _BaseClient:
+    """Base class for common helper functions."""
 
     def __init__(self) -> None:
-        """Initialize the HttpxTransport with a synchronous httpx.Client."""
-        super().__init__()
-        self.client = httpx.Client()  # Synchronous HTTPX client
+        """Initialize the base class."""
+        self._client = None
+        self._username = None
+        self._password = None
+        self._user_id = None
+        self._tanks = []
 
-    def post(
+    def redact(self, obj: dict[str, str | list | dict]) -> dict[str, str | list | dict]:
+        """Redact values email and password from request/response."""
+        if isinstance(obj, dict):
+            new_dict = {}
+            for key, value in obj.items():
+                if key in ("emailAddress", "password", "apiUserID", "signalmanNo"):
+                    new_dict[key] = "*redacted*"
+                else:
+                    new_dict[key] = self.redact(value)
+            return new_dict
+
+        if isinstance(obj, list):
+            return [self.redact(item) for item in obj]
+
+        return obj
+
+    def build_request(self, endpoint: str, data: dict[str, str | list | dict]) -> tuple:
+        headers = {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "Authorization": f"Bearer {TOKEN}",
+        }
+        url = f"{API_BASE_URL}{endpoint}"
+        _LOGGER.debug(
+            "API request %s, headers=%s, content=%s",
+            url,
+            headers,
+            self.redact(data),
+        )
+        return (url, headers, json.dumps(data))
+
+    def check_payload(self, response: httpx.Response) -> dict[str, str | list | dict]:
+        payload = json.loads(response.content)
+        if "apiResult" not in payload or "code" not in payload["apiResult"]:
+            msg = "Malformed response from API: cannot extract response/code"
+            _LOGGER.debug("API error: %s, payload=%s", msg, self.redact(payload))
+            raise KingspanAPIError(msg)
+
+        if payload["apiResult"]["code"] != 0:
+            msg = payload["apiResult"]["description"]
+            _LOGGER.debug("API error: %s, payload=%s", msg, self.redact(payload))
+            if "Authentication Failed" in msg:
+                raise KingspanInvalidCredentials(msg)
+            raise KingspanAPIError(payload["apiResult"]["description"])
+
+        _LOGGER.debug("API request succeeded, payload=%s", self.redact(payload))
+        return payload
+
+    def httpx_exception(self, exc: Exception) -> None:
+        if isinstance(exc, httpx.TimeoutException):
+            msg = f"HTTP request timeout: {exc}"
+            _LOGGER.debug("API error: %s", msg)
+            raise KingspanTimeoutError(msg) from exc
+
+        msg = f"HTTP request failed: {exc}"
+        _LOGGER.debug("API error: %s", msg)
+        raise KingspanAPIError(msg) from exc
+
+    def get_history_request(
         self,
-        address: str,
-        envelope: bytes | None,
-        headers: dict,
-    ) -> httpx.Response:
-        """Override the default `post` method to use `httpx.Client`."""
-        return self.client.post(
-            address,
-            data=envelope,  # type: ignore[reportOptionalMemberAccess]
-            headers=headers,
+        signalman_no: str,
+        start_date: datetime | None = None,
+        end_date: datetime | None = None,
+    ) -> tuple[str, dict[str, str | dict]]:
+        """Build a call history request for all clients."""
+        if start_date is None:
+            start_date_dt = datetime.fromtimestamp(0)  # noqa: DTZ006
+        if end_date is None:
+            end_date_dt = datetime.now()  # noqa: DTZ005
+
+        return (
+            "/v1/V1_SoapMobileApp/GetCallHistory_v1_Async",
+            {
+                "userIdPairWithSN": {
+                    "userId": self._user_id,
+                    "signalmanNo": signalman_no,
+                    "password": self._password,
+                },
+                "startDate": start_date_dt.isoformat(),
+                "endDate": end_date_dt.isoformat(),
+            },
         )
 
 
-class SensorClient:
-    """Synchronous client for interacting with the Kingspan Connect Sensor SOAP API."""
+class SensorClient(_BaseClient):
+    """Synchronous client for interacting with the Kingspan Connect Sensor API."""
 
     def __init__(self) -> None:
-        """Initialize the SensorClient with a SOAP client."""
-        self._soap_client = SoapClient(WSDL_URL, transport=HttpxTransport())
-        self._soap_client.set_ns_prefix(None, "http://mobileapp/")
+        """Init for Synchronous client."""
+        super().__init__()
+        self._client = httpx.Client()
+
+    def _request(self, endpoint: str, data: dict[str, str | dict]) -> dict:
+        try:
+            (url, headers, content) = self.build_request(endpoint, data)
+            response = self._client.post(url, headers=headers, content=content)
+            response.raise_for_status()
+        except (httpx.TimeoutException, httpx.HTTPError) as e:
+            self.httpx_exception(e)
+
+        return self.check_payload(response)
 
     def login(self, username: str, password: str) -> None:
         """Authenticate with the SOAP API and initialize tank list."""
         self._username = username
         self._password = password
+        response = self._request(
+            "/v3/V3_SoapMobileApp/Authenticate_v3_Async",
+            {"emailAddress": self._username, "password": self._password},
+        )
 
-        try:
-            response = self._soap_client.service.SoapMobileAPPAuthenicate_v3(
-                emailaddress=username,
-                password=password,
-            )
-        except ZeepError as e:
-            _LOGGER.debug("Zeep error during login: %s", e)
-            msg = f"Zeep error during login: {e}"
-            raise APIError(msg) from e
-
-        # No need to catch KeyErrors here as the WSDL guarantees the structure
-        # of the response, so we can assume the keys exist. If not, a ZeepError
-        # will have been raised earlier.
-        if response["APIResult"]["Code"] != 0:
-            raise APIError(response["APIResult"]["Description"])
-
-        self._user_id = response["APIUserID"]
-        self._tanks = []
-        for tank_info in response["Tanks"]["APITankInfo_V3"]:
-            self._tanks.append(Tank(self, tank_info["SignalmanNo"]))
+        self._user_id = response["apiUserID"]
+        for tank_info in response["tanks"]:
+            self._tanks.append(Tank(self, tank_info["signalmanNo"]))
 
     @property
     def tanks(self) -> list[Tank]:
@@ -86,24 +160,14 @@ class SensorClient:
 
     def _get_latest_level(self, signalman_no: str) -> dict:
         """Get the latest level reading for a given tank."""
-        try:
-            response = self._soap_client.service.SoapMobileAPPGetLatestLevel_v3(
-                userid=self._user_id,
-                password=self._password,
-                signalmanno=signalman_no,
-                culture="en",
-            )
-        except ZeepError as e:
-            _LOGGER.debug("Zeep error fetching tank data: %s", e)
-            msg = f"Zeep error fetching tank data: {e}"
-            raise APIError(msg) from e
-
-        # No need to catch KeyErrors here as the WSDL guarantees the structure
-        # of the response, so we can assume the keys exist. If not, a ZeepError
-        # will have been raised earlier.
-        if response["APIResult"]["Code"] != 0:
-            raise APIError(response["APIResult"]["Description"])
-        return response
+        return self._request(
+            "/v1/V1_SoapMobileApp/GetLatestLevel_v1_Async?culture=EN",
+            {
+                "userId": self._user_id,
+                "signalmanNo": signalman_no,
+                "password": self._password,
+            },
+        )
 
     def _get_history(
         self,
@@ -111,39 +175,13 @@ class SensorClient:
         start_date: datetime | None = None,
         end_date: datetime | None = None,
     ) -> list[dict]:
-        """Get the call history for a given tank within the specified date range."""
-        if start_date is None:
-            start_date_dt = datetime.fromtimestamp(0)  # noqa: DTZ006
-        if end_date is None:
-            end_date_dt = datetime.now()  # noqa: DTZ005
-
-        try:
-            response = self._soap_client.service.SoapMobileAPPGetCallHistory_v1(
-                userid=self._user_id,
-                password=self._password,
-                signalmanno=signalman_no,
-                startdate=start_date_dt.isoformat(),
-                enddate=end_date_dt.isoformat(),
-            )
-        except ZeepError as e:
-            _LOGGER.debug("Zeep error fetching tank history: %s", e)
-            msg = f"Zeep error fetching tank history: {e}"
-            raise APIError(msg) from e
-
-        # No need to catch KeyErrors here as the WSDL guarantees the structure
-        # of the response, so we can assume the keys exist. If not, a ZeepError
-        # will have been raised earlier.
-        if response["APIResult"]["Code"] != 0:
-            raise APIError(response["APIResult"]["Description"])
-        return response["Levels"]["APILevel"]
+        (endpoint, data) = self.get_history_request(signalman_no, start_date, end_date)
+        response = self._request(endpoint, data)
+        return response["levels"]
 
 
-class AsyncSensorClient:
-    """Asynchronous client for interacting with the Kingspan Connect Sensor SOAP API."""
-
-    def __init__(self) -> None:
-        """Initialize the AsyncSensorClient with an async SOAP client."""
-        self._soap_client = None
+class AsyncSensorClient(_BaseClient):
+    """Asynchronous client for interacting with the Kingspan Connect Sensor API."""
 
     async def __aenter__(self):  # noqa: ANN204
         """Enter the async context manager."""
@@ -152,59 +190,40 @@ class AsyncSensorClient:
     async def __aexit__(self, exc_t, exc_v, exc_tb):  # noqa: ANN204, ANN001
         """Exit the async context manager."""
 
-    async def _init_zeep(self) -> None:
-        """Initialize the Zeep async SOAP client."""
-        # Zeep.AsyncClient uses httpx which loads SSL cerficates at
-        # construction, so we need to delay creating the connection.
-        loop = get_running_loop()
+    async def _init_client(self) -> httpx.AsyncClient:
+        # httpx.AsyncClient loads certificates in a blocking manner which is flagged
+        # by Home Assistant, so we run in its own thread once on the first request.
+        def _build_client() -> httpx.AsyncClient:
+            return httpx.AsyncClient()
 
-        def _build_client() -> AsyncSoapClient:
-            # Build HTTP in s thread so that load_verify_locations() doesn't
-            # block the caller's thread
-            wsdl_client = httpx.Client()
-            httpx_client = httpx.AsyncClient()
-            transport = AsyncTransport(client=httpx_client, wsdl_client=wsdl_client)
-            client = AsyncSoapClient(WSDL_URL, transport=transport)
-            client.set_ns_prefix(None, "http://mobileapp/")
-            return client
+        loop = get_running_loop()
+        return await loop.run_in_executor(None, _build_client)
+
+    async def _request(self, endpoint: str, data: dict[str, str | list | dict]) -> dict:
+        if self._client is None:
+            self._client = await self._init_client()
 
         try:
-            self._soap_client = await loop.run_in_executor(None, _build_client)
-        except ZeepError as e:
-            _LOGGER.debug("Zeep error during initialization: %s", e)
-            msg = f"Zeep error during initialization: {e}"
-            raise APIError(msg) from e
+            (url, headers, content) = self.build_request(endpoint, data)
+            response = await self._client.post(url, headers=headers, content=content)
+            response.raise_for_status()
+        except (httpx.TimeoutException, httpx.HTTPError) as e:
+            self.httpx_exception(e)
 
-    async def login(self, username: str, password: str) -> dict:
-        """Authenticate with the SOAP API and initialize async tank list."""
-        if self._soap_client is None:
-            await self._init_zeep()
+        return self.check_payload(response)
 
+    async def login(self, username: str, password: str) -> None:
+        """Authenticate with the SOAP API and initialize tank list."""
         self._username = username
         self._password = password
+        response = await self._request(
+            "/v3/V3_SoapMobileApp/Authenticate_v3_Async",
+            {"emailAddress": self._username, "password": self._password},
+        )
 
-        _LOGGER.debug("Logging in with username: %s", username)
-        try:
-            response = await self._soap_client.service.SoapMobileAPPAuthenicate_v3(  # type: ignore[reportOptionalMemberAccess]
-                emailaddress=username,
-                password=password,
-            )
-        except (ZeepError, httpx.HTTPError) as e:
-            _LOGGER.debug("Zeep error during login: %s", e)
-            msg = f"Zeep error during login: {e}"
-            raise APIError(msg) from e
-
-        # No need to catch KeyErrors here as the WSDL guarantees the structure
-        # of the response, so we can assume the keys exist. If not, a ZeepError
-        # will have been raised earlier.
-        if response["APIResult"]["Code"] != 0:
-            raise APIError(response["APIResult"]["Description"])
-
-        self._user_id = response["APIUserID"]
-        self._tanks = []
-        for tank_info in response["Tanks"]["APITankInfo_V3"]:
-            self._tanks.append(AsyncTank(self, tank_info["SignalmanNo"]))
-        return response
+        self._user_id = response["apiUserID"]
+        for tank_info in response["tanks"]:
+            self._tanks.append(AsyncTank(self, tank_info["signalmanNo"]))
 
     @async_property
     async def tanks(self) -> list[AsyncTank]:
@@ -212,29 +231,15 @@ class AsyncSensorClient:
         return self._tanks
 
     async def _get_latest_level(self, signalman_no: str) -> dict:
-        """Get the latest level reading for a given tank asynchronously."""
-        if self._soap_client is None:
-            await self._init_zeep()
-        if self._soap_client is None:
-            msg = "SOAP client could not be initialized."
-            raise APIError(msg)
-        try:
-            response = await self._soap_client.service.SoapMobileAPPGetLatestLevel_v3(
-                userid=self._user_id,
-                password=self._password,
-                signalmanno=signalman_no,
-                culture="en",
-            )
-        except ZeepError as e:
-            msg = f"Zeep error fetching tank data: {e}"
-            raise APIError(msg) from e
-
-        # No need to catch KeyErrors here as the WSDL guarantees the structure
-        # of the response, so we can assume the keys exist. If not, a ZeepError
-        # will have been raised earlier.
-        if response["APIResult"]["Code"] != 0:
-            raise APIError(response["APIResult"]["Description"])
-        return response
+        """Get the latest level reading for a given tank."""
+        return await self._request(
+            "/v1/V1_SoapMobileApp/GetLatestLevel_v1_Async?culture=EN",
+            {
+                "userId": self._user_id,
+                "signalmanNo": signalman_no,
+                "password": self._password,
+            },
+        )
 
     async def _get_history(
         self,
@@ -242,33 +247,7 @@ class AsyncSensorClient:
         start_date: datetime | None = None,
         end_date: datetime | None = None,
     ) -> list[dict]:
-        """Get the call history for a given tank within the specified date range asynchronously."""
-        if self._soap_client is None:
-            await self._init_zeep()
-        if self._soap_client is None:
-            msg = "SOAP client could not be initialized."
-            raise APIError(msg)
-        start_date_dt = (
-            datetime.fromtimestamp(0)  # noqa: DTZ006
-            if start_date is None
-            else start_date
-        )
-        end_date_dt = datetime.now() if end_date is None else end_date  # noqa: DTZ005
-        try:
-            response = await self._soap_client.service.SoapMobileAPPGetCallHistory_v1(
-                userid=self._user_id,
-                password=self._password,
-                signalmanno=signalman_no,
-                startdate=start_date_dt.isoformat(),
-                enddate=end_date_dt.isoformat(),
-            )
-        except ZeepError as e:
-            msg = f"Zeep error fetching tank history: {e}"
-            raise APIError(msg) from e
-
-        # No need to catch KeyErrors here as the WSDL guarantees the structure
-        # of the response, so we can assume the keys exist. If not, a ZeepError
-        # will have been raised earlier.
-        if response["APIResult"]["Code"] != 0:
-            raise APIError(response["APIResult"]["Description"])
-        return response["Levels"]["APILevel"]
+        """Get the call history for a given tank within the specified date range."""
+        (endpoint, data) = self.get_history_request(signalman_no, start_date, end_date)
+        response = await self._request(endpoint, data)
+        return response["levels"]

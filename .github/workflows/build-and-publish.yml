@@ -1,21 +1,22 @@
-name: All tests
+name: Build and Publish
+
+permissions:
+  id-token: write
+  contents: read
 
 on:
-  push:
-    branches: [ "main", "v4.0"]
-  pull_request:
-    branches: [ "main", "v4.0" ]
   workflow_dispatch:
+  release:
+    types: [created]
 
 jobs:
-  build:
-
-    runs-on: ubuntu-latest
+  build-and-publish:
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.12", "3.13", "3.14"]
-
+        os: [ubuntu-latest]
+        python-version: ["3.13"]
     steps:
     - uses: actions/checkout@v4
 
@@ -29,3 +30,9 @@ jobs:
 
     - name: Run tests
       run: uv run pytest -n logical
+
+    - name: Build distribution
+      run: uv build
+
+    - name: Publish to PyPI
+      run: uv publish

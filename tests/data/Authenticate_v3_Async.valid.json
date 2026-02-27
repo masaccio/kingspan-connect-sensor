@@ -1,0 +1,46 @@
+{
+    "apiResult": {
+        "code": 0,
+        "description": ""
+    },
+    "apiUserID": "BOX20001000",
+    "emailAddress": "test@example.com",
+    "consumerServicesBrandID": 19,
+    "consumerServicesBrandCode": "SENSiT_RETAIL",
+    "tanks": [
+        {
+            "signalmanNo": 2000100,
+            "tankName": "TestTank",
+            "isSmartServDevice": false,
+            "displayMobileApp": true,
+            "displayLevelAlert": false,
+            "displayDropAlert": false,
+            "displayConsumption": false,
+            "displayGetQuote": false,
+            "displayAdvancedProperties": true,
+            "hideLevelAlert": false,
+            "hideDropAlert": false,
+            "hideLOWBATTERY": false,
+            "hideNOECHO": false,
+            "hideConsumption": false,
+            "levelPercentage": 80,
+            "levelLitres": 1600,
+            "unitOfMeasurement": "litres",
+            "measurement": 1600,
+            "smartServReading": {
+                "signalmanNo": -1,
+                "input1InAlarm": false,
+                "input1InUse": false,
+                "input2InAlarm": false,
+                "input2InUse": false,
+                "input3InAlarm": false,
+                "input3InUse": false,
+                "inputsMeaning": "",
+                "readingDate": "0001-01-01T00:00:00.0000000+00:00"
+            },
+            "productTypeID": 7
+        }
+    ],
+    "displayAccount": false,
+    "roleID": 500
+}

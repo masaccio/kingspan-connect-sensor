@@ -6,7 +6,9 @@
 
 API to get oil tank from [Kingspan SENSiT sensors](https://www.kingspan.com/gb/en-gb/products/tank-monitoring-systems/remote-tank-monitoring/sensit-smart-wifi-tank-level-monitoring-kit)
 
-To make use of the API, you will need the credentials you used to register with the App. You do not need other details such as the tank ID as these are already associated with your account.
+To make use of the API, you will need the credentials you used to register with the App. You do not need other details such as the tank ID as these are already associated with your account. 
+
+The new KNECT Pro service is supported only from version 4.0.
 
 ## Installation
 
@@ -15,8 +17,6 @@ python3 -m pip kingspan-connect-sensor
 ```
 
 ## Usage
-
-*NOTE* from version 2.0.0, the API changes to use attributes rather than methods for tank parameters.
 
 Reading documents:
 
@@ -33,8 +33,6 @@ The `tanks` method returns a `Tanks` object which can be queried for the status 
 
 ## Async Usage
 
-From version 2.0.0, an asyncio verison of the client is available:
-
 ``` python
 async with AsyncSensorClient() as client:
     await client.login("test@example.com", "s3cret")
@@ -47,7 +45,7 @@ async with AsyncSensorClient() as client:
 
 ## Tanks object
 
-As of version 3.0, `history` no longer returns a Pandas dataframe to simplify packge dependencies. Instead, an list of dicts is returned, where each list element is a sample from the web API, sorted by logging time. There should be one record per day. Each dict has the following keys:
+As of version 3.0, `history` no longer returns a Pandas dataframe to simplify package dependencies. Instead, an list of dicts is returned, where each list element is a sample from the web API, sorted by logging time. There should be one record per day. Each dict has the following keys:
 
 * `reading_date`: a datetime object indicating the time a measurement was made
 * `level_percent`: integer percentage full
@@ -63,7 +61,7 @@ df = pd.DataFrame(history)
 
 ## Scripts
 
-Reporting on the current status of the tank using `kingspan-status`:
+As of version 4.0, the notifier and export script have been removed as integrations like Home Assistant provide much better functionality. Reporting on the current status of the tank can still be performed `kingspan-status`:
 
 ``` bash
 % kingspan-status --username=test@example.com --password=s3cret
@@ -82,36 +80,3 @@ History:
  01-Feb-2021 00:29      78     1008 
  02-Feb-2021 00:59      76     986  
 ```
-
-`kingspan-notifier` can be used to check the status of a tabk and report via email when the tank is likely to run out of oil. As of version 3.0, [pandas](https://pypi.org/project/pandas/) is no longer installed as a dependency so you must `pip install pandas` manually to use `kingspan-notifier`.
-
-``` bash
-% kingspan-notifier --config kingspan.ini
-Current level 1148 litres
-No notification; 196 days oil remain
-```
-
-Command line options include:
-
-* `--config CONFIG`: a config file in ini-format
-* `--no-update`: don't update cache with new data (defaults to updating the DB cache)
-* `--window WINDOW`: the number of days history to consider (default: 14 days)
-* `--notice NOTICE`: the number of days before out-of-oil forecast to warn (default: 14)
-
-An example config file is:
-
-``` ini
-[sensit]
-username=test@example.com
-password=s3cret
-cache=/home/me/kingspan.db
-start-date=2021-01-31
-
-[smtp]
-server=smtp.isp.co.uk
-username=ispuser
-email=test@example.com
-password=smtps3cret
-```
-
-The cache is an SQLite database and will be intialised if not present.

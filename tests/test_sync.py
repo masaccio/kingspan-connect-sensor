@@ -1,10 +1,12 @@
 from datetime import datetime
 
+import httpx
+import logging
 import pandas as pd
 import pytest
-from zeep.exceptions import Error as ZeepError
 
-from connectsensor import APIError, SensorClient
+from conftest import get_mock_filename, get_mock_response
+from connectsensor import KingspanAPIError, KingspanInvalidCredentials, SensorClient
 from mock_data import PASSWORD, USERNAME
 
 
@@ -24,48 +26,60 @@ def test_status(mock_sync_httpx_post):  # noqa: ARG001
     assert tank_history.level_litres[2] == 1880
 
 
-def zeep_exception(*args, **kwargs):
-    raise ZeepError("Test error")
-
-
 def test_login_exception(mock_sync_httpx_post):
     client = SensorClient()
-    client._soap_client.service.SoapMobileAPPAuthenicate_v3 = (  # noqa: SLF001
-        zeep_exception
-    )
-
     with pytest.raises(
-        APIError,
-        match="Zeep error during login: Test error",
+        KingspanInvalidCredentials,
+        match="Authentication Failed, Invalid Login",
     ):
         client.login("invalid_user", "invalid_password")
 
 
-def test_tank_exception(mock_sync_httpx_post):
+def test_tank_exception(mocker):
+    def mocked_post(self, url, *args, **kwargs):
+        if "GetLatestLevel" in url:
+            raise KingspanAPIError("Test Exception for GetLatestLevel")
+        mock_filename = get_mock_filename(url, kwargs["content"])
+        return get_mock_response(url, open(mock_filename, "rb").read())
+
+    mocker.patch.object(httpx.Client, "post", new=mocked_post)
+
     client = SensorClient()
-    client._soap_client.service.SoapMobileAPPGetLatestLevel_v3 = (  # noqa: SLF001
-        zeep_exception
-    )
     client.login(USERNAME, PASSWORD)
     tanks = client.tanks
 
     with pytest.raises(
-        APIError,
-        match="Zeep error fetching tank data: Test error",
+        KingspanAPIError,
+        match="Test Exception for GetLatestLevel",
     ):
-        tanks[0].level
+        _ = tanks[0].level
 
 
-def test_history_exception(mock_sync_httpx_post):
+def test_history_exception(mocker):
+    def mocked_post(self, url, *args, **kwargs):
+        if "GetCallHistory" in url:
+            raise KingspanAPIError("Test Exception for GetCallHistory")
+        mock_filename = get_mock_filename(url, kwargs["content"])
+        return get_mock_response(url, open(mock_filename, "rb").read())
+
+    mocker.patch.object(httpx.Client, "post", new=mocked_post)
     client = SensorClient()
-    client._soap_client.service.SoapMobileAPPGetCallHistory_v1 = (  # noqa: SLF001
-        zeep_exception
-    )
     client.login(USERNAME, PASSWORD)
     tanks = client.tanks
 
     with pytest.raises(
-        APIError,
-        match="Zeep error fetching tank history: Test error",
+        KingspanAPIError,
+        match="Test Exception for GetCallHistory",
     ):
-        tanks[0].history
+        _ = tanks[0].history
+
+
+def test_debug_redaction(mock_sync_httpx_post, caplog):  # noqa: ARG001
+    caplog.set_level(logging.DEBUG, logger="connectsensor")
+    client = SensorClient()
+    client.login(USERNAME, PASSWORD)
+    log_text = caplog.text
+    assert len(log_text.splitlines()) == 2
+    assert USERNAME not in log_text
+    assert PASSWORD not in log_text
+    assert "*redacted*" in log_text
