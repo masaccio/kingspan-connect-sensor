@@ -1,7 +1,7 @@
+import logging
 from datetime import datetime
 
 import httpx
-import logging
 import pandas as pd
 import pytest
 
@@ -36,7 +36,7 @@ def test_login_exception(mock_sync_httpx_post):
 
 
 def test_tank_exception(mocker):
-    def mocked_post(self, url, *args, **kwargs):
+    def mocked_post(self, url, *args, **kwargs):  # noqa: ANN003, ARG001
         if "GetLatestLevel" in url:
             raise KingspanAPIError("Test Exception for GetLatestLevel")
         mock_filename = get_mock_filename(url, kwargs["content"])
