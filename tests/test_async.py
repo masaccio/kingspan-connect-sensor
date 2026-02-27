@@ -1,8 +1,6 @@
 from datetime import datetime
-from unittest.mock import patch
 
 import httpx
-import pandas as pd
 import pytest
 
 from conftest import get_mock_filename, get_mock_response
@@ -26,11 +24,9 @@ async def test_status(mock_async_httpx_post):
         assert await tanks[0].capacity == 2000
 
         tank_history = await tanks[0].history
-        tank_history = pd.DataFrame(tank_history)
-        reading_date = tank_history.reading_date[0].to_pydatetime()
-        assert reading_date == datetime(2021, 1, 25, 13, 59, 14)
-        assert tank_history.level_percent[1] == 95
-        assert tank_history.level_litres[2] == 1880
+        assert tank_history[0]["reading_date"] == datetime(2021, 1, 25, 13, 59, 14)
+        assert tank_history[1]["level_percent"] == 95
+        assert tank_history[2]["level_litres"] == 1880
 
 
 @pytest.mark.asyncio

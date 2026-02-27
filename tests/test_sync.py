@@ -2,7 +2,6 @@ import logging
 from datetime import datetime
 
 import httpx
-import pandas as pd
 import pytest
 
 from conftest import get_mock_filename, get_mock_response
@@ -19,11 +18,10 @@ def test_status(mock_sync_httpx_post):  # noqa: ARG001
     assert tanks[0].model == "TestModel"
     assert tanks[0].name == "TestTank"
     assert tanks[0].capacity == 2000
-    tank_history = pd.DataFrame(tanks[0].history)
-    reading_date = tank_history.reading_date[0].to_pydatetime()
-    assert reading_date == datetime(2021, 1, 25, 13, 59, 14)
-    assert tank_history.level_percent[1] == 95
-    assert tank_history.level_litres[2] == 1880
+    tank_history = tanks[0].history
+    assert tank_history[0]["reading_date"] == datetime(2021, 1, 25, 13, 59, 14)
+    assert tank_history[1]["level_percent"] == 95
+    assert tank_history[2]["level_litres"] == 1880
 
 
 def test_login_exception(mock_sync_httpx_post):
