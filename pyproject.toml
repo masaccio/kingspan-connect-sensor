@@ -98,4 +98,5 @@ max-branches = 20
 ban-relative-imports = "all"
 
 [tool.ruff.lint.per-file-ignores]
+"src/connectsensor/_kingspan_status.py" = ["T201"]
 "tests/**" = ["PLR2004", "S101", "D100", "D101", "D102", "D103", "ANN201", "ANN001", "PTH123"]
