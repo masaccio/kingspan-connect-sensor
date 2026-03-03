@@ -1,3 +1,5 @@
+"""Constants and types shared across the package."""
+
 from typing import TypeAlias
 
 # API is HTTP and sends the username and password in the clear

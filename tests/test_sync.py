@@ -5,7 +5,11 @@ import httpx
 import pytest
 
 from conftest import get_mock_filename, get_mock_response
-from connectsensor import KingspanAPIError, KingspanInvalidCredentials, SensorClient
+from connectsensor import (
+    KingspanAPIError,
+    KingspanInvalidCredentialsError,
+    SensorClient,
+)
 from mock_data import PASSWORD, USERNAME
 
 
@@ -27,7 +31,7 @@ def test_status(mock_sync_httpx_post):  # noqa: ARG001
 def test_login_exception(mock_sync_httpx_post):
     client = SensorClient()
     with pytest.raises(
-        KingspanInvalidCredentials,
+        KingspanInvalidCredentialsError,
         match="Authentication Failed, Invalid Login",
     ):
         client.login("invalid_user", "invalid_password")

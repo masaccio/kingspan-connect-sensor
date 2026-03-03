@@ -17,7 +17,7 @@ from connectsensor.const import (
 )
 from connectsensor.exceptions import (
     KingspanAPIError,
-    KingspanInvalidCredentials,
+    KingspanInvalidCredentialsError,
     KingspanTimeoutError,
 )
 from connectsensor.tank import AsyncTank, Tank
@@ -79,7 +79,7 @@ class _BaseClient:
             msg = payload["apiResult"]["description"]
             _LOGGER.debug("API error: %s, payload=%s", msg, self.redact(payload))
             if "Authentication Failed" in msg:
-                raise KingspanInvalidCredentials(msg)
+                raise KingspanInvalidCredentialsError(msg)
             raise KingspanAPIError(payload["apiResult"]["description"])
 
         _LOGGER.debug("API request succeeded, payload=%s", self.redact(payload))

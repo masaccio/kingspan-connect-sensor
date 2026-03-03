@@ -4,6 +4,8 @@ from datetime import datetime
 
 from async_property import async_property
 
+from connectsensor.const import APIResponse
+
 
 class _BaseTank:
     """Base class for Tanks."""
@@ -14,11 +16,11 @@ class _BaseTank:
         self._signalman_no = signalman_no
         self._level_data = None
 
-    def unpack_tank_data(self, response) -> None:
+    def unpack_tank_data(self, response: APIResponse) -> None:
         self._level_data = response["level"]
         self._tank_info = {x["name"]: x["value"] for x in response["tankInfo"]}
 
-    def transform_history_data(self, data: dict[str, list[dict]]) -> list[dict]:
+    def transform_history_data(self, data: APIResponse) -> APIResponse:
         """Transform raw tank history data into a list of dicts."""
         return [
             {
@@ -70,7 +72,7 @@ class Tank(_BaseTank):
         return datetime.fromisoformat(self._level_data["readingDate"])
 
     @property
-    def history(self) -> list[dict]:
+    def history(self) -> APIResponse:
         """Return the history of the tank readings as a list of dicts."""
         history_data = self._client._get_history(self._signalman_no)  # noqa: SLF001
         return self.transform_history_data(history_data)
@@ -122,9 +124,9 @@ class AsyncTank(_BaseTank):
         return datetime.fromisoformat(self._level_data["readingDate"])
 
     @async_property
-    async def history(self):
+    async def history(self) -> APIResponse:
         """Return the history of the tank readings as a list of dicts."""
-        history_data = await self._client._get_history(
+        history_data = await self._client._get_history(  # noqa: SLF001
             self._signalman_no,
         )
         return self.transform_history_data(history_data)
@@ -132,7 +134,7 @@ class AsyncTank(_BaseTank):
     async def _cache_tank_data(self) -> None:
         """Cache the latest tank data if not already cached."""
         if self._level_data is None:
-            response = await self._client._get_latest_level(
+            response = await self._client._get_latest_level(  # noqa: SLF001
                 self._signalman_no,
             )
             self.unpack_tank_data(response)

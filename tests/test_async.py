@@ -7,7 +7,7 @@ from conftest import get_mock_filename, get_mock_response
 from connectsensor import (
     AsyncSensorClient,
     KingspanAPIError,
-    KingspanInvalidCredentials,
+    KingspanInvalidCredentialsError,
 )
 from mock_data import PASSWORD, USERNAME
 
@@ -33,7 +33,7 @@ async def test_status(mock_async_httpx_post):
 async def test_login_exception(mock_async_httpx_post):
     async with AsyncSensorClient() as client:
         with pytest.raises(
-            KingspanInvalidCredentials,
+            KingspanInvalidCredentialsError,
             match="Authentication Failed, Invalid Login",
         ):
             await client.login("invalid_user", "invalid_password")

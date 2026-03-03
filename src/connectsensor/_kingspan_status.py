@@ -2,7 +2,11 @@ import argparse
 import logging
 import sys
 
-from connectsensor import KingspanAPIError, KingspanInvalidCredentials, SensorClient
+from connectsensor import (
+    KingspanAPIError,
+    KingspanInvalidCredentialsError,
+    SensorClient,
+)
 
 
 def main() -> None:
@@ -23,7 +27,7 @@ def main() -> None:
     client = SensorClient()
     try:
         client.login(args.username, args.password)
-    except KingspanInvalidCredentials:
+    except KingspanInvalidCredentialsError:
         print("Authentication Failed: invalid username or password", file=sys.stderr)
         sys.exit(1)
     except KingspanAPIError as e:
