@@ -8,7 +8,13 @@ from datetime import datetime
 import httpx
 from async_property import async_property
 
-from connectsensor.const import API_BASE_URL, HTTP_UNAUTHORIZED, TOKEN
+from connectsensor.const import (
+    API_BASE_URL,
+    HTTP_UNAUTHORIZED,
+    TOKEN,
+    APIRequest,
+    APIResponse,
+)
 from connectsensor.exceptions import (
     KingspanAPIError,
     KingspanInvalidCredentials,
@@ -31,7 +37,7 @@ class _BaseClient:
         self._user_id = None
         self._tanks = []
 
-    def redact(self, obj: dict[str, str | list | dict]) -> dict[str, str | list | dict]:
+    def redact(self, obj: APIResponse) -> APIResponse:
         """Redact values email and password from request/response."""
         if isinstance(obj, dict):
             new_dict = {}
@@ -62,7 +68,7 @@ class _BaseClient:
         )
         return (url, headers, json.dumps(data))
 
-    def check_payload(self, response: httpx.Response) -> dict[str, str | list | dict]:
+    def check_payload(self, response: httpx.Response) -> APIResponse:
         payload = json.loads(response.content)
         if "apiResult" not in payload or "code" not in payload["apiResult"]:
             msg = "Malformed response from API: cannot extract response/code"
@@ -94,7 +100,7 @@ class _BaseClient:
         signalman_no: str,
         start_date: datetime | None = None,
         end_date: datetime | None = None,
-    ) -> tuple[str, dict[str, str | dict]]:
+    ) -> tuple[str, APIRequest]:
         """Build a call history request for all clients."""
         if start_date is None:
             start_date_dt = datetime.fromtimestamp(0)  # noqa: DTZ006
@@ -123,7 +129,7 @@ class SensorClient(_BaseClient):
         super().__init__()
         self._client = httpx.Client()
 
-    def _request(self, endpoint: str, data: dict[str, str | dict]) -> dict:
+    def _request(self, endpoint: str, data: APIRequest) -> APIResponse:
         try:
             (url, headers, content) = self.build_request(endpoint, data)
             response = self._client.post(url, headers=headers, content=content)
@@ -179,11 +185,11 @@ class SensorClient(_BaseClient):
 class AsyncSensorClient(_BaseClient):
     """Asynchronous client for interacting with the Kingspan Connect Sensor API."""
 
-    async def __aenter__(self):  # noqa: ANN204
+    async def __aenter__(self) -> "AsyncSensorClient":
         """Enter the async context manager."""
         return self
 
-    async def __aexit__(self, exc_t, exc_v, exc_tb):  # noqa: ANN204, ANN001
+    async def __aexit__(self, exc_t, exc_v, exc_tb) -> None:  # noqa: ANN001
         """Exit the async context manager."""
 
     async def _init_client(self) -> httpx.AsyncClient:
@@ -195,7 +201,7 @@ class AsyncSensorClient(_BaseClient):
         loop = get_running_loop()
         return await loop.run_in_executor(None, _build_client)
 
-    async def _request(self, endpoint: str, data: dict[str, str | list | dict]) -> dict:
+    async def _request(self, endpoint: str, data: APIRequest) -> dict:
         if self._client is None:
             self._client = await self._init_client()
 
@@ -226,7 +232,7 @@ class AsyncSensorClient(_BaseClient):
         """Return the list of AsyncTank objects for the authenticated user."""
         return self._tanks
 
-    async def _get_latest_level(self, signalman_no: str) -> dict:
+    async def _get_latest_level(self, signalman_no: str) -> APIResponse:
         """Get the latest level reading for a given tank."""
         return await self._request(
             "/v1/V1_SoapMobileApp/GetLatestLevel_v1_Async?culture=EN",
