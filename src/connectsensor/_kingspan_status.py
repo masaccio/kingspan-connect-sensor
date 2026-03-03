@@ -1,4 +1,5 @@
 import argparse
+import logging
 import sys
 
 from connectsensor import KingspanAPIError, KingspanInvalidCredentials, SensorClient
@@ -7,15 +8,17 @@ from connectsensor import KingspanAPIError, KingspanInvalidCredentials, SensorCl
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--username", required=True, help="Kingspan account email address",
+        "--username",
+        required=True,
+        help="Kingspan account email address",
     )
     parser.add_argument("--password", required=True, help="Kingspan account password")
     parser.add_argument("--debug", action="store_true")
 
     args = parser.parse_args()
 
-    if args.debug:  # pragma: no branch
-        import connectsensor.debug  # noqa: F401, PLC0415
+    if args.debug:
+        logging.basicConfig(level=logging.DEBUG)
 
     client = SensorClient()
     try:
@@ -24,7 +27,7 @@ def main() -> None:
         print("Authentication Failed: invalid username or password", file=sys.stderr)
         sys.exit(1)
     except KingspanAPIError as e:
-        print(f"Unknown API error: {e}", file=sys.stderr)
+        print(f"Kingspan API error: {e}", file=sys.stderr)
         sys.exit(1)
 
     for tank in client.tanks:
