@@ -8,6 +8,7 @@ envlist
 httpx
 inprocess
 Kingspan
+KNECT
 minversion
 mypy
 openpyxl
