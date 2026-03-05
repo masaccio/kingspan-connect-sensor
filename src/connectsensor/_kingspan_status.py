@@ -6,7 +6,27 @@ from connectsensor import (
     KingspanAPIError,
     KingspanInvalidCredentialsError,
     SensorClient,
+    APIVersion,
 )
+
+
+class PasswordFilter(logging.Filter):
+    def filter(self, record):
+        if isinstance(record.msg, str):
+            record.msg = record.msg.replace("password", "secret")
+        return True
+
+
+def enable_debug_logging() -> None:
+    handler = logging.StreamHandler(sys.stderr)
+    handler.setLevel(logging.DEBUG)
+    formatter = logging.Formatter("%(levelname)s:%(name)s:%(message)s")
+    handler.setFormatter(formatter)
+    handler.addFilter(PasswordFilter())
+    logger = logging.getLogger("connectsensor")
+    logger.setLevel(logging.DEBUG)
+    logger.addHandler(handler)
+    logger.propagate = False
 
 
 def main() -> None:
@@ -17,14 +37,20 @@ def main() -> None:
         help="Kingspan account email address",
     )
     parser.add_argument("--password", required=True, help="Kingspan account password")
+    parser.add_argument(
+        "--api-version",
+        choices=APIVersion.__members__.keys(),
+        default="KNECT_V1",
+        help="Which API to use from Kingspan (default: KNECT_V1)",
+    )
     parser.add_argument("--debug", action="store_true")
 
     args = parser.parse_args()
 
     if args.debug:
-        logging.basicConfig(level=logging.DEBUG)
+        enable_debug_logging()
 
-    client = SensorClient()
+    client = SensorClient(APIVersion[args.api_version])
     try:
         client.login(args.username, args.password)
     except KingspanInvalidCredentialsError:
