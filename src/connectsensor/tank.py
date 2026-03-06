@@ -106,7 +106,11 @@ class AsyncTank(_BaseTank):
     async def serial_number(self) -> str:
         """Return the serial number of the tank."""
         await self._cache_tank_data()
-        return self._tank_info["Signalman No"]
+        return (
+            self._tank_info["Signalman No"]
+            if "Signalman No" in self._tank_info
+            else self._tank_info["Serial No"]
+        )
 
     @async_property
     async def model(self) -> str:

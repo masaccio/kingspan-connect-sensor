@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 
 import httpx
@@ -79,3 +80,14 @@ async def test_history_exception(mocker):
             match="Test Exception for GetCallHistory",
         ):
             _ = await tanks[0].history
+
+
+async def test_debug_redaction(mock_sync_httpx_post, caplog):  # noqa: ARG001
+    caplog.set_level(logging.DEBUG, logger="connectsensor")
+    async with AsyncSensorClient() as client:
+        await client.login(USERNAME, PASSWORD)
+        log_text = caplog.text
+        assert len(log_text.splitlines()) == 2
+        assert USERNAME not in log_text
+        assert PASSWORD not in log_text
+        assert "*redacted*" in log_text

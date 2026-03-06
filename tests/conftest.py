@@ -90,7 +90,7 @@ def get_mock_filename(url: str, content: str | bytes, generated=False) -> str:
     if method == "SoapMobileAPPGetCallHistory_v1" and generated:
         return os.path.join("tests/data/SoapMobileAPPGetCallHistory_v1.template.xml")
 
-    if "SOAP" in method:
+    if method.startswith("Soap"):
         return os.path.join(f"tests/data/{method}.xml")
 
     if "Authenticate_v3" in method:
