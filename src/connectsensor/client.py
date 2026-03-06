@@ -3,14 +3,13 @@
 import json
 import logging
 from asyncio import get_running_loop
+from collections.abc import Callable
 from datetime import datetime
-from typing import Callable
 
 import httpx
 from async_property import async_property
 from zeep import AsyncClient as AsyncSoapClient
 from zeep import Client as SoapClient
-from zeep.exceptions import Error as ZeepError
 from zeep.helpers import serialize_object
 from zeep.transports import AsyncTransport, Transport
 
@@ -21,7 +20,6 @@ from connectsensor.const import (
     SOAP_NS_PREFIX,
     TOKEN,
     WSDL_URL,
-    APIRequest,
     APIResponse,
     APIVersion,
 )
@@ -93,28 +91,33 @@ class _BaseClient:
 
         return obj
 
-    def check_payload(self, response: httpx.Response) -> APIResponse:
-        payload = json.loads(response.content)
-        if "apiResult" not in payload or "code" not in payload["apiResult"]:
+    def check_response(self, response: APIResponse) -> APIResponse:
+        """Check the API response is well-formed or raise an exception."""
+        if "apiResult" not in response or "code" not in response["apiResult"]:
             msg = "Malformed response from API: cannot extract response/code"
             _LOGGER.debug(
-                "API error: %s, payload=%s", msg, self.redact_response(payload)
+                "API error: %s, response=%s",
+                msg,
+                self.redact_response(response),
             )
             raise KingspanAPIError(msg)
 
-        if payload["apiResult"]["code"] != 0:
-            msg = payload["apiResult"]["description"]
+        if response["apiResult"]["code"] != 0:
+            msg = response["apiResult"]["description"]
             _LOGGER.debug(
-                "API error: %s, payload=%s", msg, self.redact_response(payload)
+                "API error: %s, response=%s",
+                msg,
+                self.redact_response(response),
             )
             if "Authentication Failed" in msg:
                 raise KingspanInvalidCredentialsError(msg)
-            raise KingspanAPIError(payload["apiResult"]["description"])
+            raise KingspanAPIError(response["apiResult"]["description"])
 
         _LOGGER.debug(
-            "API request succeeded, payload=%s", self.redact_response(payload)
+            "API request succeeded, response=%s",
+            self.redact_response(response),
         )
-        return payload
+        return response
 
     def transform_response(self, response: object) -> APIResponse:
         """Convert a response object to python and force snakeCase."""
@@ -142,7 +145,9 @@ class _BaseClient:
         if isinstance(response, httpx.Response):
             return json.loads(response.content)
 
-        return transform(serialize_object(response))
+        transformed_response = transform(serialize_object(response))
+        self.check_response(transformed_response)
+        return transformed_response
 
     def handle_exception(self, exc: Exception) -> None:
         if isinstance(exc, httpx.TimeoutException):
@@ -155,20 +160,22 @@ class _BaseClient:
         raise KingspanAPIError(msg) from exc
 
     def login_request(
-        self, username: str, password: str
+        self,
+        username: str,
+        password: str,
     ) -> tuple[Callable, list, dict]:
         self._username = username
         self._password = password
         if self._version == APIVersion.CONNECT_V1:
             data = {"emailaddress": self._username, "password": self._password}
             return (self._client.service.SoapMobileAPPAuthenicate_v3, [], data)
-        else:
-            data = {"emailAddress": self._username, "password": self._password}
-            return (
-                self._client.post,
-                [f"{API_BASE_URL}/v3/V3_SoapMobileApp/Authenticate_v3_Async"],
-                {"headers": POST_HEADERS, "content": json.dumps(data)},
-            )
+
+        data = {"emailAddress": self._username, "password": self._password}
+        return (
+            self._client.post,
+            [f"{API_BASE_URL}/v3/V3_SoapMobileApp/Authenticate_v3_Async"],
+            {"headers": POST_HEADERS, "content": json.dumps(data)},
+        )
 
     def login_response(self, response: httpx.Response | object) -> None:
         if (
@@ -178,14 +185,14 @@ class _BaseClient:
             # JSON API for an invalid JWT
             msg = "Invalid token authorization"
             raise KingspanAPIError(msg)
-
         data = self.transform_response(response)
         self._user_id = data["apiUserID"]
         for tank_info in data["tanks"]:
             self._tanks.append(Tank(self, tank_info["signalmanNo"]))
 
     def get_latest_level_request(
-        self, signalman_no: str
+        self,
+        signalman_no: str,
     ) -> tuple[Callable, list, dict]:
         data = {
             "userid": self._user_id,
@@ -196,14 +203,12 @@ class _BaseClient:
 
         if self._version == APIVersion.CONNECT_V1:
             return (self._client.service.SoapMobileAPPGetLatestLevel_v3, [], data)
-        else:
-            return (
-                self._client.post,
-                [
-                    f"{API_BASE_URL}/v1/V1_SoapMobileApp/GetLatestLevel_v1_Async?culture=EN"
-                ],
-                {"headers": POST_HEADERS, "content": json.dumps(data)},
-            )
+
+        return (
+            self._client.post,
+            [f"{API_BASE_URL}/v1/V1_SoapMobileApp/GetLatestLevel_v1_Async?culture=EN"],
+            {"headers": POST_HEADERS, "content": json.dumps(data)},
+        )
 
     def get_history_request(
         self,
@@ -226,21 +231,21 @@ class _BaseClient:
                 "enddate": end_date_dt.isoformat(),
             }
             return (self._client.service.SoapMobileAPPGetCallHistory_v1, [], data)
-        else:
-            data = {
-                "userIdPairWithSN": {
-                    "userId": self._user_id,
-                    "signalmanNo": signalman_no,
-                    "password": self._password,
-                },
-                "startDate": start_date_dt.isoformat(),
-                "endDate": end_date_dt.isoformat(),
-            }
-            return (
-                self._client.post,
-                [f"{API_BASE_URL}/v1/V1_SoapMobileApp/GetCallHistory_v1_Async"],
-                {"headers": POST_HEADERS, "content": json.dumps(data)},
-            )
+
+        data = {
+            "userIdPairWithSN": {
+                "userId": self._user_id,
+                "signalmanNo": signalman_no,
+                "password": self._password,
+            },
+            "startDate": start_date_dt.isoformat(),
+            "endDate": end_date_dt.isoformat(),
+        }
+        return (
+            self._client.post,
+            [f"{API_BASE_URL}/v1/V1_SoapMobileApp/GetCallHistory_v1_Async"],
+            {"headers": POST_HEADERS, "content": json.dumps(data)},
+        )
 
 
 class SensorClient(_BaseClient):
@@ -255,7 +260,7 @@ class SensorClient(_BaseClient):
         else:
             self._client = httpx.Client()
 
-    def _request(self, func: Callable, *args: str | datetime) -> APIResponse:
+    def _request(self, func: Callable, *args: str | datetime | None) -> APIResponse:
         (func, req_args, req_kwargs) = func(*args)
         try:
             response = func(*req_args, **req_kwargs)
@@ -286,7 +291,10 @@ class SensorClient(_BaseClient):
     ) -> list[dict]:
         """Tanks helper: get the history data for a given tank."""
         response = self._request(
-            self.get_history_request, signalman_no, start_date, end_date
+            self.get_history_request,
+            signalman_no,
+            start_date,
+            end_date,
         )
         new_response = self.transform_response(response)
         return new_response["levels"]
@@ -297,6 +305,7 @@ class AsyncSensorClient(_BaseClient):
 
     async def __aenter__(self) -> "AsyncSensorClient":
         """Enter the async context manager."""
+        await self._init_client()
         return self
 
     async def __aexit__(self, exc_t, exc_v, exc_tb) -> None:  # noqa: ANN001
@@ -319,10 +328,12 @@ class AsyncSensorClient(_BaseClient):
         loop = get_running_loop()
         try:
             self._client = await loop.run_in_executor(None, _build_client)
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             self.handle_exception(e)
 
-    async def _request(self, func: Callable, *args: str | datetime) -> APIResponse:
+    async def _request(
+        self, func: Callable, *args: str | datetime | None
+    ) -> APIResponse:
         (req_func, req_args, req_kwargs) = func(*args)
         try:
             response = await req_func(*req_args, **req_kwargs)
@@ -353,7 +364,10 @@ class AsyncSensorClient(_BaseClient):
     ) -> list[dict]:
         """Get the call history for a given tank within the specified date range."""
         response = await self._request(
-            self.get_history_request, signalman_no, start_date, end_date
+            self.get_history_request,
+            signalman_no,
+            start_date,
+            end_date,
         )
         new_response = self.transform_response(response)
         return new_response["levels"]
