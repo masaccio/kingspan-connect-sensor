@@ -72,7 +72,9 @@ def generate_history_data(data: bytes) -> bytes:
 def get_mock_filename(url: str, content: str | bytes, generated=False) -> str:
     content = content.decode() if isinstance(content, bytes) else cast("str", content)
 
-    if m := re.search(r"<(soap:Body|soap-env:Body)>\s*<(\w+)", content):
+    if content is not None and (
+        m := re.search(r"<(soap:Body|soap-env:Body)>\s*<(\w+)", content)
+    ):
         method = m.group(2)
     elif m := re.search(r".*/(\w+)", url):
         method = m.group(1)
@@ -117,7 +119,12 @@ def mock_sync_httpx_post(request):
     """Mock httpx.Client.post method to return content from a file."""
 
     def mock_post(url, *args, **kwargs):
-        content = kwargs["content"] if "content" in kwargs else kwargs["data"]
+        if "content" in kwargs:
+            content = kwargs["content"]
+        elif "data" in kwargs:
+            content = kwargs["data"]
+        else:
+            content = None
         mock_filename = get_mock_filename(url, content)
 
         try:
