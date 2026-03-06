@@ -20,20 +20,18 @@ class _BaseTank:
         self._level_data = response["level"]
         self._tank_info = {x["name"]: x["value"] for x in response["tankInfo"]}
 
-    def property_lookup(self, obj: dict, key: str) -> str:
-        """Lookup a key with either an upper or lower case first letter."""
-        key_lower = key[0].lower() + key[1:]
-        return obj[key_lower] if key_lower in obj else obj[key]
+    def format_reading_date(self, date: datetime | str) -> datetime:
+        if isinstance(date, datetime):
+            return date
+        return datetime.fromisoformat(date)
 
     def transform_history_data(self, data: APIResponse) -> APIResponse:
         """Transform raw tank history data into a list of dicts."""
         return [
             {
-                "reading_date": datetime.fromisoformat(
-                    self.property_lookup(x, "ReadingDate")
-                ),
-                "level_percent": self.property_lookup(x, "LevelPercentage"),
-                "level_litres": self.property_lookup(x, "LevelLitres"),
+                "reading_date": self.format_reading_date(x["readingDate"]),
+                "level_percent": x["levelPercentage"],
+                "level_litres": x["levelLitres"],
             }
             for x in data
         ]
@@ -46,7 +44,7 @@ class Tank(_BaseTank):
     def level(self) -> int:
         """Return the oil level in the tank in litres."""
         self._cache_tank_data()
-        return int(self.property_lookup(self._level_data, "LevelLitres"))
+        return int(self._level_data["levelLitres"])
 
     @property
     def serial_number(self) -> str:
@@ -80,9 +78,7 @@ class Tank(_BaseTank):
     def last_read(self) -> datetime:
         """Return the last read date of the tank as a datetime object."""
         self._cache_tank_data()
-        return datetime.fromisoformat(
-            self.property_lookup(self._level_data, "ReadingDate")
-        )
+        return self.format_reading_date(self._level_data["readingDate"])
 
     @property
     def history(self) -> APIResponse:
@@ -104,7 +100,7 @@ class AsyncTank(_BaseTank):
     async def level(self) -> int:
         """Return the oil level in the tank in litres."""
         await self._cache_tank_data()
-        return int(self.property_lookup(self._level_data, "LevelLitres"))
+        return int(self._level_data["levelLitres"])
 
     @async_property
     async def serial_number(self) -> str:
@@ -134,9 +130,7 @@ class AsyncTank(_BaseTank):
     async def last_read(self) -> datetime:
         """Return the last read date of the tank as a datetime object."""
         await self._cache_tank_data()
-        return datetime.fromisoformat(
-            self.property_lookup(self._level_data, "ReadingDate")
-        )
+        return datetime.fromisoformat(self._level_data["readingDate"])
 
     @async_property
     async def history(self) -> APIResponse:
