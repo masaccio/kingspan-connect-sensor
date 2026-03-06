@@ -4,6 +4,7 @@ asyncio
 caplog
 connectsensor
 Connell
+emailaddress
 envlist
 httpx
 inprocess
@@ -19,5 +20,7 @@ pythonpath
 sensit
 sensorapi
 setuptools
+signalmanno
+SoapMobileAPPAuthenicate_v3
 testpaths
 xdist

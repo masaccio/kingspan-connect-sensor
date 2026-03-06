@@ -9,23 +9,27 @@ from connectsensor import (
     KingspanAPIError,
     KingspanInvalidCredentialsError,
     SensorClient,
+    APIVersion,
 )
 from mock_data import PASSWORD, USERNAME
 
 
 def test_status(mock_sync_httpx_post):  # noqa: ARG001
-    client = SensorClient()
-    client.login(USERNAME, PASSWORD)
-    tanks = client.tanks
-    assert tanks[0].level == 1000
-    assert tanks[0].serial_number == "20001000"
-    assert tanks[0].model == "TestModel"
-    assert tanks[0].name == "TestTank"
-    assert tanks[0].capacity == 2000
-    tank_history = tanks[0].history
-    assert tank_history[0]["reading_date"] == datetime(2021, 1, 25, 13, 59, 14)
-    assert tank_history[1]["level_percent"] == 95
-    assert tank_history[2]["level_litres"] == 1880
+    def check_client(client: SensorClient) -> None:
+        client.login(USERNAME, PASSWORD)
+        tanks = client.tanks
+        assert tanks[0].level == 1000
+        assert tanks[0].serial_number == "20001000"
+        assert tanks[0].model == "TestModel"
+        assert tanks[0].name == "TestTank"
+        assert tanks[0].capacity == 2000
+        tank_history = tanks[0].history
+        assert tank_history[0]["reading_date"] == datetime(2021, 1, 25, 13, 59, 14)
+        assert tank_history[1]["level_percent"] == 95
+        assert tank_history[2]["level_litres"] == 1880
+
+    check_client(SensorClient(APIVersion.CONNECT_V1))
+    check_client(SensorClient(APIVersion.KNECT_V1))
 
 
 def test_login_exception(mock_sync_httpx_post):

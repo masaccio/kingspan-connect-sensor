@@ -1,7 +1,7 @@
 """Constants and types shared across the package."""
 
-from typing import TypeAlias
 from enum import IntEnum, auto
+from typing import TypeAlias
 
 # JSON API is HTTP and sends the username and password in the clear
 API_SERVER = "sensorapi.connectsensor.com"
@@ -12,6 +12,7 @@ API_BASE_URL = f"http://{API_SERVER}:{API_PORT}"
 DEFAULT_SERVER = "www.connectsensor.com"
 WSDL_PATH = "soap/MobileApp.asmx?WSDL"
 WSDL_URL = f"https://{DEFAULT_SERVER}/{WSDL_PATH}"
+SOAP_NS_PREFIX = "http://mobileapp/"
 
 
 # API versions don't match what Kingspan call them as these are not obviously
