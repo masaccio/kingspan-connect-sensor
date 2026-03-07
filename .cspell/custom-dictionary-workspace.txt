@@ -4,6 +4,7 @@ asyncio
 caplog
 connectsensor
 Connell
+dataframe
 emailaddress
 enddate
 envlist
@@ -19,6 +20,7 @@ pydatetime
 pylint
 pytest
 pythonpath
+s3cret
 sensit
 sensorapi
 setuptools
@@ -27,3 +29,4 @@ SoapMobileAPPAuthenicate_v3
 startdate
 testpaths
 xdist
+zeep
