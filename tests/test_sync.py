@@ -14,7 +14,7 @@ from connectsensor import (
 from mock_data import PASSWORD, USERNAME
 
 
-def test_status(mock_sync_httpx_post):  # noqa: ARG001
+def test_status(mock_sync_httpx_post, mock_wsdl):  # noqa: ARG001
     def check_client(api_version: APIVersion) -> None:
         client = SensorClient(api_version)
         client.login(USERNAME, PASSWORD)
@@ -33,7 +33,7 @@ def test_status(mock_sync_httpx_post):  # noqa: ARG001
     check_client(APIVersion.KNECT_V1)
 
 
-def test_login_exception(mock_sync_httpx_post):
+def test_login_exception(mock_sync_httpx_post):  # noqa: ARG001
     client = SensorClient()
     with pytest.raises(
         KingspanInvalidCredentialsError,

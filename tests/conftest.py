@@ -115,6 +115,16 @@ def get_mock_response(url: str, mock_data: bytes, generated=False) -> httpx.Resp
 
 
 @pytest.fixture
+def mock_wsdl():
+    wsdl_filename = "tests/data/connectsensor.wsdl"
+    with open(wsdl_filename, "rb") as f:
+        mock_response = f.read()
+
+    with patch("zeep.transports.Transport.load", return_value=mock_response):
+        yield
+
+
+@pytest.fixture
 def mock_sync_httpx_post(request):
     """Mock httpx.Client.post method to return content from a file."""
 

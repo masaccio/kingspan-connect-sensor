@@ -15,7 +15,7 @@ from mock_data import PASSWORD, USERNAME
 
 
 @pytest.mark.asyncio
-async def test_status(mock_async_httpx_post):
+async def test_status(mock_async_httpx_post, mock_wsdl):  # noqa: ARG001
     async def check_client(api_version: APIVersion) -> None:
         async with AsyncSensorClient(api_version) as client:
             await client.login(USERNAME, PASSWORD)
