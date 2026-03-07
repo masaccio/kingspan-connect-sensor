@@ -1,14 +1,12 @@
 # kingspan-connect-sensor
 
 [![build:](https://github.com/masaccio/kingspan-connect-sensor/actions/workflows/run-all-tests.yml/badge.svg)](https://github.com/masaccio/kingspan-connect-sensor/actions/workflows/run-all-tests.yml)
-[![build:](https://github.com/masaccio/kingspan-connect-sensor/actions/workflows/codeql.yml/badge.svg)](https://github.com/masaccio/kingspan-connect-sensor/actions/workflows/codeql.yml)
-<!-- [![codecov](https://codecov.io/gh/masaccio/kingspan-connect-sensor/branch/main/graph/badge.svg?token=EKIUFGT05E)](https://codecov.io/gh/masaccio/kingspan-connect-sensor) -->
+[![codecov](https://codecov.io/gh/masaccio/kingspan-connect-sensor/branch/main/graph/badge.svg?token=EKIUFGT05E)](https://codecov.io/gh/masaccio/kingspan-connect-sensor)
+[![PyPI Version](https://badge.fury.io/py/kingspan-connect-sensor.svg)](https://badge.fury.io/py/kingspan-connect-sensor)
 
-API to get oil tank from [Kingspan SENSiT sensors](https://www.kingspan.com/gb/en-gb/products/tank-monitoring-systems/remote-tank-monitoring/sensit-smart-wifi-tank-level-monitoring-kit)
+API to get oil tank from [Kingspan SENSiT sensors](https://www.kingspan.com/gb/en-gb/products/tank-monitoring-systems/remote-tank-monitoring/sensit-smart-wifi-tank-level-monitoring-kit).
 
-To make use of the API, you will need the credentials you used to register with the App. You do not need other details such as the tank ID as these are already associated with your account. 
-
-The new KNECT Pro service is supported only from version 4.0.
+To make use of the API, you will need the credentials you used to register with the App. You do not need other details such as the tank ID as these are already associated with your account. The new KNECT Pro service is supported only from version 4.0.
 
 ## Installation
 
@@ -38,7 +36,7 @@ async with AsyncSensorClient() as client:
     await client.login("test@example.com", "s3cret")
     tanks = await client.tanks
     tank_level = await tanks[0].level
-    tank_capcity = await tanks[0].capacity
+    tank_capacity = await tanks[0].capacity
     tank_percent = 100 * (tank_level / tank_percent)
     print(f"Tank is {tank_percent:.1f}% full")
 ```
@@ -58,6 +56,12 @@ tanks = await client.tanks
 history = await tanks[0].history
 df = pd.DataFrame(history)
 ```
+
+## Supported APIs
+
+The package supports both the new JSON API used by the KNECT Pro app introduced in February 2026, and the legacy SOAP API. You can select the appropriate API using the `api_version` parameter passed to the `SensorClient` and `AsyncSensorClient` constructors. Valid version options are `APIVersion.CONNECT_V1` and `APIVersion.KNECT_V1`.
+
+**NOTE:** as of March 2026, the `APIVersion.KNECT_V1` API uses HTTP without any password encryption as the TLS endpoint is unavailable.
 
 ## Scripts
 
