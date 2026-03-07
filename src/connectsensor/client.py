@@ -91,38 +91,12 @@ class _BaseClient:
 
         return obj
 
-    def check_response(self, response: APIResponse) -> APIResponse:
+    def check_response(self, response: object) -> APIResponse:  # noqa: C901
         """Check the API response is well-formed or raise an exception."""
-        if "apiResult" not in response or "code" not in response["apiResult"]:
-            msg = "Malformed response from API: cannot extract response/code"
-            _LOGGER.debug(
-                "API error: %s, response=%s",
-                msg,
-                self.redact_response(response),
-            )
-            raise KingspanAPIError(msg)
 
-        if response["apiResult"]["code"] != 0:
-            msg = response["apiResult"]["description"]
-            _LOGGER.debug(
-                "API error: %s, response=%s",
-                msg,
-                self.redact_response(response),
-            )
-            if "Authentication Failed" in msg:
-                raise KingspanInvalidCredentialsError(msg)
-            raise KingspanAPIError(response["apiResult"]["description"])
+        def transform_soap_response(obj: APIResponse) -> APIResponse:
+            """Convert a SOAP response to the same structure as the JSON API."""
 
-        _LOGGER.debug(
-            "API request succeeded, response=%s",
-            self.redact_response(response),
-        )
-        return response
-
-    def transform_response(self, response: object) -> APIResponse:
-        """Convert a response object to python and force snakeCase."""
-
-        def transform(obj: APIResponse) -> APIResponse:
             def lower_first(s: str) -> str:
                 if not s:
                     return s
@@ -134,20 +108,44 @@ class _BaseClient:
                 result: dict = {}
                 for k, v in obj.items():
                     if k in ("APILevel", "APITankInfo_V3", "APITankInfoItem"):
-                        return transform(v)
-                    result[lower_first(k)] = transform(v)
+                        return transform_soap_response(v)
+                    result[lower_first(k)] = transform_soap_response(v)
                 return result
 
             if isinstance(obj, list):
-                return [transform(v) for v in obj]
+                return [transform_soap_response(v) for v in obj]
             return obj
 
         if isinstance(response, httpx.Response):
-            return json.loads(response.content)
+            content = json.loads(response.content)
+        else:
+            content = transform_soap_response(serialize_object(response))
 
-        transformed_response = transform(serialize_object(response))
-        self.check_response(transformed_response)
-        return transformed_response
+        if "apiResult" not in content or "code" not in content["apiResult"]:
+            msg = "Malformed response from API: cannot extract response/code"
+            _LOGGER.debug(
+                "API error: %s, content=%s",
+                msg,
+                self.redact_response(content),
+            )
+            raise KingspanAPIError(msg)
+
+        if content["apiResult"]["code"] != 0:
+            msg = content["apiResult"]["description"]
+            _LOGGER.debug(
+                "API error: %s, content=%s",
+                msg,
+                self.redact_response(content),
+            )
+            if "Authentication Failed" in msg:
+                raise KingspanInvalidCredentialsError(msg)
+            raise KingspanAPIError(content["apiResult"]["description"])
+
+        _LOGGER.debug(
+            "API request succeeded, content=%s",
+            self.redact_response(content),
+        )
+        return content
 
     def handle_exception(self, exc: Exception) -> None:
         if isinstance(exc, httpx.TimeoutException):
@@ -177,7 +175,9 @@ class _BaseClient:
             {"headers": POST_HEADERS, "content": json.dumps(data)},
         )
 
-    def login_response(self, response: httpx.Response | object) -> None:
+    def login_response(
+        self, response: httpx.Response | object, tank_type: type
+    ) -> None:
         if (
             hasattr(response, "status_code")
             and response.status_code == HTTP_UNAUTHORIZED
@@ -185,10 +185,10 @@ class _BaseClient:
             # JSON API for an invalid JWT
             msg = "Invalid token authorization"
             raise KingspanAPIError(msg)
-        data = self.transform_response(response)
+        data = self.check_response(response)
         self._user_id = data["apiUserID"]
         for tank_info in data["tanks"]:
-            self._tanks.append(Tank(self, tank_info["signalmanNo"]))
+            self._tanks.append(tank_type(self, tank_info["signalmanNo"]))
 
     def get_latest_level_request(
         self,
@@ -271,7 +271,7 @@ class SensorClient(_BaseClient):
     def login(self, username: str, password: str) -> None:
         """Authenticate with the API and initialize tank list."""
         response = self._request(self.login_request, username, password)
-        self.login_response(response)
+        self.login_response(response, Tank)
 
     @property
     def tanks(self) -> list[Tank]:
@@ -281,7 +281,7 @@ class SensorClient(_BaseClient):
     def _get_latest_level(self, signalman_no: str) -> dict:
         """Tanks helper: get the latest level reading for a given tank."""
         response = self._request(self.get_latest_level_request, signalman_no)
-        return self.transform_response(response)
+        return self.check_response(response)
 
     def _get_history(
         self,
@@ -296,7 +296,7 @@ class SensorClient(_BaseClient):
             start_date,
             end_date,
         )
-        new_response = self.transform_response(response)
+        new_response = self.check_response(response)
         return new_response["levels"]
 
 
@@ -334,27 +334,28 @@ class AsyncSensorClient(_BaseClient):
     async def _request(
         self, func: Callable, *args: str | datetime | None
     ) -> APIResponse:
-        (req_func, req_args, req_kwargs) = func(*args)
+        """Private wrapper for SOAP/HTTP calls."""
+        (func, req_args, req_kwargs) = func(*args)
         try:
-            response = await req_func(*req_args, **req_kwargs)
+            response = await func(*req_args, **req_kwargs)
         except Exception as e:  # noqa: BLE001
             self.handle_exception(e)
         return response
 
     async def login(self, username: str, password: str) -> None:
-        """Authenticate with the SOAP API and initialize tank list."""
+        """Authenticate with the API and initialize tank list."""
         response = await self._request(self.login_request, username, password)
-        self.login_response(response)
+        self.login_response(response, AsyncTank)
 
-    @async_property
+    @property
     async def tanks(self) -> list[AsyncTank]:
-        """Return the list of AsyncTank objects for the authenticated user."""
+        """Return the list of Tank objects for the authenticated user."""
         return self._tanks
 
-    async def _get_latest_level(self, signalman_no: str) -> APIResponse:
-        """Get the latest level reading for a given tank."""
+    async def _get_latest_level(self, signalman_no: str) -> dict:
+        """Tanks helper: get the latest level reading for a given tank."""
         response = await self._request(self.get_latest_level_request, signalman_no)
-        return self.transform_response(response)
+        return self.check_response(response)
 
     async def _get_history(
         self,
@@ -362,12 +363,12 @@ class AsyncSensorClient(_BaseClient):
         start_date: datetime | None = None,
         end_date: datetime | None = None,
     ) -> list[dict]:
-        """Get the call history for a given tank within the specified date range."""
+        """Tanks helper: get the history data for a given tank."""
         response = await self._request(
             self.get_history_request,
             signalman_no,
             start_date,
             end_date,
         )
-        new_response = self.transform_response(response)
+        new_response = self.check_response(response)
         return new_response["levels"]
