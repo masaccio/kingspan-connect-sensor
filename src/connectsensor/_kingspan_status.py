@@ -3,10 +3,10 @@ import logging
 import sys
 
 from connectsensor import (
+    APIVersion,
     KingspanAPIError,
     KingspanInvalidCredentialsError,
     SensorClient,
-    APIVersion,
 )
 
 

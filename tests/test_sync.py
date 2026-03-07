@@ -6,10 +6,10 @@ import pytest
 
 from conftest import get_mock_filename, get_mock_response
 from connectsensor import (
+    APIVersion,
     KingspanAPIError,
     KingspanInvalidCredentialsError,
     SensorClient,
-    APIVersion,
 )
 from mock_data import PASSWORD, USERNAME
 

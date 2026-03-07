@@ -7,7 +7,6 @@ from collections.abc import Callable
 from datetime import datetime
 
 import httpx
-from async_property import async_property
 from zeep import AsyncClient as AsyncSoapClient
 from zeep import Client as SoapClient
 from zeep.helpers import serialize_object
@@ -176,7 +175,7 @@ class _BaseClient:
         )
 
     def login_response(
-        self, response: httpx.Response | object, tank_type: type
+        self, response: httpx.Response | object, tank_type: type,
     ) -> None:
         if (
             hasattr(response, "status_code")
@@ -332,7 +331,7 @@ class AsyncSensorClient(_BaseClient):
             self.handle_exception(e)
 
     async def _request(
-        self, func: Callable, *args: str | datetime | None
+        self, func: Callable, *args: str | datetime | None,
     ) -> APIResponse:
         """Private wrapper for SOAP/HTTP calls."""
         (func, req_args, req_kwargs) = func(*args)
