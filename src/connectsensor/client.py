@@ -97,8 +97,6 @@ class _BaseClient:
             """Convert a SOAP response to the same structure as the JSON API."""
 
             def lower_first(s: str) -> str:
-                if not s:
-                    return s
                 if s.startswith("API"):
                     return "api" + s[3:]
                 return s[0].lower() + s[1:]
@@ -175,7 +173,9 @@ class _BaseClient:
         )
 
     def login_response(
-        self, response: httpx.Response | object, tank_type: type,
+        self,
+        response: httpx.Response | object,
+        tank_type: type,
     ) -> None:
         if (
             hasattr(response, "status_code")
@@ -331,7 +331,9 @@ class AsyncSensorClient(_BaseClient):
             self.handle_exception(e)
 
     async def _request(
-        self, func: Callable, *args: str | datetime | None,
+        self,
+        func: Callable,
+        *args: str | datetime | None,
     ) -> APIResponse:
         """Private wrapper for SOAP/HTTP calls."""
         (func, req_args, req_kwargs) = func(*args)
