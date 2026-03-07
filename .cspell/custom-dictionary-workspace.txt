@@ -5,11 +5,13 @@ caplog
 connectsensor
 Connell
 emailaddress
+enddate
 envlist
 httpx
 inprocess
 Kingspan
 KNECT
+lxml
 minversion
 mypy
 openpyxl
@@ -22,5 +24,6 @@ sensorapi
 setuptools
 signalmanno
 SoapMobileAPPAuthenicate_v3
+startdate
 testpaths
 xdist
