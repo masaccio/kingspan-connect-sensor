@@ -15,7 +15,8 @@ from mock_data import PASSWORD, USERNAME
 
 
 def test_status(mock_sync_httpx_post):  # noqa: ARG001
-    def check_client(client: SensorClient) -> None:
+    def check_client(api_version: APIVersion) -> None:
+        client = SensorClient(api_version)
         client.login(USERNAME, PASSWORD)
         tanks = client.tanks
         assert tanks[0].level == 1000
@@ -28,8 +29,8 @@ def test_status(mock_sync_httpx_post):  # noqa: ARG001
         assert tank_history[1]["level_percent"] == 95
         assert tank_history[2]["level_litres"] == 1880
 
-    check_client(SensorClient(APIVersion.CONNECT_V1))
-    check_client(SensorClient(APIVersion.KNECT_V1))
+    check_client(APIVersion.CONNECT_V1)
+    check_client(APIVersion.KNECT_V1)
 
 
 def test_login_exception(mock_sync_httpx_post):
