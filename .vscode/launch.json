@@ -11,7 +11,7 @@
             "program": "${file}",
             "purpose": ["debug-test"],
             "console": "integratedTerminal",
-            "env": {"PYTEST_ADDOPTS": "--no-cov"}, 
+            "env": {"PYTEST_ADDOPTS": "--no-cov --force-enable-socket"}, 
             "justMyCode": true
         }
     ]

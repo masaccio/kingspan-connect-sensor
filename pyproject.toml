@@ -60,7 +60,7 @@ branch = true
 directory = "coverage_html_report"
 
 [tool.pytest.ini_options]
-addopts = "-W ignore::DeprecationWarning -n logical  --disable-socket --cov-report=html --cov-report=term-missing:skip-covered --cov=connectsensor"
+addopts = "-W ignore::DeprecationWarning -n logical  --disable-socket --allow-unix-socket --cov-report=html --cov-report=term-missing:skip-covered --cov=connectsensor"
 minversion = 6.0
 pythonpath = [".", "tests"]
 testpaths = ["tests"]
