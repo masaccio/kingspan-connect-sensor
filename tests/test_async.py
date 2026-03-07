@@ -88,7 +88,7 @@ async def test_history_exception(mocker):
 
 
 @pytest.mark.asyncio
-async def test_debug_redaction(mock_sync_httpx_post, caplog):  # noqa: ARG001
+async def test_debug_redaction(mock_async_httpx_post, caplog):  # noqa: ARG001
     caplog.set_level(logging.DEBUG, logger="connectsensor")
     async with AsyncSensorClient() as client:
         await client.login(USERNAME, PASSWORD)
