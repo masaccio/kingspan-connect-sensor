@@ -67,7 +67,7 @@ testpaths = ["tests"]
 
 [tool.tox]
 requires = ["tox>=4.0"]
-envlist = ["py310", "py311", "py312", "py313"]
+envlist = ["py310", "py311", "py312", "py313", "py314"]
 
 [testenv]
 deps = [
