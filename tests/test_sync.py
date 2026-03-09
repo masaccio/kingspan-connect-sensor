@@ -24,7 +24,7 @@ def test_status(mock_sync_httpx_post, mock_wsdl):  # noqa: ARG001
         assert tanks[0].model == "TestModel"
         assert tanks[0].name == "TestTank"
         assert tanks[0].capacity == 2000
-        tank_history = tanks[0].history
+        tank_history = tanks[0].history()
         assert tank_history[0]["reading_date"] == datetime(2021, 1, 25, 13, 59, 14)
         assert tank_history[1]["level_percent"] == 95
         assert tank_history[2]["level_litres"] == 1880
@@ -65,7 +65,8 @@ def test_tank_exception(mocker):
 def test_history_exception(mocker):
     def mocked_post(self, url, *args, **kwargs):
         if "GetCallHistory" in url:
-            raise KingspanAPIError("Test Exception for GetCallHistory")
+            msg = "Test Exception for GetCallHistory"
+            raise KingspanAPIError(msg)
         mock_filename = get_mock_filename(url, kwargs["content"])
         return get_mock_response(url, open(mock_filename, "rb").read())
 
@@ -78,7 +79,7 @@ def test_history_exception(mocker):
         KingspanAPIError,
         match="Test Exception for GetCallHistory",
     ):
-        _ = tanks[0].history
+        _ = tanks[0].history()
 
 
 def test_debug_redaction(mock_sync_httpx_post, caplog):  # noqa: ARG001
@@ -87,11 +88,6 @@ def test_debug_redaction(mock_sync_httpx_post, caplog):  # noqa: ARG001
     client = SensorClient()
     client.login(USERNAME, PASSWORD)
     log_text = caplog.text
-    import sys
-
-    print("\n\n>>>>>>>>>>>>>> DEBUG: caplog.text", file=sys.stderr)
-    print(caplog.text, file=sys.stderr)
-    print("\n\n<<<<<<<<<<<<<< DEBUG", file=sys.stderr)
     assert len(log_text.splitlines()) == 2
     assert USERNAME not in log_text
     assert PASSWORD not in log_text

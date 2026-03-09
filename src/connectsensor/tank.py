@@ -89,10 +89,15 @@ class Tank(_BaseTank):
         self._cache_tank_data()
         return self.format_reading_date(self._level_data["readingDate"])
 
-    @property
-    def history(self) -> APIResponse:
+    def history(
+        self,
+        start_date: datetime | None = None,
+        end_date: datetime | None = None,
+    ) -> APIResponse:
         """Return the history of the tank readings as a list of dicts."""
-        history_data = self._client._get_history(self._signalman_no)  # noqa: SLF001
+        history_data = self._client._get_history(  # noqa: SLF001
+            self._signalman_no, start_date, end_date
+        )
         return self.transform_history_data(history_data)
 
     def _cache_tank_data(self) -> None:
@@ -145,11 +150,14 @@ class AsyncTank(_BaseTank):
         await self._cache_tank_data()
         return datetime.fromisoformat(self._level_data["readingDate"])
 
-    @async_property
-    async def history(self) -> APIResponse:
+    async def history(
+        self,
+        start_date: datetime | None = None,
+        end_date: datetime | None = None,
+    ) -> APIResponse:
         """Return the history of the tank readings as a list of dicts."""
         history_data = await self._client._get_history(  # noqa: SLF001
-            self._signalman_no,
+            self._signalman_no, start_date, end_date
         )
         return self.transform_history_data(history_data)
 

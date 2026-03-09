@@ -72,7 +72,7 @@ def main() -> None:
 
         print("\nHistory:")
         print("\t{:<22} {:<6} {:<5}".format("Reading date", "%Full", "Litres"))
-        for _, measurement in enumerate(tank.history):
+        for _, measurement in enumerate(tank.history()):
             print(
                 "\t{:<22} {:<6} {:<5}".format(
                     measurement["reading_date"].strftime("%d-%b-%Y %H:%M"),

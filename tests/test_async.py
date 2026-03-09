@@ -26,7 +26,7 @@ async def test_status(mock_async_httpx_post, mock_wsdl):  # noqa: ARG001
             assert await tanks[0].name == "TestTank"
             assert await tanks[0].capacity == 2000
 
-            tank_history = await tanks[0].history
+            tank_history = await tanks[0].history()
             assert tank_history[0]["reading_date"] == datetime(2021, 1, 25, 13, 59, 14)
             assert tank_history[1]["level_percent"] == 95
             assert tank_history[2]["level_litres"] == 1880
@@ -86,7 +86,7 @@ async def test_history_exception(mocker):
             KingspanAPIError,
             match="Test Exception for GetCallHistory",
         ):
-            _ = await tanks[0].history
+            _ = await tanks[0].history()
 
 
 @pytest.mark.asyncio

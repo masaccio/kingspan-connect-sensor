@@ -131,7 +131,7 @@ class _BaseClient:
             raise KingspanAPIError(msg)
 
         if content["apiResult"]["code"] != 0:
-            msg = cast(str, content["apiResult"]["description"])
+            msg = cast("str", content["apiResult"]["description"])
             _LOGGER.debug(
                 "API error: %s, content=%s",
                 msg,
@@ -223,10 +223,12 @@ class _BaseClient:
         end_date: datetime | None = None,
     ) -> tuple[Callable, list, dict]:
         """Build a call history request for all clients."""
-        if start_date is None:
-            start_date_dt = datetime.fromtimestamp(0)  # noqa: DTZ006
-        if end_date is None:
-            end_date_dt = datetime.now()  # noqa: DTZ005
+        start_date_dt = (
+            datetime.fromtimestamp(0)  # noqa: DTZ006
+            if start_date is None
+            else start_date
+        )
+        end_date_dt = datetime.now() if end_date is None else end_date  # noqa: DTZ005
 
         if self._version == APIVersion.CONNECT_V1:
             data = {
