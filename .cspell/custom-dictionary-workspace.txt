@@ -28,5 +28,6 @@ signalmanno
 SoapMobileAPPAuthenicate_v3
 startdate
 testpaths
+typeshed
 xdist
 zeep

@@ -1,10 +1,11 @@
 """Tank class for Connect Sensor API."""
 
 from datetime import datetime
+from typing import cast
 
 from async_property import async_property
 
-from connectsensor.const import APIResponse
+from connectsensor.const import APIResponse, APIResponseValue
 
 
 class _BaseTank:
@@ -25,16 +26,24 @@ class _BaseTank:
             return date
         return datetime.fromisoformat(date)
 
-    def transform_history_data(self, data: APIResponse) -> APIResponse:
+    def transform_history_data(
+        self,
+        data: APIResponse,
+    ) -> list[dict[str, APIResponseValue]]:
         """Transform raw tank history data into a list of dicts."""
-        return [
-            {
-                "reading_date": self.format_reading_date(x["readingDate"]),
-                "level_percent": x["levelPercentage"],
-                "level_litres": x["levelLitres"],
-            }
-            for x in data
-        ]
+        result: list[dict[str, APIResponseValue]] = []
+
+        for x in data:
+            x_dict = cast("dict[str, APIResponseValue]", x)
+            result.append(
+                {
+                    "reading_date": self.format_reading_date(x_dict["readingDate"]),
+                    "level_percent": x_dict["levelPercentage"],
+                    "level_litres": x_dict["levelLitres"],
+                },
+            )
+
+        return result
 
 
 class Tank(_BaseTank):

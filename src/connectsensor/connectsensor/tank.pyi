@@ -1,13 +1,12 @@
-from datetime import datetime
-
 from async_property import async_property
-
-from connectsensor.const import APIResponse
+from connectsensor.const import APIResponse as APIResponse
+from datetime import datetime
 
 class _BaseTank:
     def __init__(self, client: object, signalman_no: str) -> None: ...
     def unpack_tank_data(self, response: APIResponse) -> None: ...
-    def transform_history_data(self, data: dict[str, list[dict]]) -> list[dict]: ...
+    def format_reading_date(self, date: datetime | str) -> datetime: ...
+    def transform_history_data(self, data: APIResponse) -> APIResponse: ...
 
 class Tank(_BaseTank):
     @property

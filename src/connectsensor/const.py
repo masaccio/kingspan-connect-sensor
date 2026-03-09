@@ -1,5 +1,6 @@
 """Constants and types shared across the package."""
 
+from datetime import datetime
 from enum import IntEnum, auto
 from typing import TypeAlias
 
@@ -31,7 +32,7 @@ TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJUaGVNb2JpbGVBcHAiLCJyb2
 
 # Types for API request and response
 APIResponseValue: TypeAlias = (
-    str | list["APIResponseValue"] | dict[str, "APIResponseValue"]
+    str | int | datetime | list["APIResponseValue"] | dict[str, "APIResponseValue"]
 )
 APIRequest: TypeAlias = dict[str, APIResponseValue]
 APIResponse: TypeAlias = dict[str, APIResponseValue]

@@ -36,7 +36,7 @@ async def test_status(mock_async_httpx_post, mock_wsdl):  # noqa: ARG001
 
 
 @pytest.mark.asyncio
-async def test_login_exception(mock_async_httpx_post):
+async def test_login_exception(mock_async_httpx_post):  # noqa: ARG001
     async with AsyncSensorClient() as client:
         with pytest.raises(
             KingspanInvalidCredentialsError,
@@ -49,7 +49,8 @@ async def test_login_exception(mock_async_httpx_post):
 async def test_tank_exception(mocker):
     async def mocked_post(self, url, *args, **kwargs) -> httpx.Response:
         if "GetLatestLevel" in url:
-            raise KingspanAPIError("Test Exception for GetLatestLevel")
+            msg = "Test Exception for GetLatestLevel"
+            raise KingspanAPIError(msg)
         mock_filename = get_mock_filename(url, kwargs["content"])
         return get_mock_response(url, open(mock_filename, "rb").read())
 
@@ -70,7 +71,8 @@ async def test_tank_exception(mocker):
 async def test_history_exception(mocker):
     async def mocked_post(self, url, *args, **kwargs):
         if "GetCallHistory" in url:
-            raise KingspanAPIError("Test Exception for GetCallHistory")
+            msg = "Test Exception for GetCallHistory"
+            raise KingspanAPIError(msg)
         mock_filename = get_mock_filename(url, kwargs["content"])
         return get_mock_response(url, open(mock_filename, "rb").read())
 
@@ -89,8 +91,10 @@ async def test_history_exception(mocker):
 
 @pytest.mark.asyncio
 async def test_debug_redaction(
-    mock_async_httpx_post, mock_wsdl, caplog
-):  # noqa: ARG001
+    mock_async_httpx_post,  # noqa: ARG001
+    mock_wsdl,  # noqa: ARG001
+    caplog,
+):
     async def check_client(api_version: APIVersion) -> None:
         caplog.set_level(logging.DEBUG, logger="connectsensor")
         caplog.clear()

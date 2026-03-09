@@ -1,25 +1,22 @@
-import httpx
-from async_property import async_property
-from connectsensor.const import (
-    APIRequest as APIRequest,
-    APIResponse as APIResponse,
-    API_BASE_URL as API_BASE_URL,
-    HTTP_UNAUTHORIZED as HTTP_UNAUTHORIZED,
-    TOKEN as TOKEN,
-)
-from connectsensor.exceptions import (
-    KingspanAPIError as KingspanAPIError,
-    KingspanInvalidCredentialsError as KingspanInvalidCredentialsError,
-    KingspanTimeoutError as KingspanTimeoutError,
-)
-from connectsensor.tank import AsyncTank as AsyncTank, Tank as Tank
 from datetime import datetime
 
+import httpx
+from async_property import async_property
+
+from connectsensor.const import (
+    APIRequest,
+    APIResponse,
+    APIVersion,
+)
+from connectsensor.tank import AsyncTank, Tank
+
 class _BaseClient:
-    def __init__(self) -> None: ...
+    def __init__(self, version: APIVersion = ...) -> None: ...
     def redact(self, obj: APIResponse) -> APIResponse: ...
     def build_request(
-        self, endpoint: str, data: dict[str, str | list | dict]
+        self,
+        endpoint: str,
+        data: dict[str, str | list | dict],
     ) -> tuple: ...
     def check_payload(self, response: httpx.Response) -> APIResponse: ...
     def httpx_exception(self, exc: Exception) -> None: ...

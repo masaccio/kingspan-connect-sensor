@@ -5,6 +5,7 @@ import logging
 from asyncio import get_running_loop
 from collections.abc import Callable
 from datetime import datetime
+from typing import cast
 
 import httpx
 from zeep import AsyncClient as AsyncSoapClient
@@ -67,7 +68,9 @@ class _BaseClient:
     def __init__(self, version: APIVersion = DEFAULT_API_VERSION) -> None:
         """Initialize the base class."""
         _LOGGER.debug("Init API with version=%s", version.name)
-        self._client = None
+        self._client: (
+            httpx.Client | httpx.AsyncClient | SoapClient | AsyncSoapClient | None
+        ) = None
         self._version = version
         self._username = None
         self._password = None
@@ -128,7 +131,7 @@ class _BaseClient:
             raise KingspanAPIError(msg)
 
         if content["apiResult"]["code"] != 0:
-            msg = content["apiResult"]["description"]
+            msg = cast(str, content["apiResult"]["description"])
             _LOGGER.debug(
                 "API error: %s, content=%s",
                 msg,
@@ -163,11 +166,13 @@ class _BaseClient:
         self._password = password
         if self._version == APIVersion.CONNECT_V1:
             data = {"emailaddress": self._username, "password": self._password}
-            return (self._client.service.SoapMobileAPPAuthenicate_v3, [], data)
+            client = cast("SoapClient | AsyncSoapClient", self._client)
+            return (client.service.SoapMobileAPPAuthenicate_v3, [], data)
 
         data = {"emailAddress": self._username, "password": self._password}
+        client = cast("httpx.Client | httpx.AsyncClient", self._client)
         return (
-            self._client.post,
+            client.post,
             [f"{API_BASE_URL}/v3/V3_SoapMobileApp/Authenticate_v3_Async"],
             {"headers": POST_HEADERS, "content": json.dumps(data)},
         )
@@ -201,10 +206,12 @@ class _BaseClient:
         }
 
         if self._version == APIVersion.CONNECT_V1:
-            return (self._client.service.SoapMobileAPPGetLatestLevel_v3, [], data)
+            client = cast("SoapClient | AsyncSoapClient", self._client)
+            return (client.service.SoapMobileAPPGetLatestLevel_v3, [], data)
 
+        client = cast("httpx.Client | httpx.AsyncClient", self._client)
         return (
-            self._client.post,
+            client.post,
             [f"{API_BASE_URL}/v1/V1_SoapMobileApp/GetLatestLevel_v1_Async?culture=EN"],
             {"headers": POST_HEADERS, "content": json.dumps(data)},
         )
@@ -229,7 +236,8 @@ class _BaseClient:
                 "startdate": start_date_dt.isoformat(),
                 "enddate": end_date_dt.isoformat(),
             }
-            return (self._client.service.SoapMobileAPPGetCallHistory_v1, [], data)
+            client = cast("SoapClient | AsyncSoapClient", self._client)
+            return (client.service.SoapMobileAPPGetCallHistory_v1, [], data)
 
         data = {
             "userIdPairWithSN": {
@@ -240,8 +248,9 @@ class _BaseClient:
             "startDate": start_date_dt.isoformat(),
             "endDate": end_date_dt.isoformat(),
         }
+        client = cast("httpx.Client | httpx.AsyncClient", self._client)
         return (
-            self._client.post,
+            client.post,
             [f"{API_BASE_URL}/v1/V1_SoapMobileApp/GetCallHistory_v1_Async"],
             {"headers": POST_HEADERS, "content": json.dumps(data)},
         )
