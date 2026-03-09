@@ -53,9 +53,11 @@ You can construct a Pandas dataframe simply using:
 
 ``` python
 tanks = await client.tanks
-history = await tanks[0].history
+history = await tanks[0].history()
 df = pd.DataFrame(history)
 ```
+
+The `history` method takes optional parameters `start_date` and `end_date` which are `datetime.datetime` objects specifying the range of dates to query from the API.
 
 ## Supported APIs
 
