@@ -100,6 +100,7 @@ async def test_debug_redaction(
         logger = logging.getLogger("connectsensor")
         logger.propagate = True
         caplog.set_level(logging.DEBUG, logger="connectsensor")
+        caplog.clear()
         async with AsyncSensorClient(api_version) as client:
             await client.login(USERNAME, PASSWORD)
             log_text = caplog.text
