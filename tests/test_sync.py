@@ -151,7 +151,10 @@ def test_history_exception(mocker):
 
 
 def test_debug_redaction(mock_sync_httpx_post, caplog):  # noqa: ARG001
+    logger = logging.getLogger("connectsensor")
+    logger.propagate = True
     caplog.set_level(logging.DEBUG, logger="connectsensor")
+
     client = SensorClient()
     client.login(USERNAME, PASSWORD)
     log_text = caplog.text
