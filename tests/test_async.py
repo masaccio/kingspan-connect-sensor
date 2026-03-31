@@ -25,7 +25,8 @@ async def test_status(mock_async_httpx_post, mock_wsdl):  # noqa: ARG001
             assert await tanks[0].model == "TestModel"
             assert await tanks[0].name == "TestTank"
             assert await tanks[0].capacity == 2000
-
+            last_read = await tanks[0].last_read
+            assert last_read.replace(microsecond=0) == datetime(2021, 1, 31, 0, 59, 30)
             tank_history = await tanks[0].history()
             assert tank_history[0]["reading_date"] == datetime(2021, 1, 25, 13, 59, 14)
             assert tank_history[1]["level_percent"] == 95
