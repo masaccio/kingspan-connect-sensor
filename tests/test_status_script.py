@@ -99,5 +99,5 @@ def test_main(script_runner):
         print_result=False,
     )
     assert ret.success
-    assert "kingspan_status.py [-h]" in ret.stdout
+    assert "[-h] --username" in ret.stdout
     assert ret.stderr == ""
