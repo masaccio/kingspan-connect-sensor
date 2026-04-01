@@ -288,7 +288,7 @@ class SensorClient(_BaseClient):
         """Return the list of Tank objects for the authenticated user."""
         return self._tanks
 
-    def _get_latest_level(self, signalman_no: str) -> dict:
+    def _get_latest_level(self, signalman_no: str) -> APIResponse:
         """Tanks helper: get the latest level reading for a given tank."""
         response = self._request(self.get_latest_level_request, signalman_no)
         return self.check_response(response)
@@ -298,7 +298,7 @@ class SensorClient(_BaseClient):
         signalman_no: str,
         start_date: datetime | None = None,
         end_date: datetime | None = None,
-    ) -> list[dict]:
+    ) -> APIResponse:
         """Tanks helper: get the history data for a given tank."""
         response = self._request(
             self.get_history_request,
@@ -364,7 +364,7 @@ class AsyncSensorClient(_BaseClient):
         """Return the list of Tank objects for the authenticated user."""
         return self._tanks
 
-    async def _get_latest_level(self, signalman_no: str) -> dict:
+    async def _get_latest_level(self, signalman_no: str) -> APIResponse:
         """Tanks helper: get the latest level reading for a given tank."""
         response = await self._request(self.get_latest_level_request, signalman_no)
         return self.check_response(response)
@@ -374,7 +374,7 @@ class AsyncSensorClient(_BaseClient):
         signalman_no: str,
         start_date: datetime | None = None,
         end_date: datetime | None = None,
-    ) -> list[dict]:
+    ) -> APIResponse:
         """Tanks helper: get the history data for a given tank."""
         response = await self._request(
             self.get_history_request,
