@@ -1,12 +1,12 @@
 import json
 
 import httpx
-from pytest import mark
+import pytest
 
 from mock_data import VALID_STATUS
 
 
-@mark.script_launch_mode("subprocess")
+@pytest.mark.script_launch_mode("subprocess")
 def test_help(script_runner):
     ret = script_runner.run("kingspan-status", print_result=False)
     assert not ret.success
@@ -14,7 +14,7 @@ def test_help(script_runner):
     assert ret.stdout == ""
 
 
-@mark.script_launch_mode("subprocess")
+@pytest.mark.script_launch_mode("subprocess")
 def test_help_verbose(script_runner):
     ret = script_runner.run("kingspan-status", "--help", print_result=False)
     assert ret.success
@@ -23,7 +23,7 @@ def test_help_verbose(script_runner):
     assert ret.stderr == ""
 
 
-@mark.script_launch_mode("inprocess")
+@pytest.mark.script_launch_mode("inprocess")
 def test_help_invalid_credentials(script_runner, mock_sync_httpx_post):
     ret = script_runner.run(
         "kingspan-status",
@@ -37,7 +37,7 @@ def test_help_invalid_credentials(script_runner, mock_sync_httpx_post):
     assert ret.stdout == ""
 
 
-@mark.script_launch_mode("inprocess")
+@pytest.mark.script_launch_mode("inprocess")
 def test_help_invalid_error(script_runner, mocker):
     mock_response = httpx.Response(
         status_code=200,
@@ -59,8 +59,8 @@ def test_help_invalid_error(script_runner, mocker):
     assert ret.stdout == ""
 
 
-@mark.script_launch_mode("inprocess")
-def test_status(script_runner, mock_sync_httpx_post):
+@pytest.mark.script_launch_mode("inprocess")
+def test_status(script_runner, mock_sync_httpx_post):  # noqa: ARG001
     ret = script_runner.run(
         "kingspan-status",
         "--username=test@example.com",
@@ -73,8 +73,8 @@ def test_status(script_runner, mock_sync_httpx_post):
     assert ret.stderr == ""
 
 
-@mark.script_launch_mode("inprocess")
-def test_debug(script_runner, mock_sync_httpx_post, mock_wsdl):
+@pytest.mark.script_launch_mode("inprocess")
+def test_debug(script_runner, mock_sync_httpx_post, mock_wsdl):  # noqa: ARG001
     ret = script_runner.run(
         "kingspan-status",
         "--username=test@example.com",
@@ -92,7 +92,7 @@ def test_debug(script_runner, mock_sync_httpx_post, mock_wsdl):
     assert "'emailAddress': '*redacted*'" in stderr[1]
 
 
-@mark.script_launch_mode("subprocess")
+@pytest.mark.script_launch_mode("subprocess")
 def test_main(script_runner):
     ret = script_runner.run(
         ["python3", "-m", "connectsensor._kingspan_status", "--help"],

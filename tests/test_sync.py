@@ -131,7 +131,7 @@ def test_malformed_response(mocker):
 
 
 def test_history_exception(mocker):
-    def mocked_post(self, url, *args, **kwargs):
+    def mocked_post(self, url, *args, **kwargs):  # noqa: ANN003
         if "GetCallHistory" in url:
             msg = "Test Exception for GetCallHistory"
             raise KingspanAPIError(msg)
