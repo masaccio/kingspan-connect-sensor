@@ -3,6 +3,7 @@ from datetime import datetime
 
 import httpx
 import pytest
+import zeep
 
 from conftest import get_mock_filename, get_mock_response
 from connectsensor import (
@@ -66,6 +67,17 @@ async def test_tank_exception(mocker):
             match="Test Exception for GetLatestLevel",
         ):
             _ = await tanks[0].level
+
+
+@pytest.mark.asyncio
+async def test_init_exception(mocker):
+    mocker.patch(
+        "httpx.AsyncClient",
+        side_effect=httpx.HTTPError("Test zeep init"),
+    )
+    with pytest.raises(KingspanAPIError, match="Test zeep init"):
+        async with AsyncSensorClient(version=APIVersion.CONNECT_V1) as _:
+            pass
 
 
 @pytest.mark.asyncio

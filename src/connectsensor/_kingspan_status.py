@@ -11,9 +11,8 @@ from connectsensor import (
 
 
 class PasswordFilter(logging.Filter):
-    def filter(self, record):
-        if isinstance(record.msg, str):
-            record.msg = record.msg.replace("password", "secret")
+    def filter(self, record: logging.LogRecord) -> bool:
+        record.msg = record.msg.replace("password", "secret")
         return True
 
 

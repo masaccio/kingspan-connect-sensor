@@ -1,3 +1,6 @@
+import json
+
+import httpx
 from pytest import mark
 
 from mock_data import VALID_STATUS
@@ -35,6 +38,28 @@ def test_help_invalid_credentials(script_runner, mock_sync_httpx_post):
 
 
 @mark.script_launch_mode("inprocess")
+def test_help_invalid_error(script_runner, mocker):
+    mock_response = httpx.Response(
+        status_code=200,
+        content=json.dumps(
+            {"apiResult": {"code": 1, "description": "test API error"}}
+        ).encode("utf-8"),
+    )
+    mocker.patch.object(httpx.Client, "post", return_value=mock_response)
+
+    ret = script_runner.run(
+        "kingspan-status",
+        "--username=invalid@example.com",
+        "--password=invalid",
+        print_result=False,
+    )
+
+    assert not ret.success
+    assert "Kingspan API error: test API error" in ret.stderr
+    assert ret.stdout == ""
+
+
+@mark.script_launch_mode("inprocess")
 def test_status(script_runner, mock_sync_httpx_post):
     ret = script_runner.run(
         "kingspan-status",
@@ -65,3 +90,14 @@ def test_debug(script_runner, mock_sync_httpx_post, mock_wsdl):
     assert stderr[0] == "DEBUG:connectsensor:Init API with version=CONNECT_V1"
     assert "'apiUserID': '*redacted*'" in stderr[1]
     assert "'emailAddress': '*redacted*'" in stderr[1]
+
+
+@mark.script_launch_mode("subprocess")
+def test_main(script_runner):
+    ret = script_runner.run(
+        ["python3", "-m", "connectsensor._kingspan_status", "--help"],
+        print_result=False,
+    )
+    assert ret.success
+    assert "kingspan_status.py [-h]" in ret.stdout
+    assert ret.stderr == ""
