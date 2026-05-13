@@ -5,11 +5,18 @@ on:
     branches: [ "main", "v4.0"]
   pull_request:
     branches: [ "main", "v4.0" ]
+  # For dependabot
+  schedule:
+    - cron: '0 0 1 * *'
   workflow_dispatch:
 
-jobs:
-  build:
+permissions:
+  contents: write
+  pull-requests: write
 
+jobs:
+  test:
+    name: Run All Tests
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -29,3 +36,20 @@ jobs:
 
     - name: Run tests
       run: uv run pytest -n logical
+
+  dependabot:
+    needs: test
+    runs-on: ubuntu-latest
+    if: ${{ github.actor == 'dependabot[bot]' && github.event_name == 'pull_request' }}
+    steps:
+      - name: Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@v3
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Auto-merge for Dependabot PRs
+        run: gh pr merge --auto --squash "$PR_URL"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}    
