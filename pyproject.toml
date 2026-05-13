@@ -17,7 +17,7 @@ classifiers = [
 ]
 dependencies = [
   "async-property>=0.2.1,<0.3.0",
-  "asyncio>=3.4.3,<4.0.0",
+  "asyncio>=4.0.0",
   "datetime>=4.7,<7.0.0",
   "httpx>=0.28",
   "lxml>=6.0.2",
