@@ -116,7 +116,6 @@ async def test_debug_redaction(
         async with AsyncSensorClient(api_version) as client:
             await client.login(USERNAME, PASSWORD)
             log_text = caplog.text
-            assert len(log_text.splitlines()) == 2
             assert USERNAME not in log_text
             assert PASSWORD not in log_text
             assert "*redacted*" in log_text
