@@ -1,49 +1,48 @@
 """Tank class for Connect Sensor API."""
 
 from datetime import datetime
-from typing import cast
+from typing import Any, cast
 
 from async_property import async_property
 
-from connectsensor.const import APIResponse, APIResponseValue
+from connectsensor.const import APIResponseValue
 
 
 class _BaseTank:
     """Base class for Tanks."""
 
-    def __init__(self, client: object, signalman_no: str) -> None:
+    def __init__(self, client: Any, signalman_no: str) -> None:  # noqa: ANN401
         """Initialize a Tank instance."""
         self._client = client
         self._signalman_no = signalman_no
-        self._level_data = None
+        self._level_data: dict[str, Any] = {}
+        self._tank_info: dict[str, Any] = {}
 
-    def unpack_tank_data(self, response: APIResponse) -> None:
-        self._level_data = response["level"]
-        self._tank_info = {x["name"]: x["value"] for x in response["tankInfo"]}
+    def unpack_tank_data(self, response: dict[str, Any]) -> None:
+        """Extract level and tank information from the API response."""
+        self._level_data = cast("dict[str, Any]", response["level"])
+        tank_info_list = cast("list[dict[str, Any]]", response["tankInfo"])
+        self._tank_info = {str(x["name"]): x["value"] for x in tank_info_list}
 
     def format_reading_date(self, date: datetime | str) -> datetime:
+        """Format the reading date string into a datetime object."""
         if isinstance(date, datetime):
             return date
-        return datetime.fromisoformat(date)
+        return datetime.fromisoformat(str(date))
 
     def transform_history_data(
         self,
-        data: APIResponse,
+        data: list[dict[str, Any]],
     ) -> list[dict[str, APIResponseValue]]:
         """Transform raw tank history data into a list of dicts."""
-        result: list[dict[str, APIResponseValue]] = []
-
-        for x in data:
-            x_dict = cast("dict[str, APIResponseValue]", x)
-            result.append(
-                {
-                    "reading_date": self.format_reading_date(x_dict["readingDate"]),
-                    "level_percent": x_dict["levelPercentage"],
-                    "level_litres": x_dict["levelLitres"],
-                },
-            )
-
-        return result
+        return [
+            {
+                "reading_date": self.format_reading_date(cast("str", x["readingDate"])),
+                "level_percent": cast("APIResponseValue", x["levelPercentage"]),
+                "level_litres": cast("APIResponseValue", x["levelLitres"]),
+            }
+            for x in data
+        ]
 
 
 class Tank(_BaseTank):
@@ -59,23 +58,23 @@ class Tank(_BaseTank):
     def serial_number(self) -> str:
         """Return the serial number of the tank."""
         self._cache_tank_data()
-        return (
+        return str(
             self._tank_info["Signalman No"]
             if "Signalman No" in self._tank_info
-            else self._tank_info["Serial No"]
+            else self._tank_info["Serial No"],
         )
 
     @property
     def model(self) -> str:
         """Return the model of the tank."""
         self._cache_tank_data()
-        return self._tank_info["Model"]
+        return str(self._tank_info["Model"])
 
     @property
     def name(self) -> str:
         """Return the name of the tank."""
         self._cache_tank_data()
-        return self._tank_info["Tank Name"]
+        return str(self._tank_info["Tank Name"])
 
     @property
     def capacity(self) -> int:
@@ -87,24 +86,26 @@ class Tank(_BaseTank):
     def last_read(self) -> datetime:
         """Return the last read date of the tank as a datetime object."""
         self._cache_tank_data()
-        return self.format_reading_date(self._level_data["readingDate"])
+        return self.format_reading_date(cast("str", self._level_data["readingDate"]))
 
     def history(
         self,
         start_date: datetime | None = None,
         end_date: datetime | None = None,
-    ) -> APIResponse:
+    ) -> list[dict[str, APIResponseValue]]:
         """Return the history of the tank readings as a list of dicts."""
-        history_data = self._client._get_history(  # noqa: SLF001
-            self._signalman_no, start_date, end_date
+        history_data = self._client._get_history(  # noqa: SLF001 # pylint: disable=protected-access
+            self._signalman_no,
+            start_date,
+            end_date,
         )
-        return self.transform_history_data(history_data)
+        return self.transform_history_data(cast("list[dict[str, Any]]", history_data))
 
     def _cache_tank_data(self) -> None:
         """Cache the latest tank data if not already cached."""
-        if self._level_data is None:
-            data = self._client._get_latest_level(self._signalman_no)  # noqa: SLF001
-            self.unpack_tank_data(data)
+        if not self._level_data:
+            data = self._client._get_latest_level(self._signalman_no)  # noqa: SLF001 # pylint: disable=protected-access
+            self.unpack_tank_data(cast("dict[str, Any]", data))
 
 
 class AsyncTank(_BaseTank):
@@ -120,23 +121,23 @@ class AsyncTank(_BaseTank):
     async def serial_number(self) -> str:
         """Return the serial number of the tank."""
         await self._cache_tank_data()
-        return (
+        return str(
             self._tank_info["Signalman No"]
             if "Signalman No" in self._tank_info
-            else self._tank_info["Serial No"]
+            else self._tank_info["Serial No"],
         )
 
     @async_property
     async def model(self) -> str:
         """Return the model of the tank."""
         await self._cache_tank_data()
-        return self._tank_info["Model"]
+        return str(self._tank_info["Model"])
 
     @async_property
     async def name(self) -> str:
         """Return the name of the tank."""
         await self._cache_tank_data()
-        return self._tank_info["Tank Name"]
+        return str(self._tank_info["Tank Name"])
 
     @async_property
     async def capacity(self) -> int:
@@ -148,23 +149,25 @@ class AsyncTank(_BaseTank):
     async def last_read(self) -> datetime:
         """Return the last read date of the tank as a datetime object."""
         await self._cache_tank_data()
-        return self.format_reading_date(self._level_data["readingDate"])
+        return self.format_reading_date(cast("str", self._level_data["readingDate"]))
 
     async def history(
         self,
         start_date: datetime | None = None,
         end_date: datetime | None = None,
-    ) -> APIResponse:
+    ) -> list[dict[str, APIResponseValue]]:
         """Return the history of the tank readings as a list of dicts."""
-        history_data = await self._client._get_history(  # noqa: SLF001
-            self._signalman_no, start_date, end_date
+        history_data = await self._client._get_history(  # noqa: SLF001 # pylint: disable=protected-access
+            self._signalman_no,
+            start_date,
+            end_date,
         )
-        return self.transform_history_data(history_data)
+        return self.transform_history_data(cast("list[dict[str, Any]]", history_data))
 
     async def _cache_tank_data(self) -> None:
         """Cache the latest tank data if not already cached."""
-        if self._level_data is None:
-            response = await self._client._get_latest_level(  # noqa: SLF001
+        if not self._level_data:
+            response = await self._client._get_latest_level(  # noqa: SLF001 # pylint: disable=protected-access
                 self._signalman_no,
             )
-            self.unpack_tank_data(response)
+            self.unpack_tank_data(cast("dict[str, Any]", response))

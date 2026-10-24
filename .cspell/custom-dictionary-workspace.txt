@@ -1,6 +1,8 @@
 addopts
 aiofiles
+asmx
 asyncio
+autoremove
 caplog
 connectsensor
 Connell
@@ -18,6 +20,7 @@ mypy
 openpyxl
 pydatetime
 pylint
+pyproject
 pytest
 pythonpath
 s3cret

@@ -1,9 +1,9 @@
 import logging
 from datetime import datetime
+from unittest.mock import AsyncMock, patch
 
 import httpx
 import pytest
-import zeep
 
 from conftest import get_mock_filename, get_mock_response
 from connectsensor import (
@@ -12,6 +12,8 @@ from connectsensor import (
     KingspanAPIError,
     KingspanInvalidCredentialsError,
 )
+from connectsensor.client import AsyncSensorClient
+from connectsensor.const import APIVersion
 from mock_data import PASSWORD, USERNAME
 
 
@@ -122,3 +124,32 @@ async def test_debug_redaction(
 
     await check_client(APIVersion.CONNECT_V1)
     await check_client(APIVersion.KNECT_V1)
+
+
+@pytest.mark.asyncio
+async def test_async_client_injection():
+    """Verify injected HTTPX clients bypass internal lifecycle management."""
+    mock_client = AsyncMock(spec=httpx.AsyncClient)
+
+    # Test 1: Injected client should NOT be closed on __aexit__
+    async with AsyncSensorClient(
+        version=APIVersion.KNECT_V1,
+        client=mock_client,
+    ) as client:
+        assert client._injected_client is True
+        assert client._client == mock_client
+
+    mock_client.aclose.assert_not_called()
+
+    # Test 2: Internally created client MUST be closed on __aexit__
+    with patch(
+        "connectsensor.client.httpx.AsyncClient",
+        autospec=True,
+    ) as mock_internal_class:
+        mock_internal_instance = mock_internal_class.return_value
+
+        async with AsyncSensorClient(version=APIVersion.KNECT_V1) as client:
+            assert client._injected_client is False
+            assert client._client == mock_internal_instance
+
+        mock_internal_instance.aclose.assert_called_once()

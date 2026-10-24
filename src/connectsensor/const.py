@@ -19,6 +19,8 @@ SOAP_NS_PREFIX = "http://mobileapp/"
 # API versions don't match what Kingspan call them as these are not obviously
 # incrementing and use different servers/protocols.
 class APIVersion(IntEnum):
+    """Supported Kingspan API variants."""
+
     CONNECT_V1 = auto()
     KNECT_V1 = auto()
 
@@ -28,7 +30,7 @@ DEFAULT_API_VERSION = APIVersion.KNECT_V1
 HTTP_UNAUTHORIZED = 401
 
 # The JWT appears to be hard-coded into the application rather than securely returned
-TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJUaGVNb2JpbGVBcHAiLCJyb2xlIjoiVGhlTW9iaWxlQXBwIiwibmJmIjoxNzg2OTYzNzIyLCJleHAiOjIxMDI1ODI5MjIsImlzcyI6IlNlbnNvckFQSSBBdXRoU2VydmVyIiwiYXVkIjoiU2Vuc29yQVBJIFVzZXJzIn0.tforQzK2UITLC1AOqkI1dbxH4afrABOsQhoBbgEQ1Fs"  # noqa: E501, S105, cspell:disable-line
+TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJUaGVNb2JpbGVBcHAiLCJyb2xlIjoiVGhlTW9iaWxlQXBwIiwibmJmIjoxNzg2OTYzNzIyLCJleHAiOjIxMDI1ODI5MjIsImlzcyI6IlNlbnNvckFQSSBBdXRoU2VydmVyIiwiYXVkIjoiU2Vuc29yQVBJIFVzZXJzIn0.tforQzK2UITLC1AOqkI1dbxH4afrABOsQhoBbgEQ1Fs"  # noqa: E501, S105, cspell:disable-line, pylint: disable=line-too-long
 
 # Types for API request and response
 APIResponseValue: TypeAlias = (

@@ -67,6 +67,20 @@ minversion = 6.0
 pythonpath = [".", "tests"]
 testpaths = ["tests"]
 
+[tool.mypy]
+python_version = "3.14"
+check_untyped_defs = true
+warn_return_any = true
+warn_unused_ignores = true
+show_error_codes = true
+files = ["custom_components/kingspan_watchman_sensit"]
+
+[[tool.mypy.overrides]]
+module = [
+  "async_property"
+]
+ignore_missing_imports = true
+
 [tool.tox]
 requires = ["tox>=4.0"]
 envlist = ["py310", "py311", "py312", "py313", "py314"]

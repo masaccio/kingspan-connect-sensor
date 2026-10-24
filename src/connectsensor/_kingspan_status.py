@@ -1,6 +1,12 @@
+"""CLI script to retrieve and print Kingspan tank status."""
+
 import argparse
 import logging
 import sys
+from typing import TYPE_CHECKING, cast
+
+if TYPE_CHECKING:
+    from datetime import datetime
 
 from connectsensor import (
     APIVersion,
@@ -10,13 +16,17 @@ from connectsensor import (
 )
 
 
-class PasswordFilter(logging.Filter):
+class PasswordFilter(logging.Filter):  # pylint: disable=too-few-public-methods
+    """Filter to redact passwords from log messages."""
+
     def filter(self, record: logging.LogRecord) -> bool:
+        """Replace the word password with secret in log records."""
         record.msg = record.msg.replace("password", "secret")
         return True
 
 
 def enable_debug_logging() -> None:
+    """Configure and enable debug logging."""
     handler = logging.StreamHandler(sys.stderr)
     handler.setLevel(logging.DEBUG)
     formatter = logging.Formatter("%(levelname)s:%(name)s:%(message)s")
@@ -29,6 +39,7 @@ def enable_debug_logging() -> None:
 
 
 def main() -> None:
+    """Run the Kingspan status CLI."""
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--username",
@@ -62,7 +73,7 @@ def main() -> None:
     for tank in client.tanks:
         tank_level_percent = str(int(100 * tank.level / tank.capacity))
 
-        print(tank.name + ":")
+        print(f"{tank.name}:")
         print(f"\tCapacity = {tank.capacity}")
         print(f"\tSerial Number = {tank.serial_number}")
         print(f"\tModel = {tank.model}")
@@ -70,17 +81,16 @@ def main() -> None:
         print(f"\tLast Read = {tank.last_read}")
 
         print("\nHistory:")
-        print("\t{:<22} {:<6} {:<5}".format("Reading date", "%Full", "Litres"))
+        print(f"\t{'Reading date':<22} {'%Full':<6} {'Litres':<5}")
         for _, measurement in enumerate(tank.history()):
-            print(
-                "\t{:<22} {:<6} {:<5}".format(
-                    measurement["reading_date"].strftime("%d-%b-%Y %H:%M"),
-                    measurement["level_percent"],
-                    measurement["level_litres"],
-                ),
-            )
+            reading_date = cast("datetime", measurement["reading_date"])
+            date_str = reading_date.strftime("%d-%b-%Y %H:%M")
+            level_pct = measurement["level_percent"]
+            level_litres = measurement["level_litres"]
+
+            print(f"\t{date_str:<22} {level_pct:<6} {level_litres:<5}")
 
 
-if __name__ == "__main__": # pragma: no cover
+if __name__ == "__main__":  # pragma: no cover
     # execute only if run as a script
     main()
