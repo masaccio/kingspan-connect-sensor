@@ -3,19 +3,30 @@
         "editor.formatOnSave": true,
         "editor.wordWrap": "wordWrapColumn",
         "editor.wordWrapColumn": 100,
-        "editor.defaultFormatter": "ms-python.black-formatter"
+        "editor.defaultFormatter": "charliermarsh.ruff",
+        "editor.codeActionsOnSave": {
+            "source.fixAll.ruff": "explicit",
+            "source.organizeImports.ruff": "explicit"
+        }
     },
-    "python.testing.pytestEnabled": true,
-    "python.testing.unittestEnabled": false,
-    "python.analysis.typeCheckingMode": "basic",
     "python.testing.pytestArgs": [
         "--no-cov",
         "-o",
         "log_cli=True",
         "--log-cli-level=ERROR",
     ],
-    "python.analysis.include": [
-        "src/connectsensor/*.py",
+    "python.testing.pytestEnabled": true,
+    "python.testing.unittestEnabled": false,
+    "mypy-type-checker.args": [
+        "--config-file",
+        "pyproject.toml"
+    ],
+    "python-envs.defaultEnvManager": "ms-python.python:venv",
+    "python-envs.pythonProjects": [],
+
+    "cSpell.language": "en",
+    "cSpell.ignorePaths": [
+        "**/settings.json"
     ],
     "cSpell.customDictionaries": {
         "custom-dictionary-workspace": {
@@ -24,7 +35,5 @@
             "addWords": true,
             "scope": "workspace"
         }
-    },
-    "python-envs.defaultEnvManager": "ms-python.python:venv",
-    "python-envs.pythonProjects": [],
+    }
 }
