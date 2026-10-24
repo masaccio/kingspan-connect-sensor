@@ -4,11 +4,16 @@ import importlib.metadata
 
 from connectsensor.client import AsyncSensorClient, SensorClient
 from connectsensor.const import APIVersion
-from connectsensor.exceptions import *  # noqa: F403
+from connectsensor.exceptions import (
+    KingspanAPIError,
+    KingspanDBError,
+    KingspanInvalidCredentialsError,
+    KingspanTimeoutError,
+)
 
 __version__ = importlib.metadata.version("kingspan-connect-sensor")
 
-__all__ = [  # noqa: F405
+__all__ = [
     "APIVersion",
     "AsyncSensorClient",
     "KingspanAPIError",
