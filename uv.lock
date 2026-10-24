@@ -585,7 +585,7 @@ wheels = [
 
 [[package]]
 name = "kingspan-connect-sensor"
-version = "4.2.1"
+version = "4.3.0"
 source = { editable = "." }
 dependencies = [
     { name = "async-property" },
