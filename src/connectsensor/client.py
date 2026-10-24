@@ -47,6 +47,28 @@ POST_HEADERS = {
 }
 
 
+def _lower_first(s: str) -> str:
+    """Lower the first character of a string, handling API prefixes."""
+    if s.startswith("API"):
+        return "api" + s[3:]
+    return s[0].lower() + s[1:]
+
+
+def _transform_soap_response(obj: Any) -> Any:  # noqa: ANN401
+    """Convert a SOAP response to the same structure as the JSON API."""
+    if isinstance(obj, dict):
+        result: dict[str, Any] = {}
+        for k, v in obj.items():
+            if k in ("APILevel", "APITankInfo_V3", "APITankInfoItem"):
+                return _transform_soap_response(v)
+            result[_lower_first(k)] = _transform_soap_response(v)
+        return result
+
+    if isinstance(obj, list):
+        return [_transform_soap_response(v) for v in obj]
+    return obj
+
+
 class HttpxTransport(Transport):
     """Custom Zeep transport using httpx.Client for synchronous HTTP requests."""
 
@@ -98,33 +120,12 @@ class _BaseClient:
 
         return obj
 
-    def check_response(self, response: object) -> APIResponse:  # noqa: C901
+    def check_response(self, response: object) -> APIResponse:
         """Check the API response is well-formed or raise an exception."""
-
-        def transform_soap_response(obj: Any) -> Any:  # noqa: ANN401
-            """Convert a SOAP response to the same structure as the JSON API."""
-
-            def lower_first(s: str) -> str:
-                if s.startswith("API"):
-                    return "api" + s[3:]
-                return s[0].lower() + s[1:]
-
-            if isinstance(obj, dict):
-                result: dict[str, Any] = {}
-                for k, v in obj.items():
-                    if k in ("APILevel", "APITankInfo_V3", "APITankInfoItem"):
-                        return transform_soap_response(v)
-                    result[lower_first(k)] = transform_soap_response(v)
-                return result
-
-            if isinstance(obj, list):
-                return [transform_soap_response(v) for v in obj]
-            return obj
-
         if isinstance(response, httpx.Response):
             content = json.loads(response.content)
         else:
-            content = transform_soap_response(serialize_object(response))
+            content = _transform_soap_response(serialize_object(response))
 
         if "apiResult" not in content or "code" not in content["apiResult"]:
             msg = "Malformed response from API: cannot extract response/code"
