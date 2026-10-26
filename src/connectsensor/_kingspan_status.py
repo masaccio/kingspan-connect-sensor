@@ -71,7 +71,9 @@ def main() -> None:
         sys.exit(1)
 
     for tank in client.tanks:
-        tank_level_percent = str(int(100 * tank.level / tank.capacity))
+        tank_level_percent = (
+            str(int(100 * tank.level / tank.capacity)) if tank.capacity > 0 else "0"
+        )
 
         print(f"{tank.name}:")
         print(f"\tCapacity = {tank.capacity}")
