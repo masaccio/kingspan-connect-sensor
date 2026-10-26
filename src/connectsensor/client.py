@@ -77,6 +77,10 @@ class HttpxTransport(Transport):
         super().__init__()
         self.client = httpx.Client()  # Synchronous HTTPX client
 
+    def close(self) -> None:
+        """Close the synchronous HTTPX client."""
+        self.client.close()
+
     def post(
         self,
         address: str,
@@ -123,7 +127,7 @@ class _BaseClient:
     def check_response(self, response: object) -> APIResponse:
         """Check the API response is well-formed or raise an exception."""
         if isinstance(response, httpx.Response):
-            content = json.loads(response.content)
+            content = response.json()
         else:
             content = _transform_soap_response(serialize_object(response))
 
@@ -191,12 +195,13 @@ class _BaseClient:
     ) -> None:
         """Process the login API response and instantiate tank objects."""
         if hasattr(response, "status_code") and response.status_code == HTTP_UNAUTHORIZED:
-            # JSON API for an invalid JWT
             msg = "Invalid token authorization"
             raise KingspanAPIError(msg)
         data = self.check_response(response)
 
         self._user_id = cast("str", data["apiUserID"])
+
+        self._tanks.clear()
         tanks_list = cast("list[dict[str, Any]]", data["tanks"])
         for tank_info in tanks_list:
             self._tanks.append(tank_type(self, cast("str", tank_info["signalmanNo"])))
@@ -275,7 +280,30 @@ class SensorClient(_BaseClient):
         else:
             self._client = httpx.Client()
 
-    def _request(self, func: Callable, *args: str | datetime | None) -> Any:  # noqa: ANN401
+    def __enter__(self) -> Self:
+        """Enter the context manager."""
+        return self
+
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> None:
+        """Exit the context manager and close the client."""
+        self.close()
+
+    def close(self) -> None:
+        """Close underlying connections."""
+        client = cast("Any", self._client)
+        if hasattr(client, "close"):
+            # KNECT API using httpx
+            client.close()
+        else:
+            # Legacy Zeep API
+            client.transport.close()
+
+    def _request(self, func: Callable, *args: Any) -> Any:  # noqa: ANN401
         func, req_args, req_kwargs = func(*args)
         try:
             response = func(*req_args, **req_kwargs)
@@ -342,33 +370,45 @@ class AsyncSensorClient(_BaseClient):
         exc_tb: TracebackType | None,
     ) -> None:
         """Exit the async context manager and close the client if we created it."""
-        if not self._injected_client and hasattr(self._client, "aclose"):
-            await cast("Any", self._client).aclose()
+        if not self._injected_client:
+            client = cast("Any", self._client)
+            if hasattr(client, "aclose"):
+                # KNECT API using httpx
+                await client.aclose()
+            else:
+                # Legacy Zeep API
+                await client.transport.client.aclose()
+                client.transport.wsdl_client.close()
 
     async def _init_client(self) -> None:
-        # httpx.AsyncClient loads certificates in a blocking manner which is flagged
-        # by Home Assistant, so we run in its own thread once on the first request.
-        def _build_client() -> httpx.AsyncClient | AsyncSoapClient:
+        def _build_client(
+            async_client: httpx.AsyncClient,
+        ) -> httpx.AsyncClient | AsyncSoapClient:
             if self._version == APIVersion.CONNECT_V1:
                 wsdl_client = httpx.Client()
-                httpx_client = httpx.AsyncClient()
-                transport = AsyncTransport(client=httpx_client, wsdl_client=wsdl_client)
+                transport = AsyncTransport(client=async_client, wsdl_client=wsdl_client)
                 client = AsyncSoapClient(WSDL_URL, transport=transport)
                 client.set_ns_prefix(None, SOAP_NS_PREFIX)
                 return client
 
-            return httpx.AsyncClient()
+            return async_client
 
         loop = get_running_loop()
         try:
-            self._client = await loop.run_in_executor(None, _build_client)
+            # Instantiate AsyncClient on main event loop before passing to executor
+            httpx_client = httpx.AsyncClient()
+            self._client = await loop.run_in_executor(
+                None,
+                _build_client,
+                httpx_client,
+            )
         except Exception as e:  # noqa: BLE001 # pylint: disable=broad-exception-caught
             self.handle_exception(e)
 
     async def _request(
         self,
         func: Callable,
-        *args: str | datetime | None,
+        *args: Any,  # noqa: ANN401
     ) -> Any:  # noqa: ANN401
         """Private wrapper for SOAP/HTTP calls."""
         func, req_args, req_kwargs = func(*args)
