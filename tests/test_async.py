@@ -1,5 +1,6 @@
 import logging
 from datetime import datetime
+from pathlib import Path
 from unittest.mock import AsyncMock, patch
 
 import httpx
@@ -56,7 +57,7 @@ async def test_tank_exception(mocker):
             msg = "Test Exception for GetLatestLevel"
             raise KingspanAPIError(msg)
         mock_filename = get_mock_filename(url, kwargs["content"])
-        return get_mock_response(url, open(mock_filename, "rb").read())
+        return get_mock_response(url, Path(mock_filename).read_bytes())
 
     mocker.patch.object(httpx.AsyncClient, "post", new=mocked_post)
 
@@ -89,7 +90,7 @@ async def test_history_exception(mocker):
             msg = "Test Exception for GetCallHistory"
             raise KingspanAPIError(msg)
         mock_filename = get_mock_filename(url, kwargs["content"])
-        return get_mock_response(url, open(mock_filename, "rb").read())
+        return get_mock_response(url, Path(mock_filename).read_bytes())
 
     mocker.patch.object(httpx.AsyncClient, "post", new=mocked_post)
 
@@ -153,3 +154,25 @@ async def test_async_client_injection():
             assert client._client == mock_internal_instance
 
         mock_internal_instance.aclose.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_caching(mock_async_httpx_post, mocker):
+    """Verify that multiple async data accesses do not trigger repeated API calls."""
+    async with AsyncSensorClient() as client:
+        await client.login(USERNAME, PASSWORD)
+        tanks = await client.tanks
+
+        mock_get_latest = mocker.spy(client, "_get_latest_level")
+
+        # Access property twice, should only fetch once
+        _ = await tanks[0].level
+        _ = await tanks[0].level
+
+        assert mock_get_latest.call_count == 1
+
+        # Clear cache and assert a new call is made
+        tanks[0].clear_cache()
+        _ = await tanks[0].level
+
+        assert mock_get_latest.call_count == 2

@@ -18,6 +18,11 @@ class _BaseTank:
         self._level_data: dict[str, Any] = {}
         self._tank_info: dict[str, Any] = {}
 
+    def clear_cache(self) -> None:
+        """Clear the cached tank data to force a network refresh on next access."""
+        self._level_data = {}
+        self._tank_info = {}
+
     def unpack_tank_data(self, response: dict[str, Any]) -> None:
         """Extract level and tank information from the API response."""
         self._level_data = cast("dict[str, Any]", response["level"])
@@ -59,28 +64,29 @@ class Tank(_BaseTank):
         """Return the serial number of the tank."""
         self._cache_tank_data()
         return str(
-            self._tank_info["Signalman No"]
-            if "Signalman No" in self._tank_info
-            else self._tank_info["Serial No"],
+            self._tank_info.get(
+                "Signalman No",
+                self._tank_info.get("Serial No", "Unknown"),
+            ),
         )
 
     @property
     def model(self) -> str:
         """Return the model of the tank."""
         self._cache_tank_data()
-        return str(self._tank_info["Model"])
+        return str(self._tank_info.get("Model", "Unknown"))
 
     @property
     def name(self) -> str:
         """Return the name of the tank."""
         self._cache_tank_data()
-        return str(self._tank_info["Tank Name"])
+        return str(self._tank_info.get("Tank Name", "Unknown"))
 
     @property
     def capacity(self) -> int:
         """Return the capacity of the tank in litres."""
         self._cache_tank_data()
-        return int(self._tank_info["Tank Capacity(L)"])
+        return int(self._tank_info.get("Tank Capacity(L)", 0))
 
     @property
     def last_read(self) -> datetime:
@@ -122,28 +128,29 @@ class AsyncTank(_BaseTank):
         """Return the serial number of the tank."""
         await self._cache_tank_data()
         return str(
-            self._tank_info["Signalman No"]
-            if "Signalman No" in self._tank_info
-            else self._tank_info["Serial No"],
+            self._tank_info.get(
+                "Signalman No",
+                self._tank_info.get("Serial No", "Unknown"),
+            ),
         )
 
     @async_property
     async def model(self) -> str:
         """Return the model of the tank."""
         await self._cache_tank_data()
-        return str(self._tank_info["Model"])
+        return str(self._tank_info.get("Model", "Unknown"))
 
     @async_property
     async def name(self) -> str:
         """Return the name of the tank."""
         await self._cache_tank_data()
-        return str(self._tank_info["Tank Name"])
+        return str(self._tank_info.get("Tank Name", "Unknown"))
 
     @async_property
     async def capacity(self) -> int:
         """Return the capacity of the tank in litres."""
         await self._cache_tank_data()
-        return int(self._tank_info["Tank Capacity(L)"])
+        return int(self._tank_info.get("Tank Capacity(L)", 0))
 
     @async_property
     async def last_read(self) -> datetime:
