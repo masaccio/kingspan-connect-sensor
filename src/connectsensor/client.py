@@ -6,14 +6,13 @@ import json
 import logging
 from asyncio import get_running_loop
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any, Self, cast
 
 if TYPE_CHECKING:
     from collections.abc import Callable
     from types import TracebackType
 
 import httpx
-from typing_extensions import Self
 from zeep import AsyncClient as AsyncSoapClient
 from zeep import Client as SoapClient
 from zeep.helpers import serialize_object
