@@ -132,10 +132,21 @@ class _BaseClient:
 
     def check_response(self, response: object) -> APIResponse:
         """Check the API response is well-formed or raise an exception."""
-        if isinstance(response, httpx.Response):
-            content = response.json()
-        else:
-            content = _transform_soap_response(serialize_object(response))
+        try:
+            if isinstance(response, httpx.Response):
+                content = response.json()
+            else:
+                content = _transform_soap_response(serialize_object(response))
+        except ValueError as e:
+            # Safely traps json.JSONDecodeError if the API returns an HTML 502 Gateway page
+            msg = f"Malformed response from API: cannot parse JSON ({e})"
+            _LOGGER.debug("API error: %s", msg)
+            raise KingspanAPIError(msg, KingspanErrorCode.UNKNOWN) from e
+        except Exception as e:
+            # Failsafe for XML/Zeep serialization crashes
+            msg = f"Unexpected error parsing response: {e}"
+            _LOGGER.debug("API error: %s", msg)
+            raise KingspanAPIError(msg, KingspanErrorCode.UNKNOWN) from e
 
         if "apiResult" not in content or "code" not in content["apiResult"]:
             msg = "Malformed response from API: cannot extract response/code"
@@ -144,7 +155,7 @@ class _BaseClient:
                 msg,
                 self.redact_response(content),
             )
-            raise KingspanAPIError(msg)
+            raise KingspanAPIError(msg, KingspanErrorCode.UNKNOWN)
 
         if content["apiResult"]["code"] != 0:
             msg = cast("str", content["apiResult"]["description"])
@@ -173,7 +184,8 @@ class _BaseClient:
             _LOGGER.debug("API error: %s", msg)
             raise KingspanTimeoutError(msg) from exc
 
-        if isinstance(exc, httpx.RequestError):
+        # Catch possible httpx issues (RequestError, ProtocolError, etc.)
+        if isinstance(exc, httpx.HTTPError):
             msg = f"Network connection failed: {exc}"
             _LOGGER.debug("API error: %s", msg)
             raise KingspanAPIError(msg, KingspanErrorCode.CANNOT_CONNECT) from exc
@@ -210,7 +222,9 @@ class _BaseClient:
         """Process the login API response and instantiate tank objects."""
         if hasattr(response, "status_code") and response.status_code == HTTP_UNAUTHORIZED:
             msg = "Invalid token authorization"
-            raise KingspanAPIError(msg)
+            # Map explicitly to the HA invalid_auth flow
+            raise KingspanInvalidCredentialsError(msg)
+
         data = self.check_response(response)
 
         self._user_id = cast("str", data["apiUserID"])
