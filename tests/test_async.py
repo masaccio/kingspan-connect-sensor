@@ -1,3 +1,4 @@
+import json
 import logging
 from datetime import datetime
 from pathlib import Path
@@ -5,17 +6,17 @@ from unittest.mock import AsyncMock, patch
 
 import httpx
 import pytest
-
 from conftest import get_mock_filename, get_mock_response
+from mock_data import PASSWORD, USERNAME
+
 from connectsensor import (
     APIVersion,
     AsyncSensorClient,
     KingspanAPIError,
     KingspanInvalidCredentialsError,
+    KingspanTimeoutError,
 )
-from connectsensor.client import AsyncSensorClient
-from connectsensor.const import APIVersion
-from mock_data import PASSWORD, USERNAME
+from connectsensor.exceptions import KingspanErrorCode, KingspanNoDataError
 
 
 @pytest.mark.asyncio
@@ -46,8 +47,59 @@ async def test_login_exception(mock_async_httpx_post):  # noqa: ARG001
         with pytest.raises(
             KingspanInvalidCredentialsError,
             match="Authentication Failed, Invalid Login",
-        ):
+        ) as exc_info:
             await client.login("invalid_user", "invalid_password")
+        assert exc_info.value.code == KingspanErrorCode.AUTH_FAILED
+
+
+@pytest.mark.asyncio
+async def test_no_data_error(mocker):
+    mock_response = httpx.Response(
+        status_code=200,
+        content=json.dumps({"apiResult": {"code": 1, "description": "no level data"}}).encode(
+            "utf-8"
+        ),
+    )
+    mocker.patch.object(httpx.AsyncClient, "post", return_value=mock_response)
+
+    async with AsyncSensorClient() as client:
+        with pytest.raises(KingspanNoDataError, match="no level data") as exc_info:
+            await client.login(USERNAME, PASSWORD)
+        assert exc_info.value.code == KingspanErrorCode.NO_DATA
+
+
+@pytest.mark.asyncio
+async def test_network_error(mocker):
+    mocker.patch.object(
+        httpx.AsyncClient,
+        "post",
+        side_effect=httpx.RequestError("Connection refused"),
+    )
+
+    async with AsyncSensorClient() as client:
+        with pytest.raises(
+            KingspanAPIError,
+            match="Network connection failed: Connection refused",
+        ) as exc_info:
+            await client.login(USERNAME, PASSWORD)
+        assert exc_info.value.code == KingspanErrorCode.CANNOT_CONNECT
+
+
+@pytest.mark.asyncio
+async def test_timeout_error(mocker):
+    mocker.patch.object(
+        httpx.AsyncClient,
+        "post",
+        side_effect=httpx.TimeoutException("Read timeout"),
+    )
+
+    async with AsyncSensorClient() as client:
+        with pytest.raises(
+            KingspanTimeoutError,
+            match="HTTP request timeout: Read timeout",
+        ) as exc_info:
+            await client.login(USERNAME, PASSWORD)
+        assert exc_info.value.code == KingspanErrorCode.TIMEOUT
 
 
 @pytest.mark.asyncio
@@ -55,9 +107,9 @@ async def test_tank_exception(mocker):
     async def mocked_post(self, url, *args, **kwargs) -> httpx.Response:
         if "GetLatestLevel" in url:
             msg = "Test Exception for GetLatestLevel"
-            raise KingspanAPIError(msg)
+            raise KingspanAPIError(msg, KingspanErrorCode.UNKNOWN)
         mock_filename = get_mock_filename(url, kwargs["content"])
-        return get_mock_response(url, Path(mock_filename).read_bytes())
+        return get_mock_response(url, Path(mock_filename).read_bytes())  # noqa: ASYNC240
 
     mocker.patch.object(httpx.AsyncClient, "post", new=mocked_post)
 
@@ -76,11 +128,14 @@ async def test_tank_exception(mocker):
 async def test_init_exception(mocker):
     mocker.patch(
         "httpx.AsyncClient",
-        side_effect=httpx.HTTPError("Test zeep init"),
+        side_effect=Exception("Test zeep init"),
     )
-    with pytest.raises(KingspanAPIError, match="Test zeep init"):
+    with pytest.raises(
+        KingspanAPIError, match="Unexpected request failure: Test zeep init"
+    ) as exc_info:
         async with AsyncSensorClient(version=APIVersion.CONNECT_V1) as _:
             pass
+    assert exc_info.value.code == KingspanErrorCode.UNKNOWN
 
 
 @pytest.mark.asyncio
@@ -88,9 +143,9 @@ async def test_history_exception(mocker):
     async def mocked_post(self, url, *args, **kwargs):
         if "GetCallHistory" in url:
             msg = "Test Exception for GetCallHistory"
-            raise KingspanAPIError(msg)
+            raise KingspanAPIError(msg, KingspanErrorCode.UNKNOWN)
         mock_filename = get_mock_filename(url, kwargs["content"])
-        return get_mock_response(url, Path(mock_filename).read_bytes())
+        return get_mock_response(url, Path(mock_filename).read_bytes())  # noqa: ASYNC240
 
     mocker.patch.object(httpx.AsyncClient, "post", new=mocked_post)
 

@@ -25,9 +25,11 @@ class APIVersion(IntEnum):
     KNECT_V1 = auto()
 
 
-DEFAULT_API_VERSION = APIVersion.KNECT_V1
-
 HTTP_UNAUTHORIZED = 401
+
+# Defaults
+DEFAULT_API_VERSION = APIVersion.KNECT_V1
+DEFAULT_API_TIMEOUT = 10.0
 
 # The JWT appears to be hard-coded into the application rather than securely returned
 TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJUaGVNb2JpbGVBcHAiLCJyb2xlIjoiVGhlTW9iaWxlQXBwIiwibmJmIjoxNzg2OTYzNzIyLCJleHAiOjIxMDI1ODI5MjIsImlzcyI6IlNlbnNvckFQSSBBdXRoU2VydmVyIiwiYXVkIjoiU2Vuc29yQVBJIFVzZXJzIn0.tforQzK2UITLC1AOqkI1dbxH4afrABOsQhoBbgEQ1Fs"  # noqa: E501, S105, cspell:disable-line, pylint: disable=line-too-long

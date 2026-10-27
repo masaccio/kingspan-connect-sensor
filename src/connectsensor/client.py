@@ -20,6 +20,7 @@ from zeep.transports import AsyncTransport, Transport
 
 from connectsensor.const import (
     API_BASE_URL,
+    DEFAULT_API_TIMEOUT,
     DEFAULT_API_VERSION,
     HTTP_UNAUTHORIZED,
     SOAP_NS_PREFIX,
@@ -31,7 +32,9 @@ from connectsensor.const import (
 )
 from connectsensor.exceptions import (
     KingspanAPIError,
+    KingspanErrorCode,
     KingspanInvalidCredentialsError,
+    KingspanNoDataError,
     KingspanTimeoutError,
 )
 from connectsensor.tank import AsyncTank, Tank
@@ -71,10 +74,10 @@ def _transform_soap_response(obj: Any) -> Any:  # noqa: ANN401
 class HttpxTransport(Transport):
     """Custom Zeep transport using httpx.Client for synchronous HTTP requests."""
 
-    def __init__(self) -> None:
+    def __init__(self, timeout: float = DEFAULT_API_TIMEOUT) -> None:
         """Initialize the HttpxTransport with a synchronous httpx.Client."""
         super().__init__()
-        self.client = httpx.Client()  # Synchronous HTTPX client
+        self.client = httpx.Client(timeout=timeout)  # Synchronous HTTPX client
 
     def close(self) -> None:
         """Close the synchronous HTTPX client."""
@@ -97,11 +100,15 @@ class HttpxTransport(Transport):
 class _BaseClient:
     """Base class for common helper functions."""
 
-    def __init__(self, version: APIVersion = DEFAULT_API_VERSION) -> None:
-        """Initialize the base class."""
+    def __init__(
+        self,
+        version: APIVersion = DEFAULT_API_VERSION,
+        timeout: float = DEFAULT_API_TIMEOUT,
+    ) -> None:
         _LOGGER.debug("Init API with version=%s", version.name)
         self._client: httpx.Client | httpx.AsyncClient | SoapClient | AsyncSoapClient | None = None
         self._version = version
+        self._timeout = timeout
         self._username: str | None = None
         self._password: str | None = None
         self._user_id: str | None = None
@@ -141,14 +148,14 @@ class _BaseClient:
 
         if content["apiResult"]["code"] != 0:
             msg = cast("str", content["apiResult"]["description"])
-            _LOGGER.debug(
-                "API error: %s, content=%s",
-                msg,
-                self.redact_response(content),
-            )
+
+            # Trap the string-based API faults at the source
             if "Authentication Failed" in msg:
                 raise KingspanInvalidCredentialsError(msg)
-            raise KingspanAPIError(content["apiResult"]["description"])
+            if "no level data" in msg.lower():
+                raise KingspanNoDataError(msg)
+
+            raise KingspanAPIError(msg, KingspanErrorCode.CANNOT_CONNECT)
 
         _LOGGER.debug(
             "API request succeeded, content=%s",
@@ -157,15 +164,23 @@ class _BaseClient:
         return cast("APIResponse", content)
 
     def handle_exception(self, exc: Exception) -> None:
-        """Handle and translate HTTP and runtime exceptions."""
-        if isinstance(exc, httpx.TimeoutException):
+        """Strictly trap and translate all HTTP and runtime exceptions."""
+        if isinstance(exc, KingspanAPIError):
+            raise exc
+
+        if isinstance(exc, (httpx.TimeoutException, TimeoutError)):
             msg = f"HTTP request timeout: {exc}"
             _LOGGER.debug("API error: %s", msg)
             raise KingspanTimeoutError(msg) from exc
 
-        msg = f"HTTP request failed: {exc}"
+        if isinstance(exc, httpx.RequestError):
+            msg = f"Network connection failed: {exc}"
+            _LOGGER.debug("API error: %s", msg)
+            raise KingspanAPIError(msg, KingspanErrorCode.CANNOT_CONNECT) from exc
+
+        msg = f"Unexpected request failure: {exc}"
         _LOGGER.debug("API error: %s", msg)
-        raise KingspanAPIError(msg) from exc
+        raise KingspanAPIError(msg, KingspanErrorCode.UNKNOWN) from exc
 
     def login_request(
         self,
@@ -270,14 +285,16 @@ class _BaseClient:
 class SensorClient(_BaseClient):
     """Synchronous client for interacting with the Kingspan Connect Sensor API."""
 
-    def __init__(self, version: APIVersion = DEFAULT_API_VERSION) -> None:
+    def __init__(
+        self, version: APIVersion = DEFAULT_API_VERSION, timeout: float = DEFAULT_API_TIMEOUT
+    ) -> None:
         """Init for Synchronous client."""
         super().__init__(version)
         if self._version == APIVersion.CONNECT_V1:
-            self._client = SoapClient(WSDL_URL, transport=HttpxTransport())
+            self._client = SoapClient(WSDL_URL, transport=HttpxTransport(timeout))
             self._client.set_ns_prefix(None, SOAP_NS_PREFIX)
         else:
-            self._client = httpx.Client()
+            self._client = httpx.Client(timeout=timeout)
 
     def __enter__(self) -> Self:
         """Enter the context manager."""
@@ -349,9 +366,10 @@ class AsyncSensorClient(_BaseClient):
         self,
         version: APIVersion = DEFAULT_API_VERSION,
         client: httpx.AsyncClient | None = None,
+        timeout: float = DEFAULT_API_TIMEOUT,
     ) -> None:
         """Initialize the async client with an optional injected httpx client."""
-        super().__init__(version)
+        super().__init__(version, timeout)
         self._injected_client = client is not None
         if client is not None:
             self._client = client
@@ -384,7 +402,7 @@ class AsyncSensorClient(_BaseClient):
             async_client: httpx.AsyncClient,
         ) -> httpx.AsyncClient | AsyncSoapClient:
             if self._version == APIVersion.CONNECT_V1:
-                wsdl_client = httpx.Client()
+                wsdl_client = httpx.Client(timeout=self._timeout)
                 transport = AsyncTransport(client=async_client, wsdl_client=wsdl_client)
                 client = AsyncSoapClient(WSDL_URL, transport=transport)
                 client.set_ns_prefix(None, SOAP_NS_PREFIX)
@@ -395,7 +413,7 @@ class AsyncSensorClient(_BaseClient):
         loop = get_running_loop()
         try:
             # Instantiate AsyncClient on main event loop before passing to executor
-            httpx_client = httpx.AsyncClient()
+            httpx_client = httpx.AsyncClient(timeout=self._timeout)
             self._client = await loop.run_in_executor(
                 None,
                 _build_client,
