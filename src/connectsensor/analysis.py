@@ -36,16 +36,19 @@ def filter_history(
     if not history:
         return []
 
-    # Use naive current datetime for comparison since API timestamps are naive
+    # Always generate a naive current time
     cutoff = datetime.now() - timedelta(days=usage_window)  # noqa: DTZ005
 
-    filtered_history: list[TankHistoryPoint] = [
-        {
-            "level_litres": point["level_litres"],
-            "reading_date": point["reading_date"],
-        }
-        for point in history
-    ]
+    filtered_history: list[TankHistoryPoint] = []
+    for point in history:
+        dt_naive = point["reading_date"].replace(tzinfo=None)
+        filtered_history.append(
+            {
+                "level_litres": point["level_litres"],
+                "reading_date": dt_naive,
+            }
+        )
+
     recent = [point for point in filtered_history if point["reading_date"] >= cutoff]
     recent.sort(key=lambda x: x["reading_date"])
     return recent
