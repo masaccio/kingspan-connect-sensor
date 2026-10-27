@@ -3,8 +3,6 @@
 from datetime import datetime
 from typing import Any, cast
 
-from async_property import async_property
-
 from connectsensor.const import APIResponseValue
 
 
@@ -117,13 +115,13 @@ class Tank(_BaseTank):
 class AsyncTank(_BaseTank):
     """Asynchronous Tank class."""
 
-    @async_property
+    @property
     async def level(self) -> int:
         """Return the oil level in the tank in litres."""
         await self._cache_tank_data()
         return int(self._level_data["levelLitres"])
 
-    @async_property
+    @property
     async def serial_number(self) -> str:
         """Return the serial number of the tank."""
         await self._cache_tank_data()
@@ -134,25 +132,25 @@ class AsyncTank(_BaseTank):
             ),
         )
 
-    @async_property
+    @property
     async def model(self) -> str:
         """Return the model of the tank."""
         await self._cache_tank_data()
         return str(self._tank_info.get("Model", "Unknown"))
 
-    @async_property
+    @property
     async def name(self) -> str:
         """Return the name of the tank."""
         await self._cache_tank_data()
         return str(self._tank_info.get("Tank Name", "Unknown"))
 
-    @async_property
+    @property
     async def capacity(self) -> int:
         """Return the capacity of the tank in litres."""
         await self._cache_tank_data()
         return int(self._tank_info.get("Tank Capacity(L)", 0))
 
-    @async_property
+    @property
     async def last_read(self) -> datetime:
         """Return the last read date of the tank as a datetime object."""
         await self._cache_tank_data()
