@@ -6,7 +6,9 @@ autoremove
 caplog
 connectsensor
 Connell
+dataclass
 dataframe
+datetimes
 emailaddress
 enddate
 envlist

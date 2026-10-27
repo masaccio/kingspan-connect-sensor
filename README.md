@@ -86,3 +86,42 @@ History:
  01-Feb-2021 00:29      78     1008 
  02-Feb-2021 00:59      76     986  
 ```
+
+## Analytics and Forecasting
+
+The package includes an optional `analysis` module to help calculate tank usage rates and forecast when the tank will be empty. This logic is decoupled from the core client to keep basic data fetching lightweight, and it processes the naive datetimes returned directly by the API.
+
+```python
+from connectsensor import AsyncSensorClient, APIVersion
+from connectsensor.analysis import (
+    calculate_forecast_empty,
+    calculate_usage_rate,
+    filter_history,
+)
+
+async with AsyncSensorClient(version=APIVersion.KNECT_V1) as client:
+    await client.login("test@example.com", "s3cret")
+    tanks = await client.tanks
+    
+    # Fetch the raw history points
+    history = await tanks[0].history()
+    
+    # Filter the data down to the last 14 days
+    recent_history = filter_history(history, usage_window=14)
+    
+    # Calculate the average daily usage (litres/day)
+    rate = calculate_usage_rate(recent_history)
+    
+    # Estimate the number of days until the tank is empty
+    days_left = calculate_forecast_empty(recent_history, rate)
+    
+    print(f"Usage rate: {rate:.1f} L/day")
+    print(f"Estimated days to empty: {days_left} days")
+```
+
+### Analysis Utilities
+
+* `filter_history(history, usage_window)`: Filters the raw history array to the specified number of days and sorts it chronologically.
+* `calculate_usage_rate(history)`: Calculates the average daily usage in litres. This function automatically detects and ignores tank refills so they do not artificially skew your usage average.
+* `calculate_forecast_empty(history, rate)`: Estimates the number of days until the tank reaches 0 litres based on the most recent tank level and the calculated usage rate.
+* `TankData`: The `connectsensor.analysis` module also exports a structured `TankData` dataclass, which is highly useful for downstream consumers like Home Assistant integrations that need to bundle the raw attributes and these calculated forecasts into a single object.
