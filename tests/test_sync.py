@@ -1,4 +1,3 @@
-import json
 import logging
 from datetime import datetime
 from pathlib import Path
@@ -28,14 +27,7 @@ def test_status(mock_sync_httpx_post, mock_wsdl):  # noqa: ARG001
             assert tanks[0].model == "TestModel"
             assert tanks[0].name == "TestTank"
             assert tanks[0].capacity == 2000
-            assert tanks[0].last_read.replace(microsecond=0) == datetime(
-                2021,
-                1,
-                31,
-                0,
-                59,
-                30,
-            )
+            assert tanks[0].last_read.replace(microsecond=0) == datetime(2021, 1, 31, 0, 59, 30)
             tank_history = tanks[0].history()
             assert tank_history[0]["reading_date"] == datetime(2021, 1, 25, 13, 59, 14)
             assert tank_history[1]["level_percent"] == 95
@@ -45,113 +37,83 @@ def test_status(mock_sync_httpx_post, mock_wsdl):  # noqa: ARG001
     check_client(APIVersion.KNECT_V1)
 
 
-def test_login_exception(mock_sync_httpx_post):  # noqa: ARG001
-    with SensorClient() as client:
-        with pytest.raises(
+@pytest.mark.parametrize(
+    ("mock_effect", "expected_exception", "expected_code", "match_string"),
+    [
+        # API Data Exceptions
+        (
+            httpx.Response(
+                200, content=b'{"apiResult": {"code": 1, "description": "Authentication Failed"}}'
+            ),
             KingspanInvalidCredentialsError,
-            match="Authentication Failed, Invalid Login",
-        ) as exc_info:
-            client.login("invalid_user", "invalid_password")
-        assert exc_info.value.code == KingspanErrorCode.AUTH_FAILED
-
-
-def test_unknown_api_error(mocker):
-    mock_response = httpx.Response(
-        status_code=200,
-        content=json.dumps({"apiResult": {"code": 1, "description": "test API error"}}).encode(
-            "utf-8"
+            KingspanErrorCode.AUTH_FAILED,
+            "Authentication Failed",
         ),
-    )
-    mocker.patch.object(httpx.Client, "post", return_value=mock_response)
-
-    with SensorClient() as client:
-        with pytest.raises(
-            KingspanAPIError,
-            match="test API error",
-        ) as exc_info:
-            client.login(USERNAME, PASSWORD)
-        assert exc_info.value.code == KingspanErrorCode.CANNOT_CONNECT
-
-
-def test_no_data_error(mocker):
-    mock_response = httpx.Response(
-        status_code=200,
-        content=json.dumps(
-            {"apiResult": {"code": 1, "description": "Tank has no level data at the moment"}}
-        ).encode("utf-8"),
-    )
-    mocker.patch.object(httpx.Client, "post", return_value=mock_response)
-
-    with SensorClient() as client:
-        with pytest.raises(
+        (
+            httpx.Response(
+                200, content=b'{"apiResult": {"code": 1, "description": "no level data"}}'
+            ),
             KingspanNoDataError,
-            match="no level data",
-        ) as exc_info:
-            client.login(USERNAME, PASSWORD)
-        assert exc_info.value.code == KingspanErrorCode.NO_DATA
-
-
-def test_network_error(mocker):
-    mocker.patch.object(
-        httpx.Client,
-        "post",
-        side_effect=httpx.RequestError("Connection reset"),
-    )
-
-    with SensorClient() as client:
-        with pytest.raises(
+            KingspanErrorCode.NO_DATA,
+            "no level data",
+        ),
+        (
+            httpx.Response(
+                200, content=b'{"apiResult": {"code": 1, "description": "test API error"}}'
+            ),
             KingspanAPIError,
-            match="Network connection failed: Connection reset",
-        ) as exc_info:
-            client.login(USERNAME, PASSWORD)
-        assert exc_info.value.code == KingspanErrorCode.CANNOT_CONNECT
-
-
-def test_timeout(mocker):
-    mocker.patch.object(
-        httpx.Client,
-        "post",
-        side_effect=httpx.TimeoutException("Test httpx timeout"),
-    )
-
-    with SensorClient() as client:
-        with pytest.raises(
+            KingspanErrorCode.CANNOT_CONNECT,
+            "test API error",
+        ),
+        # Protocol & Parsing Exceptions
+        (
+            httpx.Response(401, content=b"Unauthorized"),
+            KingspanInvalidCredentialsError,
+            KingspanErrorCode.AUTH_FAILED,
+            "Invalid token authorization",
+        ),
+        (
+            httpx.Response(502, content=b"<html>502 Bad Gateway</html>"),
+            KingspanAPIError,
+            KingspanErrorCode.UNKNOWN,
+            "cannot parse JSON",
+        ),
+        (
+            httpx.Response(200, content=b'{"unexpected": "data"}'),
+            KingspanAPIError,
+            KingspanErrorCode.UNKNOWN,
+            "cannot extract response/code",
+        ),
+        # Network Trap Exceptions
+        (
+            httpx.RequestError("Connection reset"),
+            KingspanAPIError,
+            KingspanErrorCode.CANNOT_CONNECT,
+            "Network connection failed: Connection reset",
+        ),
+        (
+            httpx.TimeoutException("Read timeout"),
             KingspanTimeoutError,
-            match="HTTP request timeout: Test httpx timeout",
-        ) as exc_info:
-            client.login(USERNAME, PASSWORD)
-        assert exc_info.value.code == KingspanErrorCode.TIMEOUT
-
-
-def test_api_unauthorized(mocker):
-    mock_response = httpx.Response(status_code=401, content=b"Unauthorized")
-
-    mocker.patch.object(httpx.Client, "post", return_value=mock_response)
-
-    with SensorClient() as client:
-        with pytest.raises(KingspanAPIError, match="Invalid token authorization") as exc_info:
-            client.login(USERNAME, PASSWORD)
-        assert exc_info.value.code == KingspanErrorCode.UNKNOWN
-
-
-def test_malformed_response(mocker):
-    mock_response = httpx.Response(
-        status_code=200, content=json.dumps({"unexpected": "data"}).encode("utf-8")
-    )
-
-    mocker.patch.object(httpx.Client, "post", return_value=mock_response)
+            KingspanErrorCode.TIMEOUT,
+            "HTTP request timeout: Read timeout",
+        ),
+    ],
+)
+def test_login_exceptions(mocker, mock_effect, expected_exception, expected_code, match_string):
+    """Parameterized test to verify all HTTP, network, and API traps during login."""
+    if isinstance(mock_effect, Exception):
+        mocker.patch.object(httpx.Client, "post", side_effect=mock_effect)
+    else:
+        mocker.patch.object(httpx.Client, "post", return_value=mock_effect)
 
     with SensorClient() as client:
-        with pytest.raises(
-            KingspanAPIError,
-            match="Malformed response from API: cannot extract response/code",
-        ) as exc_info:
+        with pytest.raises(expected_exception, match=match_string) as exc_info:
             client.login(USERNAME, PASSWORD)
-        assert exc_info.value.code == KingspanErrorCode.UNKNOWN
+        assert exc_info.value.code == expected_code
 
 
 def test_tank_exception(mocker):
-    def mocked_post(self, url, *args, **kwargs):  # noqa: ANN003, ARG001
+    def mocked_post(_self, url, *args, **kwargs) -> httpx.Response:
         if "GetLatestLevel" in url:
             msg = "Test Exception for GetLatestLevel"
             raise KingspanAPIError(msg, KingspanErrorCode.UNKNOWN)
@@ -163,16 +125,12 @@ def test_tank_exception(mocker):
     with SensorClient() as client:
         client.login(USERNAME, PASSWORD)
         tanks = client.tanks
-
-        with pytest.raises(
-            KingspanAPIError,
-            match="Test Exception for GetLatestLevel",
-        ):
+        with pytest.raises(KingspanAPIError, match="Test Exception for GetLatestLevel"):
             _ = tanks[0].level
 
 
 def test_history_exception(mocker):
-    def mocked_post(self, url, *args, **kwargs):  # noqa: ANN003
+    def mocked_post(_self, url, *_args, **kwargs) -> httpx.Response:
         if "GetCallHistory" in url:
             msg = "Test Exception for GetCallHistory"
             raise KingspanAPIError(msg, KingspanErrorCode.UNKNOWN)
@@ -180,14 +138,11 @@ def test_history_exception(mocker):
         return get_mock_response(url, Path(mock_filename).read_bytes())
 
     mocker.patch.object(httpx.Client, "post", new=mocked_post)
+
     with SensorClient() as client:
         client.login(USERNAME, PASSWORD)
         tanks = client.tanks
-
-        with pytest.raises(
-            KingspanAPIError,
-            match="Test Exception for GetCallHistory",
-        ):
+        with pytest.raises(KingspanAPIError, match="Test Exception for GetCallHistory"):
             _ = tanks[0].history()
 
 
@@ -210,17 +165,25 @@ def test_caching(mock_sync_httpx_post, mocker):  # noqa: ARG001
     with SensorClient() as client:
         client.login(USERNAME, PASSWORD)
         tanks = client.tanks
-
         mock_get_latest = mocker.spy(client, "_get_latest_level")
 
-        # Access property twice, should only fetch once
         _ = tanks[0].level
         _ = tanks[0].level
-
         assert mock_get_latest.call_count == 1
 
-        # Clear cache and assert a new call is made
         tanks[0].clear_cache()
         _ = tanks[0].level
-
         assert mock_get_latest.call_count == 2
+
+
+def test_soap_parse_exception(mocker, mock_sync_httpx_post, mock_wsdl):  # noqa: ARG001
+    """Verify that XML/Zeep serialization crashes are caught and translated."""
+    mocker.patch("connectsensor.client.serialize_object", side_effect=Exception("Zeep crash"))
+
+    with SensorClient(APIVersion.CONNECT_V1) as client:
+        with pytest.raises(
+            KingspanAPIError, match="Unexpected error parsing response: Zeep crash"
+        ) as exc_info:
+            client.login(USERNAME, PASSWORD)
+
+        assert exc_info.value.code == KingspanErrorCode.UNKNOWN
