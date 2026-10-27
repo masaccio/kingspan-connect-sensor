@@ -8,7 +8,6 @@ from unittest.mock import AsyncMock, Mock, patch
 import aiofiles
 import httpx
 import pytest
-
 from mock_data import PASSWORD
 
 
@@ -72,9 +71,7 @@ def generate_history_data(data: bytes) -> bytes:
 def get_mock_filename(url: str, content: str | bytes, generated=False) -> str:
     content = content.decode() if isinstance(content, bytes) else cast("str", content)
 
-    if content is not None and (
-        m := re.search(r"<(soap:Body|soap-env:Body)>\s*<(\w+)", content)
-    ):
+    if content is not None and (m := re.search(r"<(soap:Body|soap-env:Body)>\s*<(\w+)", content)):
         method = m.group(2)
     elif m := re.search(r".*/(\w+)", url):
         method = m.group(1)
@@ -170,11 +167,11 @@ def mock_sync_httpx_post(request):
 
 
 @pytest.fixture
-def mock_async_httpx_post():
+def mock_async_httpx_post(request):
     """Mock httpx.AsyncClient.post method to return content from a file."""
 
     async def mock_post(url, *args, **kwargs):
-        content = kwargs["content"] if "content" in kwargs else kwargs["data"]
+        content = kwargs.get("content") or kwargs.get("data")
         mock_filename = get_mock_filename(url, content)
 
         try:
@@ -186,6 +183,24 @@ def mock_async_httpx_post():
 
         return get_mock_response(url, mock_response)
 
+    async def mock_generated_post(url, *args, **kwargs):
+        content = kwargs.get("content") or kwargs.get("data")
+        mock_filename = get_mock_filename(url, content, generated=True)
+
+        try:
+            async with aiofiles.open(mock_filename, "rb") as f:
+                mock_response = await f.read()
+        except FileNotFoundError:
+            msg = f"Mock file not found: {mock_filename}"
+            raise RuntimeError(msg)  # noqa: B904
+
+        return get_mock_response(url, mock_response, generated=True)
+
+    generate_history = hasattr(request, "param") and request.param
+
     with patch("httpx.AsyncClient.post", new_callable=AsyncMock) as mock_client:
-        mock_client.side_effect = mock_post
+        if generate_history:
+            mock_client.side_effect = mock_generated_post
+        else:
+            mock_client.side_effect = mock_post
         yield mock_client
