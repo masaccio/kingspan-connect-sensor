@@ -384,14 +384,12 @@ class AsyncSensorClient(_BaseClient):
     ) -> None:
         """Initialize the async client with an optional injected httpx client."""
         super().__init__(version, timeout)
-        self._injected_client = client is not None
-        if client is not None:
-            self._client = client
+        self._has_injected_client = client is not None
+        self._injected_client = client
 
     async def __aenter__(self) -> Self:
         """Enter the async context manager."""
-        if self._client is None:
-            await self._init_client()
+        await self._init_client()
         return self
 
     async def __aexit__(
@@ -401,38 +399,34 @@ class AsyncSensorClient(_BaseClient):
         exc_tb: TracebackType | None,
     ) -> None:
         """Exit the async context manager and close the client if we created it."""
-        if not self._injected_client:
-            client = cast("Any", self._client)
-            if hasattr(client, "aclose"):
-                # KNECT API using httpx
-                await client.aclose()
-            else:
+        if not self._has_injected_client and self._client:
+            if self._version == APIVersion.CONNECT_V1:
                 # Legacy Zeep API
+                client = cast("Any", self._client)
                 await client.transport.client.aclose()
                 client.transport.wsdl_client.close()
+            else:
+                # KNECT API using httpx
+                client = cast("Any", self._client)
+                await client.aclose()
+
+    def _build_client(self) -> httpx.AsyncClient | AsyncSoapClient:
+        """Build client in the executor to prevent blocking requests from httpx/zeep."""
+        httpx_client = self._injected_client or httpx.AsyncClient(timeout=self._timeout)
+
+        if self._version == APIVersion.CONNECT_V1:
+            wsdl_client = httpx.Client(timeout=self._timeout)
+            transport = AsyncTransport(client=httpx_client, wsdl_client=wsdl_client)
+            soap_client = AsyncSoapClient(WSDL_URL, transport=transport)
+            soap_client.set_ns_prefix(None, SOAP_NS_PREFIX)
+            return soap_client
+
+        return httpx_client
 
     async def _init_client(self) -> None:
-        def _build_client(
-            async_client: httpx.AsyncClient,
-        ) -> httpx.AsyncClient | AsyncSoapClient:
-            if self._version == APIVersion.CONNECT_V1:
-                wsdl_client = httpx.Client(timeout=self._timeout)
-                transport = AsyncTransport(client=async_client, wsdl_client=wsdl_client)
-                client = AsyncSoapClient(WSDL_URL, transport=transport)
-                client.set_ns_prefix(None, SOAP_NS_PREFIX)
-                return client
-
-            return async_client
-
         loop = get_running_loop()
         try:
-            # Instantiate AsyncClient on main event loop before passing to executor
-            httpx_client = httpx.AsyncClient(timeout=self._timeout)
-            self._client = await loop.run_in_executor(
-                None,
-                _build_client,
-                httpx_client,
-            )
+            self._client = await loop.run_in_executor(None,  self._build_client)
         except Exception as e:  # noqa: BLE001 # pylint: disable=broad-exception-caught
             self.handle_exception(e)
 

@@ -167,44 +167,51 @@ async def test_history_exception(mocker):
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize(("api_version"), [(APIVersion.KNECT_V1), (APIVersion.CONNECT_V1)])
 async def test_debug_redaction(
     mock_async_httpx_post,  # noqa: ARG001
     mock_wsdl,  # noqa: ARG001
     caplog,
+    api_version
 ):
-    async def check_client(api_version: APIVersion) -> None:
-        logger = logging.getLogger("connectsensor")
-        logger.propagate = True
-        caplog.set_level(logging.DEBUG, logger="connectsensor")
-        caplog.clear()
-        async with AsyncSensorClient(api_version) as client:
-            await client.login(USERNAME, PASSWORD)
-            log_text = caplog.text
-            assert USERNAME not in log_text
-            assert PASSWORD not in log_text
-            assert "*redacted*" in log_text
-
-    await check_client(APIVersion.CONNECT_V1)
-    await check_client(APIVersion.KNECT_V1)
+    logger = logging.getLogger("connectsensor")
+    logger.propagate = True
+    caplog.set_level(logging.DEBUG, logger="connectsensor")
+    caplog.clear()
+    async with AsyncSensorClient(api_version) as client:
+        await client.login(USERNAME, PASSWORD)
+        log_text = caplog.text
+        assert USERNAME not in log_text
+        assert PASSWORD not in log_text
+        assert "*redacted*" in log_text
 
 
 @pytest.mark.asyncio
-async def test_async_client_injection():
-    """Verify injected HTTPX clients bypass internal lifecycle management."""
+@pytest.mark.parametrize("api_version", [APIVersion.KNECT_V1, APIVersion.CONNECT_V1])
+async def test_async_client_injection(mock_wsdl, api_version):
+    """Verify injected HTTPX clients bypass internal lifecycle management for both APIs."""
     mock_client = AsyncMock(spec=httpx.AsyncClient)
 
-    async with AsyncSensorClient(version=APIVersion.KNECT_V1, client=mock_client) as client:
-        assert client._injected_client is True
-        assert client._client == mock_client
-
+    async with AsyncSensorClient(version=api_version, client=mock_client) as client:
+        assert client._has_injected_client is True
+        if api_version == APIVersion.CONNECT_V1:
+            assert hasattr(client._client, "transport")
+            assert client._client.transport.client == mock_client
+        else:
+            assert client._client == mock_client
+            
     mock_client.aclose.assert_not_called()
 
     with patch("connectsensor.client.httpx.AsyncClient", autospec=True) as mock_internal:
         mock_internal_instance = mock_internal.return_value
-        async with AsyncSensorClient(version=APIVersion.KNECT_V1) as client:
-            assert client._injected_client is False
-            assert client._client == mock_internal_instance
-
+        
+        async with AsyncSensorClient(version=api_version) as client:
+            assert client._has_injected_client is False
+            if api_version == APIVersion.CONNECT_V1:
+                assert hasattr(client._client, "transport")
+            else:
+                assert client._client == mock_internal_instance
+                
         mock_internal_instance.aclose.assert_called_once()
 
 
