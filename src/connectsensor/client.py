@@ -398,17 +398,15 @@ class AsyncSensorClient(_BaseClient):
         exc_val: BaseException | None,
         exc_tb: TracebackType | None,
     ) -> None:
-        """Exit the async context manager and close the client if we created it."""
-        if not self._has_injected_client and self._client:
-            if self._version == APIVersion.CONNECT_V1:
-                # Legacy Zeep API
-                client = cast("Any", self._client)
+        """Exit the async context manager and close owned clients."""
+        if self._version == APIVersion.CONNECT_V1:
+            client = cast("Any", self._client)
+            client.transport.wsdl_client.close()
+            if not self._has_injected_client:
                 await client.transport.client.aclose()
-                client.transport.wsdl_client.close()
-            else:
-                # KNECT API using httpx
-                client = cast("Any", self._client)
-                await client.aclose()
+        elif not self._has_injected_client:
+            client = cast("Any", self._client)
+            await client.aclose()
 
     def _build_client(self) -> httpx.AsyncClient | AsyncSoapClient:
         """Build client in the executor to prevent blocking requests from httpx/zeep."""

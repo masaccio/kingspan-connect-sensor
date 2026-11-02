@@ -189,18 +189,26 @@ async def test_debug_redaction(
 @pytest.mark.asyncio
 @pytest.mark.parametrize("api_version", [APIVersion.KNECT_V1, APIVersion.CONNECT_V1])
 async def test_async_client_injection(mock_wsdl, api_version):
-    """Verify injected HTTPX clients bypass internal lifecycle management for both APIs."""
+    """Verify injected HTTPX clients bypass lifecycle management but WSDL clients are closed."""
     mock_client = AsyncMock(spec=httpx.AsyncClient)
 
-    async with AsyncSensorClient(version=api_version, client=mock_client) as client:
-        assert client._has_injected_client is True
+    with patch("connectsensor.client.httpx.Client", autospec=True) as mock_sync_client:
+        mock_wsdl_instance = mock_sync_client.return_value
+        
+        async with AsyncSensorClient(version=api_version, client=mock_client) as client:
+            assert client._has_injected_client is True
+            if api_version == APIVersion.CONNECT_V1:
+                assert hasattr(client._client, "transport")
+                assert client._client.transport.client == mock_client
+            else:
+                assert client._client == mock_client
+                
+        mock_client.aclose.assert_not_called()
+        
         if api_version == APIVersion.CONNECT_V1:
-            assert hasattr(client._client, "transport")
-            assert client._client.transport.client == mock_client
+            mock_wsdl_instance.close.assert_called_once()
         else:
-            assert client._client == mock_client
-            
-    mock_client.aclose.assert_not_called()
+            mock_sync_client.assert_not_called()
 
     with patch("connectsensor.client.httpx.AsyncClient", autospec=True) as mock_internal:
         mock_internal_instance = mock_internal.return_value
