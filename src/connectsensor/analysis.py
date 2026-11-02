@@ -56,20 +56,35 @@ def filter_history(
 
 def calculate_usage_rate(history: list[TankHistoryPoint], refill_threshold: float = 1.1) -> float:
     """Calculate the average daily usage rate over the filtered window."""
-    if len(history) < 2:  # noqa: PLR2004
+    if len(history) < 2: # noqa: PLR2004
         return 0.0
 
-    delta_levels: list[float] = []
-    current_level = history[0]["level_litres"]
+    total_drop = 0.0
+    total_days = 0.0
+
+    prev_level = history[0]["level_litres"]
+    prev_date = history[0]["reading_date"]
+
     for row in history[1:]:
-        if current_level != 0 and (row["level_litres"] / current_level) < refill_threshold:
-            delta_levels.append(current_level - row["level_litres"])
-        current_level = row["level_litres"]
+        curr_level = row["level_litres"]
+        curr_date = row["reading_date"]
 
-    if not delta_levels:
+        if prev_level != 0 and (curr_level / prev_level) < refill_threshold:
+            drop = prev_level - curr_level
+            # Calculate elapsed time in days
+            days = (curr_date - prev_date).total_seconds() / 86400.0
+
+            if days > 0 and drop >= 0:
+                total_drop += drop
+                total_days += days
+
+        prev_level = curr_level
+        prev_date = curr_date
+
+    if total_days <= 0:
         return 0.0
 
-    return sum(delta_levels) / len(delta_levels)
+    return total_drop / total_days
 
 
 def calculate_forecast_empty(history: list[TankHistoryPoint], rate: float) -> int:

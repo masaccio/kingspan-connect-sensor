@@ -105,7 +105,7 @@ async def test_e2e_history_and_analytics(mock_async_httpx_post):  # noqa: ARG001
         assert forecast > 0
 
 
-def test_analytics_filter_and_forecast_pure():
+def test_analytics_filter_and_forecast():
     """Test pure analytics functions with timezone-naive datetimes."""
     now = datetime.now()  # noqa: DTZ005
     history = [
@@ -114,17 +114,16 @@ def test_analytics_filter_and_forecast_pure():
         {"level_litres": 1000.0, "reading_date": now - timedelta(days=1)},
     ]
 
-    # Filter history within a 4-day window
     filtered = filter_history(history, usage_window=4)
-    assert len(filtered) == 2  # Should drop the 5-days-ago entry
+    assert len(filtered) == 2
 
     # Calculate daily usage rate (100L drop over 2 days = 50L/day)
     rate = calculate_usage_rate(filtered)
-    assert rate == 100.0
+    assert rate == 50.0
 
     # Calculate forecast empty days (1000L current / 50L per day = 20 days)
     forecast = calculate_forecast_empty(filtered, rate)
-    assert forecast == 10
+    assert forecast == 20
 
 
 def test_filter_history_empty():
@@ -173,3 +172,44 @@ def test_calculate_forecast_empty_edge_cases():
     assert calculate_forecast_empty(None, rate=50.0) == 0
     assert calculate_forecast_empty([], rate=50.0) == 0
     assert calculate_forecast_empty(valid_history, rate=0.0) == 0
+
+def test_calculate_usage_rate_ignores_invalid_deltas():
+    """Verify that days <= 0 and drop < 0 are skipped in the calculation."""
+    now = datetime.now()
+    
+    history = [
+        # 1. Base reading
+        {"level_litres": 1000.0, "reading_date": now - timedelta(days=4)},
+        
+        # 2. Duplicate timestamp (days == 0)
+        # Prev: 1000, Curr: 900. Drop: 100L, Days: 0 -> SKIPPED
+        {"level_litres": 900.0, "reading_date": now - timedelta(days=4)},
+        
+        # 3. Reverse time (days < 0)
+        # Prev: 900, Curr: 800. Drop: 100L, Days: -1 -> SKIPPED
+        {"level_litres": 800.0, "reading_date": now - timedelta(days=5)},
+        
+        # 4. Small increase / sensor noise (drop < 0)
+        # Prev: 800, Curr: 850 (1.06x, under 1.1x threshold). Drop: -50L, Days: 2 -> SKIPPED
+        {"level_litres": 850.0, "reading_date": now - timedelta(days=3)},
+        
+        # 5. Valid drop (days > 0, drop > 0)
+        # Prev: 850, Curr: 750. Drop: 100L, Days: 3 -> INCLUDED
+        {"level_litres": 750.0, "reading_date": now},
+    ]
+    
+    # The only valid delta recorded is step 5: Drop of 100L over 3 days (33.33 L/day)
+    rate = calculate_usage_rate(history)
+    assert rate == pytest.approx(100.0 / 3.0)
+
+def test_calculate_usage_rate_zero_valid_days():
+    """Verify fallback to 0.0 if all deltas are filtered out by the condition."""
+    now = datetime.now()
+    
+    history_invalid_only = [
+        {"level_litres": 1000.0, "reading_date": now},
+        {"level_litres": 1000.0, "reading_date": now},  # Fails: days == 0
+        {"level_litres": 1050.0, "reading_date": now + timedelta(days=1)},  # Fails: drop < 0
+    ]
+    
+    assert calculate_usage_rate(history_invalid_only) == 0.0
