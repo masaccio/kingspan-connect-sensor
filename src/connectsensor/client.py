@@ -76,7 +76,7 @@ class HttpxTransport(Transport):
 
     def __init__(self, timeout: float = DEFAULT_API_TIMEOUT) -> None:
         """Initialize the HttpxTransport with a synchronous httpx.Client."""
-        super().__init__()
+        super().__init__()  # type: ignore[no-untyped-call]
         self.client = httpx.Client(timeout=timeout)  # Synchronous HTTPX client
 
     def close(self) -> None:
@@ -87,7 +87,7 @@ class HttpxTransport(Transport):
         self,
         address: str,
         message: bytes | None,
-        headers: dict,
+        headers: dict[str, str],
     ) -> httpx.Response:
         """Override the default `post` method to use `httpx.Client`."""
         return self.client.post(
@@ -136,7 +136,9 @@ class _BaseClient:
             if isinstance(response, httpx.Response):
                 content = response.json()
             else:
-                content = _transform_soap_response(serialize_object(response))
+                content = _transform_soap_response(
+                    serialize_object(response)  # type: ignore[no-untyped-call]
+                )
         except ValueError as e:
             # Safely traps json.JSONDecodeError if the API returns an HTML 502 Gateway page
             msg = f"Malformed response from API: cannot parse JSON ({e})"
@@ -198,7 +200,7 @@ class _BaseClient:
         self,
         username: str,
         password: str,
-    ) -> tuple[Callable, list, dict]:
+    ) -> tuple[Callable[..., Any], list[Any], dict[str, Any]]:
         """Construct the API request parameters for authentication."""
         self._username = username
         self._password = password
@@ -237,7 +239,7 @@ class _BaseClient:
     def get_latest_level_request(
         self,
         signalman_no: str,
-    ) -> tuple[Callable, list, dict]:
+    ) -> tuple[Callable[..., Any], list[Any], dict[str, Any]]:
         """Construct the API request parameters for fetching the latest level."""
         data: dict[str, Any] = {
             "userid": self._user_id,
@@ -260,7 +262,7 @@ class _BaseClient:
         signalman_no: str,
         start_date: datetime | None = None,
         end_date: datetime | None = None,
-    ) -> tuple[Callable, list, dict]:
+    ) -> tuple[Callable[..., Any], list[Any], dict[str, Any]]:
         """Build a call history request for all clients."""
         start_date_dt = (
             datetime.fromtimestamp(0)  # noqa: DTZ006
@@ -305,8 +307,8 @@ class SensorClient(_BaseClient):
         """Init for Synchronous client."""
         super().__init__(version)
         if self._version == APIVersion.CONNECT_V1:
-            self._client = SoapClient(WSDL_URL, transport=HttpxTransport(timeout))
-            self._client.set_ns_prefix(None, SOAP_NS_PREFIX)
+            self._client = SoapClient(WSDL_URL, transport=HttpxTransport(timeout))  # type: ignore[no-untyped-call]
+            self._client.set_ns_prefix(None, SOAP_NS_PREFIX)  # type: ignore[no-untyped-call]
         else:
             self._client = httpx.Client(timeout=timeout)
 
@@ -333,7 +335,7 @@ class SensorClient(_BaseClient):
             # Legacy Zeep API
             client.transport.close()
 
-    def _request(self, func: Callable, *args: Any) -> Any:  # noqa: ANN401
+    def _request(self, func: Callable[..., Any], *args: Any) -> Any:  # noqa: ANN401
         func, req_args, req_kwargs = func(*args)
         try:
             response = func(*req_args, **req_kwargs)
@@ -414,9 +416,9 @@ class AsyncSensorClient(_BaseClient):
 
         if self._version == APIVersion.CONNECT_V1:
             wsdl_client = httpx.Client(timeout=self._timeout)
-            transport = AsyncTransport(client=httpx_client, wsdl_client=wsdl_client)
-            soap_client = AsyncSoapClient(WSDL_URL, transport=transport)
-            soap_client.set_ns_prefix(None, SOAP_NS_PREFIX)
+            transport = AsyncTransport(client=httpx_client, wsdl_client=wsdl_client)  # type: ignore[no-untyped-call]
+            soap_client = AsyncSoapClient(WSDL_URL, transport=transport)  # type: ignore[no-untyped-call]
+            soap_client.set_ns_prefix(None, SOAP_NS_PREFIX)  # type: ignore[no-untyped-call]
             return soap_client
 
         return httpx_client
@@ -424,13 +426,13 @@ class AsyncSensorClient(_BaseClient):
     async def _init_client(self) -> None:
         loop = get_running_loop()
         try:
-            self._client = await loop.run_in_executor(None,  self._build_client)
+            self._client = await loop.run_in_executor(None, self._build_client)
         except Exception as e:  # noqa: BLE001 # pylint: disable=broad-exception-caught
             self.handle_exception(e)
 
     async def _request(
         self,
-        func: Callable,
+        func: Callable[..., Any],
         *args: Any,  # noqa: ANN401
     ) -> Any:  # noqa: ANN401
         """Private wrapper for SOAP/HTTP calls."""

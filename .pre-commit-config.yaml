@@ -18,6 +18,6 @@ repos:
     rev: v2.4.0
     hooks:
       - id: mypy
-        args: [ --config-file, pyproject.toml ]
+        args: [ --config-file, pyproject.toml, --strict ]
         files: src/connectsensor/
         additional_dependencies: [ async-property,  asyncio,  datetime,  httpx,  lxml,  requests,  zeep ]
