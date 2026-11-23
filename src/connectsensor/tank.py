@@ -3,7 +3,7 @@
 from datetime import datetime
 from typing import Any, cast
 
-from connectsensor.const import APIResponseValue
+from connectsensor.analysis import TankHistoryPoint
 
 
 class _BaseTank:
@@ -36,13 +36,13 @@ class _BaseTank:
     def transform_history_data(
         self,
         data: list[dict[str, Any]],
-    ) -> list[dict[str, APIResponseValue]]:
-        """Transform raw tank history data into a list of dicts."""
+    ) -> list[TankHistoryPoint]:
+        """Transform raw tank history data into a list of TankHistoryPoint."""
         return [
             {
                 "reading_date": self.format_reading_date(cast("str", x["readingDate"])),
-                "level_percent": cast("APIResponseValue", x["levelPercentage"]),
-                "level_litres": cast("APIResponseValue", x["levelLitres"]),
+                "level_percent": cast("float", x["levelPercentage"]),
+                "level_litres": cast("float", x["levelLitres"]),
             }
             for x in data
         ]
@@ -92,12 +92,13 @@ class Tank(_BaseTank):
         self._cache_tank_data()
         return self.format_reading_date(cast("str", self._level_data["readingDate"]))
 
+    # In Tank:
     def history(
         self,
         start_date: datetime | None = None,
         end_date: datetime | None = None,
-    ) -> list[dict[str, APIResponseValue]]:
-        """Return the history of the tank readings as a list of dicts."""
+    ) -> list[TankHistoryPoint]:
+        """Return the history of the tank readings as a list of TankHistoryPoint."""
         history_data = self._client._get_history(  # noqa: SLF001 # pylint: disable=protected-access
             self._signalman_no,
             start_date,
@@ -160,8 +161,8 @@ class AsyncTank(_BaseTank):
         self,
         start_date: datetime | None = None,
         end_date: datetime | None = None,
-    ) -> list[dict[str, APIResponseValue]]:
-        """Return the history of the tank readings as a list of dicts."""
+    ) -> list[TankHistoryPoint]:
+        """Return the history of the tank readings as a list of TankHistoryPoint."""
         history_data = await self._client._get_history(  # noqa: SLF001 # pylint: disable=protected-access
             self._signalman_no,
             start_date,

@@ -1,6 +1,6 @@
 [project]
 name = "kingspan-connect-sensor"
-version = "4.6.7"
+version = "4.6.8"
 description = "API to get oil tank from Kingspan SENSiT sensors"
 readme = "README.md"
 requires-python = ">=3.11,<4.0"
@@ -50,6 +50,9 @@ dev = [
 [build-system]
 requires = ["setuptools >= 61.0"]
 build-backend = "setuptools.build_meta"
+
+[tool.setuptools.package-data]
+"kingspan_connect_sensor" = ["py.typed"]
 
 [tool.coverage.run]
 branch = true

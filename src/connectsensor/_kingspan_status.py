@@ -3,10 +3,6 @@
 import argparse
 import logging
 import sys
-from typing import TYPE_CHECKING, cast
-
-if TYPE_CHECKING:
-    from datetime import datetime
 
 from connectsensor import (
     APIVersion,
@@ -85,8 +81,7 @@ def main() -> None:
         print("\nHistory:")
         print(f"\t{'Reading date':<22} {'%Full':<6} {'Litres':<5}")
         for _, measurement in enumerate(tank.history()):
-            reading_date = cast("datetime", measurement["reading_date"])
-            date_str = reading_date.strftime("%d-%b-%Y %H:%M")
+            date_str = measurement["reading_date"].strftime("%d-%b-%Y %H:%M")
             level_pct = measurement["level_percent"]
             level_litres = measurement["level_litres"]
 

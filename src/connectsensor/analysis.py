@@ -4,14 +4,15 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
-from typing import TypedDict
+from typing import NotRequired, TypedDict
 
 
 class TankHistoryPoint(TypedDict):
-    """Single point of tank history returned by the Kingspan API."""
+    """Single historical tank reading."""
 
-    level_litres: float
     reading_date: datetime
+    level_percent: NotRequired[float]
+    level_litres: float
 
 
 @dataclass(slots=True)
@@ -42,12 +43,13 @@ def filter_history(
     filtered_history: list[TankHistoryPoint] = []
     for point in history:
         dt_naive = point["reading_date"].replace(tzinfo=None)
-        filtered_history.append(
-            {
-                "level_litres": point["level_litres"],
-                "reading_date": dt_naive,
-            }
-        )
+        entry: TankHistoryPoint = {
+            "level_litres": point["level_litres"],
+            "reading_date": dt_naive,
+        }
+        if "level_percent" in point:
+            entry["level_percent"] = point["level_percent"]
+        filtered_history.append(entry)
 
     recent = [point for point in filtered_history if point["reading_date"] >= cutoff]
     recent.sort(key=lambda x: x["reading_date"])
@@ -56,7 +58,7 @@ def filter_history(
 
 def calculate_usage_rate(history: list[TankHistoryPoint], refill_threshold: float = 1.1) -> float:
     """Calculate the average daily usage rate over the filtered window."""
-    if len(history) < 2: # noqa: PLR2004
+    if len(history) < 2:  # noqa: PLR2004
         return 0.0
 
     total_drop = 0.0
