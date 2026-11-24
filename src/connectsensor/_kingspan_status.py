@@ -82,7 +82,7 @@ def main() -> None:
         print(f"\t{'Reading date':<22} {'%Full':<6} {'Litres':<5}")
         for _, measurement in enumerate(tank.history()):
             date_str = measurement["reading_date"].strftime("%d-%b-%Y %H:%M")
-            level_pct = measurement["level_percent"]
+            level_pct = measurement.get("level_percent", "N/A")
             level_litres = measurement["level_litres"]
 
             print(f"\t{date_str:<22} {level_pct:<6} {level_litres:<5}")

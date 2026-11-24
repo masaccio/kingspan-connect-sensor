@@ -34,5 +34,6 @@ SoapMobileAPPAuthenicate_v3
 startdate
 testpaths
 typeshed
+usefixtures
 xdist
 zeep

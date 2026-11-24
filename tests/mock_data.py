@@ -1,3 +1,5 @@
+"""Shared mock data constants for connectsensor tests."""
+
 from datetime import datetime
 
 VALID_STATUS = [

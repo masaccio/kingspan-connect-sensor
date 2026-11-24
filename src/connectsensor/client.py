@@ -6,7 +6,7 @@ import json
 import logging
 from asyncio import get_running_loop
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Self, cast
+from typing import TYPE_CHECKING, Any, NoReturn, Self, cast
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -77,7 +77,7 @@ class HttpxTransport(Transport):
     def __init__(self, timeout: float = DEFAULT_API_TIMEOUT) -> None:
         """Initialize the HttpxTransport with a synchronous httpx.Client."""
         super().__init__()  # type: ignore[no-untyped-call]
-        self.client = httpx.Client(timeout=timeout)  # Synchronous HTTPX client
+        self.client: httpx.Client = httpx.Client(timeout=timeout)  # Synchronous HTTPX client
 
     def close(self) -> None:
         """Close the synchronous HTTPX client."""
@@ -137,7 +137,7 @@ class _BaseClient:
                 content = response.json()
             else:
                 content = _transform_soap_response(
-                    serialize_object(response)  # type: ignore[no-untyped-call]
+                    serialize_object(response),  # type: ignore[no-untyped-call]
                 )
         except ValueError as e:
             # Safely traps json.JSONDecodeError if the API returns an HTML 502 Gateway page
@@ -176,7 +176,7 @@ class _BaseClient:
         )
         return cast("APIResponse", content)
 
-    def handle_exception(self, exc: Exception) -> None:
+    def handle_exception(self, exc: Exception) -> NoReturn:
         """Strictly trap and translate all HTTP and runtime exceptions."""
         if isinstance(exc, KingspanAPIError):
             raise exc
@@ -222,7 +222,7 @@ class _BaseClient:
         tank_type: type[Tank | AsyncTank],
     ) -> None:
         """Process the login API response and instantiate tank objects."""
-        if hasattr(response, "status_code") and response.status_code == HTTP_UNAUTHORIZED:
+        if isinstance(response, httpx.Response) and response.status_code == HTTP_UNAUTHORIZED:
             msg = "Invalid token authorization"
             # Map explicitly to the HA invalid_auth flow
             raise KingspanInvalidCredentialsError(msg)
@@ -302,7 +302,7 @@ class SensorClient(_BaseClient):
     """Synchronous client for interacting with the Kingspan Connect Sensor API."""
 
     def __init__(
-        self, version: APIVersion = DEFAULT_API_VERSION, timeout: float = DEFAULT_API_TIMEOUT
+        self, version: APIVersion = DEFAULT_API_VERSION, timeout: float = DEFAULT_API_TIMEOUT,
     ) -> None:
         """Init for Synchronous client."""
         super().__init__(version)

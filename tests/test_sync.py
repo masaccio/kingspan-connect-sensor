@@ -1,11 +1,14 @@
+"""Tests for the synchronous Kingspan Connect Sensor client."""
+
+from __future__ import annotations
+
 import logging
 from datetime import datetime
 from pathlib import Path
+from typing import TYPE_CHECKING, Any
 
 import httpx
 import pytest
-from conftest import get_mock_filename, get_mock_response
-from mock_data import PASSWORD, USERNAME
 
 from connectsensor import (
     APIVersion,
@@ -15,9 +18,17 @@ from connectsensor import (
     SensorClient,
 )
 from connectsensor.exceptions import KingspanErrorCode, KingspanNoDataError
+from tests.conftest import get_mock_filename, get_mock_response
+from tests.mock_data import PASSWORD, USERNAME
+
+if TYPE_CHECKING:
+    from pytest_mock import MockerFixture
 
 
-def test_status(mock_sync_httpx_post, mock_wsdl):  # noqa: ARG001
+@pytest.mark.usefixtures("mock_sync_httpx_post", "mock_wsdl")
+def test_status() -> None:
+    """Verify sync client status and history retrieval across API versions."""
+
     def check_client(api_version: APIVersion) -> None:
         with SensorClient(api_version) as client:
             client.login(USERNAME, PASSWORD)
@@ -30,7 +41,7 @@ def test_status(mock_sync_httpx_post, mock_wsdl):  # noqa: ARG001
             assert tanks[0].last_read.replace(microsecond=0) == datetime(2021, 1, 31, 0, 59, 30)
             tank_history = tanks[0].history()
             assert tank_history[0]["reading_date"] == datetime(2021, 1, 25, 13, 59, 14)
-            assert tank_history[1]["level_percent"] == 95
+            assert tank_history[1].get("level_percent") == 95
             assert tank_history[2]["level_litres"] == 1880
 
     check_client(APIVersion.CONNECT_V1)
@@ -43,7 +54,8 @@ def test_status(mock_sync_httpx_post, mock_wsdl):  # noqa: ARG001
         # API Data Exceptions
         (
             httpx.Response(
-                200, content=b'{"apiResult": {"code": 1, "description": "Authentication Failed"}}'
+                200,
+                content=b'{"apiResult": {"code": 1, "description": "Authentication Failed"}}',
             ),
             KingspanInvalidCredentialsError,
             KingspanErrorCode.AUTH_FAILED,
@@ -51,7 +63,8 @@ def test_status(mock_sync_httpx_post, mock_wsdl):  # noqa: ARG001
         ),
         (
             httpx.Response(
-                200, content=b'{"apiResult": {"code": 1, "description": "no level data"}}'
+                200,
+                content=b'{"apiResult": {"code": 1, "description": "no level data"}}',
             ),
             KingspanNoDataError,
             KingspanErrorCode.NO_DATA,
@@ -59,7 +72,8 @@ def test_status(mock_sync_httpx_post, mock_wsdl):  # noqa: ARG001
         ),
         (
             httpx.Response(
-                200, content=b'{"apiResult": {"code": 1, "description": "test API error"}}'
+                200,
+                content=b'{"apiResult": {"code": 1, "description": "test API error"}}',
             ),
             KingspanAPIError,
             KingspanErrorCode.CANNOT_CONNECT,
@@ -99,7 +113,13 @@ def test_status(mock_sync_httpx_post, mock_wsdl):  # noqa: ARG001
         ),
     ],
 )
-def test_login_exceptions(mocker, mock_effect, expected_exception, expected_code, match_string):
+def test_login_exceptions(
+    mocker: MockerFixture,
+    mock_effect: httpx.Response | Exception,
+    expected_exception: type[KingspanAPIError],
+    expected_code: KingspanErrorCode,
+    match_string: str,
+) -> None:
     """Parameterized test to verify all HTTP, network, and API traps during login."""
     if isinstance(mock_effect, Exception):
         mocker.patch.object(httpx.Client, "post", side_effect=mock_effect)
@@ -112,8 +132,10 @@ def test_login_exceptions(mocker, mock_effect, expected_exception, expected_code
         assert exc_info.value.code == expected_code
 
 
-def test_tank_exception(mocker):
-    def mocked_post(_self, url, *args, **kwargs) -> httpx.Response:
+def test_tank_exception(mocker: MockerFixture) -> None:
+    """Verify API errors raised while fetching latest tank level are propagated."""
+
+    def mocked_post(_self: httpx.Client, url: str, *_args: Any, **kwargs: Any) -> httpx.Response:
         if "GetLatestLevel" in url:
             msg = "Test Exception for GetLatestLevel"
             raise KingspanAPIError(msg, KingspanErrorCode.UNKNOWN)
@@ -129,8 +151,10 @@ def test_tank_exception(mocker):
             _ = tanks[0].level
 
 
-def test_history_exception(mocker):
-    def mocked_post(_self, url, *_args, **kwargs) -> httpx.Response:
+def test_history_exception(mocker: MockerFixture) -> None:
+    """Verify API errors raised while fetching tank history are propagated."""
+
+    def mocked_post(_self: httpx.Client, url: str, *_args: Any, **kwargs: Any) -> httpx.Response:
         if "GetCallHistory" in url:
             msg = "Test Exception for GetCallHistory"
             raise KingspanAPIError(msg, KingspanErrorCode.UNKNOWN)
@@ -146,7 +170,9 @@ def test_history_exception(mocker):
             _ = tanks[0].history()
 
 
-def test_debug_redaction(mock_sync_httpx_post, caplog):  # noqa: ARG001
+@pytest.mark.usefixtures("mock_sync_httpx_post")
+def test_debug_redaction(caplog: pytest.LogCaptureFixture) -> None:
+    """Verify sensitive credentials are redacted from debug logs."""
     logger = logging.getLogger("connectsensor")
     logger.propagate = True
     caplog.set_level(logging.DEBUG, logger="connectsensor")
@@ -160,7 +186,8 @@ def test_debug_redaction(mock_sync_httpx_post, caplog):  # noqa: ARG001
         assert "*redacted*" in log_text
 
 
-def test_caching(mock_sync_httpx_post, mocker):  # noqa: ARG001
+@pytest.mark.usefixtures("mock_sync_httpx_post")
+def test_caching(mocker: MockerFixture) -> None:
     """Verify that multiple data accesses do not trigger repeated API calls."""
     with SensorClient() as client:
         client.login(USERNAME, PASSWORD)
@@ -176,13 +203,15 @@ def test_caching(mock_sync_httpx_post, mocker):  # noqa: ARG001
         assert mock_get_latest.call_count == 2
 
 
-def test_soap_parse_exception(mocker, mock_sync_httpx_post, mock_wsdl):  # noqa: ARG001
+@pytest.mark.usefixtures("mock_sync_httpx_post", "mock_wsdl")
+def test_soap_parse_exception(mocker: MockerFixture) -> None:
     """Verify that XML/Zeep serialization crashes are caught and translated."""
     mocker.patch("connectsensor.client.serialize_object", side_effect=Exception("Zeep crash"))
 
     with SensorClient(APIVersion.CONNECT_V1) as client:
         with pytest.raises(
-            KingspanAPIError, match="Unexpected error parsing response: Zeep crash"
+            KingspanAPIError,
+            match="Unexpected error parsing response: Zeep crash",
         ) as exc_info:
             client.login(USERNAME, PASSWORD)
 
