@@ -47,6 +47,29 @@ class _BaseTank:
             for x in data
         ]
 
+    def _extract_level(self) -> int:
+        return int(self._level_data["levelLitres"])
+
+    def _extract_serial_number(self) -> str:
+        return str(
+            self._tank_info.get(
+                "Signalman No",
+                self._tank_info.get("Serial No", "Unknown"),
+            ),
+        )
+
+    def _extract_model(self) -> str:
+        return str(self._tank_info.get("Model", "Unknown"))
+
+    def _extract_name(self) -> str:
+        return str(self._tank_info.get("Tank Name", "Unknown"))
+
+    def _extract_capacity(self) -> int:
+        return int(self._tank_info.get("Tank Capacity(L)", 0))
+
+    def _extract_last_read(self) -> datetime:
+        return self.format_reading_date(cast("str", self._level_data["readingDate"]))
+
 
 class Tank(_BaseTank):
     """Synchronous Tank class."""
@@ -55,44 +78,38 @@ class Tank(_BaseTank):
     def level(self) -> int:
         """Return the oil level in the tank in litres."""
         self._cache_tank_data()
-        return int(self._level_data["levelLitres"])
+        return self._extract_level()
 
     @property
     def serial_number(self) -> str:
         """Return the serial number of the tank."""
         self._cache_tank_data()
-        return str(
-            self._tank_info.get(
-                "Signalman No",
-                self._tank_info.get("Serial No", "Unknown"),
-            ),
-        )
+        return self._extract_serial_number()
 
     @property
     def model(self) -> str:
         """Return the model of the tank."""
         self._cache_tank_data()
-        return str(self._tank_info.get("Model", "Unknown"))
+        return self._extract_model()
 
     @property
     def name(self) -> str:
         """Return the name of the tank."""
         self._cache_tank_data()
-        return str(self._tank_info.get("Tank Name", "Unknown"))
+        return self._extract_name()
 
     @property
     def capacity(self) -> int:
         """Return the capacity of the tank in litres."""
         self._cache_tank_data()
-        return int(self._tank_info.get("Tank Capacity(L)", 0))
+        return self._extract_capacity()
 
     @property
     def last_read(self) -> datetime:
         """Return the last read date of the tank as a datetime object."""
         self._cache_tank_data()
-        return self.format_reading_date(cast("str", self._level_data["readingDate"]))
+        return self._extract_last_read()
 
-    # In Tank:
     def history(
         self,
         start_date: datetime | None = None,
@@ -120,42 +137,37 @@ class AsyncTank(_BaseTank):
     async def level(self) -> int:
         """Return the oil level in the tank in litres."""
         await self._cache_tank_data()
-        return int(self._level_data["levelLitres"])
+        return self._extract_level()
 
     @property
     async def serial_number(self) -> str:
         """Return the serial number of the tank."""
         await self._cache_tank_data()
-        return str(
-            self._tank_info.get(
-                "Signalman No",
-                self._tank_info.get("Serial No", "Unknown"),
-            ),
-        )
+        return self._extract_serial_number()
 
     @property
     async def model(self) -> str:
         """Return the model of the tank."""
         await self._cache_tank_data()
-        return str(self._tank_info.get("Model", "Unknown"))
+        return self._extract_model()
 
     @property
     async def name(self) -> str:
         """Return the name of the tank."""
         await self._cache_tank_data()
-        return str(self._tank_info.get("Tank Name", "Unknown"))
+        return self._extract_name()
 
     @property
     async def capacity(self) -> int:
         """Return the capacity of the tank in litres."""
         await self._cache_tank_data()
-        return int(self._tank_info.get("Tank Capacity(L)", 0))
+        return self._extract_capacity()
 
     @property
     async def last_read(self) -> datetime:
         """Return the last read date of the tank as a datetime object."""
         await self._cache_tank_data()
-        return self.format_reading_date(cast("str", self._level_data["readingDate"]))
+        return self._extract_last_read()
 
     async def history(
         self,
