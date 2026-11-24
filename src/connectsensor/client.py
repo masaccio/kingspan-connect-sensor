@@ -302,10 +302,12 @@ class SensorClient(_BaseClient):
     """Synchronous client for interacting with the Kingspan Connect Sensor API."""
 
     def __init__(
-        self, version: APIVersion = DEFAULT_API_VERSION, timeout: float = DEFAULT_API_TIMEOUT,
+        self,
+        version: APIVersion = DEFAULT_API_VERSION,
+        timeout: float = DEFAULT_API_TIMEOUT,
     ) -> None:
         """Init for Synchronous client."""
-        super().__init__(version)
+        super().__init__(version, timeout)
         if self._version == APIVersion.CONNECT_V1:
             self._client = SoapClient(WSDL_URL, transport=HttpxTransport(timeout))  # type: ignore[no-untyped-call]
             self._client.set_ns_prefix(None, SOAP_NS_PREFIX)  # type: ignore[no-untyped-call]
@@ -328,11 +330,9 @@ class SensorClient(_BaseClient):
     def close(self) -> None:
         """Close underlying connections."""
         client = cast("Any", self._client)
-        if hasattr(client, "close"):
-            # KNECT API using httpx
+        if self._version == APIVersion.KNECT_V1:
             client.close()
         else:
-            # Legacy Zeep API
             client.transport.close()
 
     def _request(self, func: Callable[..., Any], *args: Any) -> Any:  # noqa: ANN401

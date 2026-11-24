@@ -62,12 +62,15 @@ def filter_history(
 
     recent = [point for point in filtered_history if point["reading_date"] >= cutoff]
     recent.sort(key=lambda x: x["reading_date"])
-    return recent
+    return recent or None
 
 
-def calculate_usage_rate(history: list[TankHistoryPoint], refill_threshold: float = 1.1) -> float:
+def calculate_usage_rate(
+    history: list[TankHistoryPoint] | None,
+    refill_threshold: float = 1.1,
+) -> float:
     """Calculate the average daily usage rate over the filtered window."""
-    if len(history) < 2:  # noqa: PLR2004
+    if not history or len(history) < 2:  # noqa: PLR2004
         return 0.0
 
     total_drop = 0.0
@@ -98,10 +101,9 @@ def calculate_usage_rate(history: list[TankHistoryPoint], refill_threshold: floa
     return total_drop / total_days
 
 
-def calculate_forecast_empty(history: list[TankHistoryPoint], rate: float) -> int:
+def calculate_forecast_empty(history: list[TankHistoryPoint] | None, rate: float) -> int:
     """Estimate how many days until the tank is empty."""
-    if not history or rate == 0:
+    if not history or rate <= 0:
         return 0
 
-    current_level = int(history[-1]["level_litres"])
-    return int(current_level / abs(rate))
+    return int(history[-1]["level_litres"] / rate)
