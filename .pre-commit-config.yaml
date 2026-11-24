@@ -45,3 +45,11 @@ repos:
         files: ^(src/connectsensor/|tests/)
         additional_dependencies:
           [async-property, asyncio, datetime, httpx, lxml, requests, zeep]
+  - repo: local
+    hooks:
+      - id: pyright-verifytypes
+        name: pyright --verifytypes
+        entry: uv run --with pyright pyright --ignoreexternal --verifytypes connectsensor --level error
+        language: system
+        types: [python]
+        pass_filenames: false
