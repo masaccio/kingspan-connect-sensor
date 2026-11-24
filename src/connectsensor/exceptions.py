@@ -43,9 +43,5 @@ class KingspanNoDataError(KingspanAPIError):
     """Tank reported no level data."""
 
     def __init__(self, message: str) -> None:
-        """Create ano data error exception object."""
+        """Create a no data error exception object."""
         super().__init__(message, KingspanErrorCode.NO_DATA)
-
-
-class KingspanDBError(Exception):
-    """Exception raised for tank history database errors."""

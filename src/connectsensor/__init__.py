@@ -6,7 +6,6 @@ from connectsensor.client import AsyncSensorClient, SensorClient
 from connectsensor.const import APIVersion
 from connectsensor.exceptions import (
     KingspanAPIError,
-    KingspanDBError,
     KingspanErrorCode,
     KingspanInvalidCredentialsError,
     KingspanNoDataError,
@@ -19,7 +18,6 @@ __all__ = [
     "APIVersion",
     "AsyncSensorClient",
     "KingspanAPIError",
-    "KingspanDBError",
     "KingspanErrorCode",
     "KingspanInvalidCredentialsError",
     "KingspanNoDataError",

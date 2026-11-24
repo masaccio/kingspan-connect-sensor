@@ -12,22 +12,12 @@ from connectsensor import (
 )
 
 
-class PasswordFilter(logging.Filter):  # pylint: disable=too-few-public-methods
-    """Filter to redact passwords from log messages."""
-
-    def filter(self, record: logging.LogRecord) -> bool:
-        """Replace the word password with secret in log records."""
-        record.msg = record.msg.replace("password", "secret")
-        return True
-
-
 def enable_debug_logging() -> None:
     """Configure and enable debug logging."""
     handler = logging.StreamHandler(sys.stderr)
     handler.setLevel(logging.DEBUG)
     formatter = logging.Formatter("%(levelname)s:%(name)s:%(message)s")
     handler.setFormatter(formatter)
-    handler.addFilter(PasswordFilter())
     logger = logging.getLogger("connectsensor")
     logger.setLevel(logging.DEBUG)
     logger.addHandler(handler)
