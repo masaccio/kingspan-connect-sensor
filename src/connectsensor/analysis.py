@@ -6,6 +6,14 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from typing import NotRequired, TypedDict
 
+__all__ = [
+    "TankData",
+    "TankHistoryPoint",
+    "calculate_forecast_empty",
+    "calculate_usage_rate",
+    "filter_history",
+]
+
 
 class TankHistoryPoint(TypedDict):
     """Single historical tank reading."""
@@ -31,11 +39,12 @@ class TankData:  # pylint: disable=too-many-instance-attributes
 
 
 def filter_history(
-    history: list[TankHistoryPoint] | None, usage_window: int
-) -> list[TankHistoryPoint]:
+    history: list[TankHistoryPoint] | None,
+    usage_window: int,
+) -> list[TankHistoryPoint] | None:
     """Filter tank history to a smaller recent window of days, sorted chronologically."""
     if not history:
-        return []
+        return None
 
     # Always generate a naive current time
     cutoff = datetime.now() - timedelta(days=usage_window)  # noqa: DTZ005
