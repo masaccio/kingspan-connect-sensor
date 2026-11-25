@@ -13,7 +13,7 @@
         <ConsumerServicesBrandCode>SENSiT_RETAIL</ConsumerServicesBrandCode>
         <Tanks>
           <APITankInfo_V3>
-            <SignalmanNo>2000100</SignalmanNo>
+            <SignalmanNo>20001000</SignalmanNo>
             <TankName>TestTank</TankName>
             <IsSmartServDevice>false</IsSmartServDevice>
             <DisplayMobileApp>true</DisplayMobileApp>

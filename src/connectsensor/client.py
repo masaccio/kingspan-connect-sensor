@@ -234,7 +234,7 @@ class _BaseClient:
         self._tanks.clear()
         tanks_list = cast("list[dict[str, Any]]", data["tanks"])
         for tank_info in tanks_list:
-            self._tanks.append(tank_type(self, cast("str", tank_info["signalmanNo"])))
+            self._tanks.append(tank_type(self, str(tank_info["signalmanNo"])))
 
     def get_latest_level_request(
         self,

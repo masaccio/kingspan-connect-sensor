@@ -37,7 +37,7 @@ async def test_async_client_login_success() -> None:
         tanks = await client.tanks
 
         assert len(tanks) == 1
-        assert await tanks[0].serial_number == "20001000"
+        assert tanks[0].serial_number == "20001000"
         assert await tanks[0].capacity == 2000
 
 
@@ -181,7 +181,7 @@ def test_calculate_forecast_empty_edge_cases() -> None:
     now = datetime.now(tz=UTC).replace(tzinfo=None)
     valid_history: list[TankHistoryPoint] = [{"level_litres": 1000.0, "reading_date": now}]
 
-    assert calculate_forecast_empty(None, rate=50.0) == 0  # type: ignore[arg-type]
+    assert calculate_forecast_empty(None, rate=50.0) == 0
     assert calculate_forecast_empty([], rate=50.0) == 0
     assert calculate_forecast_empty(valid_history, rate=0.0) == 0
 

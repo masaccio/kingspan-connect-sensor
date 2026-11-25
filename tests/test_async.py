@@ -37,8 +37,8 @@ async def test_status() -> None:
         async with AsyncSensorClient(api_version) as client:
             await client.login(USERNAME, PASSWORD)
             tanks = await client.tanks
+            assert tanks[0].serial_number == "20001000"
             assert await tanks[0].level == 1000
-            assert await tanks[0].serial_number == "20001000"
             assert await tanks[0].model == "TestModel"
             assert await tanks[0].name == "TestTank"
             assert await tanks[0].capacity == 2000

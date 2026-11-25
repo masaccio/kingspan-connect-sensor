@@ -50,14 +50,6 @@ class _BaseTank:
     def _extract_level(self) -> int:
         return int(self._level_data["levelLitres"])
 
-    def _extract_serial_number(self) -> str:
-        return str(
-            self._tank_info.get(
-                "Signalman No",
-                self._tank_info.get("Serial No", "Unknown"),
-            ),
-        )
-
     def _extract_model(self) -> str:
         return str(self._tank_info.get("Model", "Unknown"))
 
@@ -83,8 +75,7 @@ class Tank(_BaseTank):
     @property
     def serial_number(self) -> str:
         """Return the serial number of the tank."""
-        self._cache_tank_data()
-        return self._extract_serial_number()
+        return self._signalman_no
 
     @property
     def model(self) -> str:
@@ -134,16 +125,15 @@ class AsyncTank(_BaseTank):
     """Asynchronous Tank class."""
 
     @property
+    def serial_number(self) -> str:
+        """Return the serial number of the tank."""
+        return self._signalman_no
+
+    @property
     async def level(self) -> int:
         """Return the oil level in the tank in litres."""
         await self._cache_tank_data()
         return self._extract_level()
-
-    @property
-    async def serial_number(self) -> str:
-        """Return the serial number of the tank."""
-        await self._cache_tank_data()
-        return self._extract_serial_number()
 
     @property
     async def model(self) -> str:

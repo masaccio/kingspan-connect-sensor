@@ -9,7 +9,7 @@
     "consumerServicesBrandCode": "SENSiT_RETAIL",
     "tanks": [
         {
-            "signalmanNo": 2000100,
+            "signalmanNo": 20001000,
             "tankName": "TestTank",
             "isSmartServDevice": false,
             "displayMobileApp": true,
