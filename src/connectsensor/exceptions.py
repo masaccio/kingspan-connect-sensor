@@ -10,6 +10,7 @@ class KingspanErrorCode(StrEnum):
     CANNOT_CONNECT = "cannot_connect"
     TIMEOUT = "timeout"
     NO_DATA = "no_data"
+    INVALID_RESPONSE = "invalid_response"
     UNKNOWN = "unknown"
 
 
@@ -45,3 +46,11 @@ class KingspanNoDataError(KingspanAPIError):
     def __init__(self, message: str) -> None:
         """Create a no data error exception object."""
         super().__init__(message, KingspanErrorCode.NO_DATA)
+
+
+class KingspanInvalidResponseError(KingspanAPIError):
+    """API returned a payload that could not be parsed or was missing expected fields."""
+
+    def __init__(self, message: str) -> None:
+        """Create a no malformed API response exception object."""
+        super().__init__(message, KingspanErrorCode.INVALID_RESPONSE)
