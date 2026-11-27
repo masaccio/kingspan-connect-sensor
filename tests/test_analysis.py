@@ -77,7 +77,7 @@ async def test_malformed_html_response(mock_async_httpx_post: AsyncMock) -> None
     async with AsyncSensorClient(version=APIVersion.KNECT_V1) as client:
         with pytest.raises(KingspanAPIError) as exc:
             await client.login("test@example.com", PASSWORD)
-        assert exc.value.code == KingspanErrorCode.UNKNOWN
+        assert exc.value.code == KingspanErrorCode.INVALID_RESPONSE
 
 
 @pytest.mark.asyncio

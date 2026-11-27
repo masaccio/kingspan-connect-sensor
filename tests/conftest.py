@@ -214,3 +214,19 @@ def mock_async_httpx_post(request: pytest.FixtureRequest) -> Generator[AsyncMock
         else:
             mock_client.side_effect = mock_post
         yield mock_client
+
+
+@pytest.fixture(params=[False, True], ids=["sync", "async"])
+def is_async(request: pytest.FixtureRequest) -> bool:
+    """Run each test against both SensorClient and AsyncSensorClient."""
+    return bool(request.param)
+
+
+@pytest.fixture
+def mock_httpx_post(
+    request: pytest.FixtureRequest,
+    is_async: bool,  # pylint: disable=redefined-outer-name
+) -> Any:
+    """Select the matching file-based HTTPX mock fixture for sync or async."""
+    fixture_name = "mock_async_httpx_post" if is_async else "mock_sync_httpx_post"
+    return request.getfixturevalue(fixture_name)
