@@ -75,7 +75,7 @@ def main() -> None:
             level_pct = measurement.get("level_percent", "N/A")
             level_litres = measurement["level_litres"]
 
-            print(f"\t{date_str:<22} {level_pct:<6} {level_litres:<5}")
+            print(f"\t{date_str:<22} {level_pct:<6.1f} {level_litres:<5.0f}")
 
 
 if __name__ == "__main__":  # pragma: no cover
