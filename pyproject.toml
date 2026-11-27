@@ -115,6 +115,13 @@ ignore = [
 max-statements = 100
 max-branches = 20
 
+[tool.pylint.messages_control]
+disable = [
+  # Duplicate ruff checks
+  "too-many-arguments",
+  "too-many-positional-arguments",
+]
+
 [tool.ruff.lint.flake8-tidy-imports]
 ban-relative-imports = "all"
 
@@ -128,6 +135,7 @@ min-similarity-lines = 10
 "tests/**" = [
   "ARG001",   # Fixtures not always referenced
   "ANN401",   # Allow Any for **kwargs
+  "FBT001",   # Allow boolean positional argument in tests
   "C901",     # Allow complex test functions
   "DTZ001",   # Numbers stores data in UTC
   "PLR2004",  # Magic values allowed
