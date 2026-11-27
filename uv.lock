@@ -583,7 +583,7 @@ wheels = [
 
 [[package]]
 name = "kingspan-connect-sensor"
-version = "5.0.0"
+version = "5.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "httpx" },
